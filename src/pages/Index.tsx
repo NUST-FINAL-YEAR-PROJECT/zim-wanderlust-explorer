@@ -9,11 +9,8 @@ import Footer from "@/components/Footer";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
-import DestinationCategories from "@/components/DestinationCategories";
-import { Globe } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
-import StatsCounter from "@/components/StatsCounter";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -49,18 +46,18 @@ const Index = () => {
 
   const features = [
     {
-      title: "Diverse Landscapes",
-      description: "From cascading waterfalls to expansive savannahs and majestic mountains",
-      image: "/nyanga.jpg"
+      title: "Victoria Falls",
+      description: "Experience the majestic Victoria Falls, one of the Seven Natural Wonders of the World",
+      image: "/victoria-falls.jpg"
     },
     {
-      title: "Rich Cultural Heritage",
-      description: "Experience traditions and history dating back thousands of years",
+      title: "Great Zimbabwe",
+      description: "Visit the ancient stone city that gave Zimbabwe its name",
       image: "/great-zimbabwe.jpg"
     },
     {
-      title: "Incredible Wildlife",
-      description: "Home to the Big Five and over 350 bird species in pristine habitats",
+      title: "Hwange National Park",
+      description: "Explore Zimbabwe's largest wildlife sanctuary with incredible safari experiences",
       image: "/hwange.jpg"
     }
   ];
@@ -70,27 +67,13 @@ const Index = () => {
       {/* Hero Carousel */}
       <HeroCarousel />
       
-      {/* Categories Section */}
-      <div className="py-16 container mx-auto px-4">
-        <div className="mb-10 text-center">
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 text-gray-800">Discover Zimbabwe</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Explore our curated categories and find your perfect destination
-          </p>
-        </div>
-        <DestinationCategories />
-      </div>
-      
-      {/* Stats Counter Section */}
-      <StatsCounter />
-      
-      {/* Features Section */}
+      {/* Featured Destinations Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 text-gray-800">Why Visit Zimbabwe?</h2>
+          <div className="mb-10 text-center">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 text-gray-800">Featured Destinations</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Experience the magic of one of Africa's most beautiful destinations
+              Discover the most beautiful spots Zimbabwe has to offer
             </p>
           </div>
           
@@ -106,7 +89,14 @@ const Index = () => {
                 </div>
                 <div className="p-6">
                   <h3 className="text-2xl font-display font-bold mb-2 text-gray-800">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <p className="text-gray-600 mb-4">{feature.description}</p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate("/browse")}
+                    className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  >
+                    Learn More
+                  </Button>
                 </div>
               </div>
             ))}

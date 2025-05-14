@@ -6,6 +6,7 @@ import { Search, Filter } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -16,6 +17,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const navigate = useNavigate();
   
   const categories = [
     "National Parks", "Historical Sites", "Adventure", "Cultural", "Wildlife", "Relaxation"
@@ -23,7 +25,11 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(query);
+    if (query.trim()) {
+      onSearch(query);
+      // Directly navigate to browse page with search query
+      navigate(`/browse?search=${encodeURIComponent(query)}`);
+    }
   };
   
   const toggleCategory = (category: string) => {
