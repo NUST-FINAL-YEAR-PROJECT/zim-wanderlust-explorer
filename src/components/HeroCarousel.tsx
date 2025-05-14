@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
 
+// Using images from the database (mapped from the available images in the project)
 const heroImages = [
   {
     url: "/victoria-falls.jpg",
@@ -27,6 +28,11 @@ const heroImages = [
     url: "/nyanga.jpg",
     title: "Nyanga National Park",
     description: "Discover scenic mountains, waterfalls and Zimbabwe's highest peak"
+  },
+  {
+    url: "/gonarezhou.jpg",
+    title: "Gonarezhou National Park",
+    description: "Encounter wildlife in the 'Place of Elephants' with its striking Chilojo Cliffs"
   },
   {
     url: "/mana-pools.jpg",
@@ -62,7 +68,10 @@ const HeroCarousel = () => {
   
   return (
     <div className="relative h-[90vh] overflow-hidden">
-      {/* Image Carousel */}
+      {/* Blue Background Base Layer */}
+      <div className="absolute inset-0 bg-sky-700"></div>
+      
+      {/* Image Carousel with Reduced Transparency */}
       <div className="absolute inset-0">
         {heroImages.map((image, index) => (
           <div
@@ -71,9 +80,15 @@ const HeroCarousel = () => {
               "absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000",
               index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
-            style={{ backgroundImage: `url(${image.url})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
+            {/* Semi-transparent overlay for the image */}
+            <div 
+              className="absolute inset-0 opacity-80" 
+              style={{ backgroundImage: `url(${image.url})` }}
+            ></div>
+            
+            {/* Blue gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-sky-900/70 via-sky-800/60 to-sky-900/70"></div>
           </div>
         ))}
       </div>
@@ -112,7 +127,7 @@ const HeroCarousel = () => {
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-5xl animate-fade-in">
-          <div className="mb-2 text-indigo-300 font-medium tracking-widest uppercase">Explore Zimbabwe</div>
+          <div className="mb-2 text-sky-100 font-medium tracking-widest uppercase">Explore Zimbabwe</div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 drop-shadow-lg">
             {heroImages[currentSlide].title}
           </h1>
@@ -126,7 +141,7 @@ const HeroCarousel = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all duration-300"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-sky-900/30 hover:shadow-sky-900/40 transition-all duration-300"
               onClick={() => navigate("/browse?tab=destinations")}
             >
               Explore Destinations
@@ -150,7 +165,7 @@ const HeroCarousel = () => {
             className={cn(
               "w-3 h-3 rounded-full transition-all",
               index === currentSlide 
-                ? "bg-indigo-500 scale-125 w-10 h-3" 
+                ? "bg-sky-400 scale-125 w-10 h-3" 
                 : "bg-white/50 hover:bg-white/70"
             )}
             onClick={() => setCurrentSlide(index)}
