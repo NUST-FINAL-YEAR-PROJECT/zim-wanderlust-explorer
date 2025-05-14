@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
-import EventBookingForm from '@/components/EventBookingForm';
+import EventBookingForm from '@/components/event-booking/EventBookingForm';
 import { getEvent } from '@/models/Event';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
