@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.7.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -183,16 +183,14 @@ serve(async (req) => {
 
   try {
     // Create SMTP client
-    const client = new SMTPClient({
-      connection: {
-        hostname: "smtp.gmail.com",
-        port: 465,
-        tls: true,
-        auth: {
-          username: Deno.env.get("GMAIL_EMAIL_USER") || "",
-          password: Deno.env.get("GMAIL_APP_PASSWORD") || "",
-        },
-      },
+    const client = new SmtpClient();
+
+    // Configure SMTP connection
+    await client.connectTLS({
+      hostname: "smtp.gmail.com",
+      port: 465,
+      username: Deno.env.get("GMAIL_EMAIL_USER") || "",
+      password: Deno.env.get("GMAIL_APP_PASSWORD") || "",
     });
 
     // Parse request body
@@ -232,8 +230,8 @@ serve(async (req) => {
       from: Deno.env.get("GMAIL_EMAIL_USER") || "",
       to: bookingData.contact_email,
       subject: emailContent.subject,
+      content: emailContent.text || "",
       html: emailContent.html,
-      text: emailContent.text,
     });
 
     await client.close();
