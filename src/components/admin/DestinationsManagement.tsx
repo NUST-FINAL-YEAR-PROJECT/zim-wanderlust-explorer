@@ -166,7 +166,30 @@ const DestinationsManagement: React.FC = () => {
 
   const handleAddDestination = async (data: DestinationFormValues) => {
     try {
-      await addDestination(data);
+      // Create a destination object that matches the required structure
+      const newDestination: Omit<Destination, 'id' | 'created_at' | 'updated_at'> = {
+        name: data.name,
+        location: data.location,
+        description: data.description,
+        price: data.price,
+        image_url: data.image_url,
+        activities: data.activities,
+        best_time_to_visit: data.best_time_to_visit,
+        duration_recommended: data.duration_recommended,
+        difficulty_level: data.difficulty_level,
+        amenities: data.amenities,
+        what_to_bring: data.what_to_bring,
+        highlights: data.highlights,
+        weather_info: data.weather_info,
+        getting_there: data.getting_there,
+        categories: data.categories,
+        additional_images: data.additional_images,
+        additional_costs: data.additional_costs,
+        is_featured: data.is_featured,
+        payment_url: data.payment_url
+      };
+      
+      await addDestination(newDestination);
       toast({
         title: 'Success',
         description: 'Destination added successfully',
@@ -192,7 +215,30 @@ const DestinationsManagement: React.FC = () => {
     if (!selectedDestination) return;
     
     try {
-      await updateDestination(selectedDestination.id, data);
+      // Create an updates object that matches the required structure
+      const updates: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>> = {
+        name: data.name,
+        location: data.location,
+        description: data.description,
+        price: data.price,
+        image_url: data.image_url,
+        activities: data.activities,
+        best_time_to_visit: data.best_time_to_visit,
+        duration_recommended: data.duration_recommended,
+        difficulty_level: data.difficulty_level,
+        amenities: data.amenities,
+        what_to_bring: data.what_to_bring,
+        highlights: data.highlights,
+        weather_info: data.weather_info,
+        getting_there: data.getting_there,
+        categories: data.categories,
+        additional_images: data.additional_images,
+        additional_costs: data.additional_costs,
+        is_featured: data.is_featured,
+        payment_url: data.payment_url
+      };
+      
+      await updateDestination(selectedDestination.id, updates);
       toast({
         title: 'Success',
         description: 'Destination updated successfully',

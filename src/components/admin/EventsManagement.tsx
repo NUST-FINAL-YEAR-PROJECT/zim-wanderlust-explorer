@@ -138,7 +138,24 @@ const EventsManagement: React.FC = () => {
 
   const handleAddEvent = async (data: EventFormValues) => {
     try {
-      await addEvent(data);
+      // Create an event object that matches the required structure
+      const newEvent: Omit<Event, 'id' | 'created_at' | 'updated_at'> = {
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        price: data.price,
+        ticket_types: data.ticket_types,
+        image_url: data.image_url,
+        event_type: data.event_type,
+        program_type: data.program_type,
+        program_name: data.program_name,
+        program_url: data.program_url,
+        payment_url: data.payment_url
+      };
+      
+      await addEvent(newEvent);
       toast({
         title: 'Success',
         description: 'Event added successfully',
@@ -164,7 +181,24 @@ const EventsManagement: React.FC = () => {
     if (!selectedEvent) return;
     
     try {
-      await updateEvent(selectedEvent.id, data);
+      // Create an updates object that matches the required structure
+      const updates: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at'>> = {
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        price: data.price,
+        ticket_types: data.ticket_types,
+        image_url: data.image_url,
+        event_type: data.event_type,
+        program_type: data.program_type,
+        program_name: data.program_name,
+        program_url: data.program_url,
+        payment_url: data.payment_url
+      };
+      
+      await updateEvent(selectedEvent.id, updates);
       toast({
         title: 'Success',
         description: 'Event updated successfully',
