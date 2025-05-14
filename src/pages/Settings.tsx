@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -21,9 +20,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 interface ProfileFormData {
   username: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
 }
 
 interface PasswordFormData {
@@ -47,9 +46,9 @@ const Settings = () => {
     defaultValues: {
       username: profile?.username || '',
       email: user?.email || '',
-      firstName: '',
-      lastName: '',
-      phone: '',
+      firstName: profile?.first_name || '',
+      lastName: profile?.last_name || '',
+      phone: profile?.phone || '',
     }
   });
 
@@ -109,7 +108,9 @@ const Settings = () => {
       const updatedProfile = await updateProfile(user.id, {
         username: data.username,
         avatar_url,
-        // Add any other fields to update
+        first_name: data.firstName,
+        last_name: data.lastName,
+        phone: data.phone,
       });
       
       if (!updatedProfile) {
