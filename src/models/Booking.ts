@@ -130,3 +130,29 @@ export async function updateBooking(id: string, updates: {
   
   return data as Booking;
 }
+
+// Add new function to cancel a booking
+export async function cancelBooking(id: string, reason: string) {
+  return updateBooking(id, {
+    status: 'cancelled',
+    cancellation_date: new Date().toISOString(),
+    cancellation_reason: reason
+  });
+}
+
+// Add function to check for duplicate unpaid bookings
+export async function checkForDuplicateBooking(userId: string, destinationId: string | null, eventId: string | null) {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('payment_status', 'pending')
+    .or(`destination_id.eq.${destinationId},event_id.eq.${eventId}`);
+  
+  if (error) {
+    console.error('Error checking for duplicate bookings:', error);
+    return null;
+  }
+  
+  return data && data.length > 0;
+}

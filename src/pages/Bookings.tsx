@@ -2,14 +2,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { getUserBookings } from '@/models/Booking';
-import { useQuery } from '@tanstack/react-query';
+import { getUserBookings, cancelBooking } from '@/models/Booking';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -19,18 +29,36 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Search, FileDown, Check, Clock, X } from 'lucide-react';
+import { Calendar, Search, FileDown, Check, Clock, X, Ban } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 const Bookings: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['userBookings', user?.id],
     queryFn: () => getUserBookings(user?.id as string),
     enabled: !!user?.id
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string, reason: string }) => cancelBooking(id, reason),
+    onSuccess: () => {
+      toast.success('Booking cancelled successfully');
+      setCancellationReason('');
+      setSelectedBookingId(null);
+      queryClient.invalidateQueries({ queryKey: ['userBookings', user?.id] });
+    },
+    onError: (error) => {
+      console.error('Error cancelling booking:', error);
+      toast.error('Failed to cancel booking. Please try again.');
+    }
   });
 
   // Filter bookings based on search and status
@@ -43,6 +71,17 @@ const Bookings: React.FC = () => {
     
     return matchesSearch && matchesStatus;
   });
+
+  const handleCancelBooking = () => {
+    if (selectedBookingId && cancellationReason.trim()) {
+      cancelMutation.mutate({
+        id: selectedBookingId,
+        reason: cancellationReason.trim()
+      });
+    } else {
+      toast.error('Please provide a reason for cancellation');
+    }
+  };
 
   // Status badge component
   const StatusBadge = ({ status }: { status: string | null }) => {
@@ -182,6 +221,7 @@ const Bookings: React.FC = () => {
                   StatusBadge={StatusBadge}
                   PaymentBadge={PaymentBadge}
                   getStatusIcon={getStatusIcon}
+                  onCancelBooking={setSelectedBookingId}
                 />
               </TabsContent>
               
@@ -195,6 +235,7 @@ const Bookings: React.FC = () => {
                   StatusBadge={StatusBadge}
                   PaymentBadge={PaymentBadge}
                   getStatusIcon={getStatusIcon}
+                  onCancelBooking={setSelectedBookingId}
                 />
               </TabsContent>
               
@@ -205,11 +246,47 @@ const Bookings: React.FC = () => {
                   StatusBadge={StatusBadge}
                   PaymentBadge={PaymentBadge}
                   getStatusIcon={getStatusIcon}
+                  onCancelBooking={setSelectedBookingId}
                 />
               </TabsContent>
             </>
           )}
         </Tabs>
+        
+        <Dialog 
+          open={!!selectedBookingId} 
+          onOpenChange={(open) => !open && setSelectedBookingId(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cancel Booking</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to cancel this booking? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <label className="text-sm font-medium mb-1 block">Reason for cancellation</label>
+              <Textarea 
+                placeholder="Please provide a reason for cancellation" 
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedBookingId(null)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleCancelBooking}
+                disabled={cancelMutation.isPending || !cancellationReason.trim()}
+              >
+                {cancelMutation.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
@@ -221,7 +298,8 @@ const BookingTable = ({
   navigate, 
   StatusBadge, 
   PaymentBadge,
-  getStatusIcon
+  getStatusIcon,
+  onCancelBooking
 }: any) => {
   if (bookings.length === 0) {
     return (
@@ -275,7 +353,7 @@ const BookingTable = ({
                 <TableCell>
                   ${booking.total_price.toFixed(2)}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right space-x-2">
                   {booking.payment_status === 'completed' ? (
                     <Button 
                       size="sm" 
@@ -285,13 +363,31 @@ const BookingTable = ({
                       <FileDown className="mr-2 h-4 w-4" /> Invoice
                     </Button>
                   ) : booking.payment_status === 'pending' ? (
-                    <Button 
-                      size="sm" 
-                      onClick={() => navigate(`/payment/${booking.id}`)}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      Pay Now
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigate(`/payment/${booking.id}`)}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Pay Now
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => navigate(`/invoice/${booking.id}`)}
+                      >
+                        <FileDown className="mr-2 h-4 w-4" /> Invoice
+                      </Button>
+                      {booking.status !== 'cancelled' && (
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={() => onCancelBooking(booking.id)}
+                        >
+                          <Ban className="mr-2 h-4 w-4" /> Cancel
+                        </Button>
+                      )}
+                    </div>
                   ) : (
                     <Button 
                       size="sm" 
