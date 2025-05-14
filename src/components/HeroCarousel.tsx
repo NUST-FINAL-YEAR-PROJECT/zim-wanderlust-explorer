@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
+import Navigation from "./Navigation";
 
 const heroImages = [
   {
@@ -61,6 +62,9 @@ const HeroCarousel = () => {
   
   return (
     <div className="relative h-[90vh] overflow-hidden">
+      {/* Navigation */}
+      <Navigation />
+      
       {/* Image Carousel */}
       <div className="absolute inset-0">
         {heroImages.map((image, index) => (

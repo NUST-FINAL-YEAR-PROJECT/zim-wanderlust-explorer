@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import DestinationCard from "@/components/DestinationCard";
@@ -11,6 +10,7 @@ import { getDestinations, searchDestinations } from "@/models/Destination";
 import { getEvents, searchEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import DestinationCategories from "@/components/DestinationCategories";
+import Navigation from "@/components/Navigation";
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -67,10 +67,14 @@ const Browse = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <div className="bg-white py-6 px-4 border-b">
-        <div className="container mx-auto">
-          <h1 className="text-2xl font-bold mb-4">Explore Zimbabwe</h1>
-          <SearchBar onSearch={handleSearch} />
+      <div className="bg-[url('/nyanga.jpg')] bg-cover bg-center h-64 relative">
+        <div className="absolute inset-0 bg-black opacity-60"></div>
+        <Navigation />
+        <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Explore Zimbabwe</h1>
+          <div className="w-full max-w-xl">
+            <SearchBar onSearch={handleSearch} />
+          </div>
         </div>
       </div>
       

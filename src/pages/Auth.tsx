@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { signIn, signUp, signInWithGoogle } from '@/models/Auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { MapPin, ShieldCheck } from 'lucide-react';
+import { MapPin, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -113,16 +113,28 @@ const Auth: React.FC = () => {
   // Show loading state if auth state is still being determined
   if (isLoading && user) {
     return <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mr-2"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-500 mr-2"></div>
       <span>Authenticating...</span>
     </div>;
   }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+      {/* Back button */}
+      <div className="absolute top-4 left-4 z-10">
+        <Link to="/">
+          <Button variant="ghost" className="flex items-center gap-2 text-white md:text-gray-700">
+            <ArrowLeft size={20} />
+            <span>Back to Home</span>
+          </Button>
+        </Link>
+      </div>
+
       {/* Banner section */}
-      <div className="md:w-1/2 gradient-purple p-8 flex flex-col justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/victoria-falls.jpg')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+      <div className="md:w-1/2 relative p-8 flex flex-col justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/victoria-falls.jpg')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-black/30"></div>
+        </div>
         <div className="relative z-10 text-white max-w-md mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-full bg-white/20 p-2">
@@ -142,14 +154,14 @@ const Auth: React.FC = () => {
         <div className="w-full max-w-md">
           <Card className="w-full shadow-lg border-0">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-bold text-purple-600">Welcome</CardTitle>
+              <CardTitle className="text-2xl font-bold text-amber-600">Welcome</CardTitle>
               <CardDescription>Sign in to your account or create a new one</CardDescription>
             </CardHeader>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-4">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                <TabsTrigger value="admin" className="bg-purple-100 text-purple-800">Admin</TabsTrigger>
+                <TabsTrigger value="admin" className="bg-amber-100 text-amber-800">Admin</TabsTrigger>
               </TabsList>
               
               {/* Regular User Sign In */}
@@ -181,7 +193,7 @@ const Auth: React.FC = () => {
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col space-y-3">
-                    <Button type="submit" className="w-full gradient-purple hover:opacity-90" disabled={loading}>
+                    <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700 text-white" disabled={loading}>
                       {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
                     <div className="relative w-full">
@@ -242,7 +254,7 @@ const Auth: React.FC = () => {
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col space-y-3">
-                    <Button type="submit" className="w-full gradient-purple hover:opacity-90" disabled={loading}>
+                    <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700 text-white" disabled={loading}>
                       {loading ? 'Creating Account...' : 'Create Account'}
                     </Button>
                     <div className="relative w-full">
@@ -279,8 +291,8 @@ const Auth: React.FC = () => {
                 <form onSubmit={handleAdminSignIn}>
                   <CardContent className="space-y-4 pt-2">
                     <div className="flex justify-center mb-4">
-                      <div className="rounded-full bg-purple-100 p-3">
-                        <ShieldCheck className="h-6 w-6 text-purple-800" />
+                      <div className="rounded-full bg-amber-100 p-3">
+                        <ShieldCheck className="h-6 w-6 text-amber-800" />
                       </div>
                     </div>
                     <div className="text-center mb-4">
@@ -314,7 +326,7 @@ const Auth: React.FC = () => {
                   <CardFooter className="flex flex-col">
                     <Button 
                       type="submit" 
-                      className="w-full bg-purple-700 hover:bg-purple-800 text-white" 
+                      className="w-full bg-amber-700 hover:bg-amber-800 text-white" 
                       disabled={loading}
                     >
                       {loading ? 'Authenticating...' : 'Access Admin Panel'}

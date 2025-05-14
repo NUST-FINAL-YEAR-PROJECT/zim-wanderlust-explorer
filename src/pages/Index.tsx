@@ -9,10 +9,9 @@ import Footer from "@/components/Footer";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
-import DestinationCategories from "@/components/DestinationCategories";
-import { Globe } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
+import DestinationCategories from "@/components/DestinationCategories";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -137,37 +136,6 @@ const Index = () => {
               )}
             </TabsContent>
           </Tabs>
-        </div>
-      </div>
-      
-      {/* Inspiration Section */}
-      <div className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-semibold mb-10">Inspiration for your trip</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="relative rounded-2xl overflow-hidden h-72 group">
-            <img src="/victoria-falls.jpg" alt="Victoria Falls" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-6 text-white">
-              <h3 className="text-2xl font-bold">Natural Wonders</h3>
-              <p className="mt-2">Experience breathtaking landscapes</p>
-            </div>
-          </div>
-          <div className="relative rounded-2xl overflow-hidden h-72 group">
-            <img src="/traditional.jpg" alt="Cultural Experiences" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-6 text-white">
-              <h3 className="text-2xl font-bold">Cultural Immersion</h3>
-              <p className="mt-2">Connect with local traditions</p>
-            </div>
-          </div>
-          <div className="relative rounded-2xl overflow-hidden h-72 group">
-            <img src="/hwange.jpg" alt="Wildlife Safari" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 p-6 text-white">
-              <h3 className="text-2xl font-bold">Wildlife Safari</h3>
-              <p className="mt-2">Encounter majestic animals</p>
-            </div>
-          </div>
         </div>
       </div>
       
