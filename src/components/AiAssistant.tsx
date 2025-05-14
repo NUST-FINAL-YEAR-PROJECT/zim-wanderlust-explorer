@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { MessageCircle, X, Tent, Drum, Binoculars, Waterfall } from "lucide-react";
+import { MessageCircle, X, Tent, Drum, Binoculars, TentTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ const AiAssistant = () => {
       <Tent size={24} key="tent" />,
       <Drum size={24} key="drum" />,
       <Binoculars size={24} key="binoculars" />,
-      <Waterfall size={24} key="waterfall" />
+      <TentTree size={24} key="tentTree" />
     ];
     
     let iconIndex = 0;

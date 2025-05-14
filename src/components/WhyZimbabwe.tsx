@@ -1,11 +1,11 @@
 
-import { Tent, Waterfall, Flag, MapPin, Drum, Binoculars } from "lucide-react";
+import { Tent, Binoculars, Flag, MapPin, Drum, TentTree } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
 
 const reasons = [
   {
-    icon: <Waterfall size={36} />,
+    icon: <TentTree size={36} />,
     title: "Natural Wonders",
     description: "From Victoria Falls to Mana Pools, Zimbabwe's diverse landscapes offer breathtaking experiences",
     hoverContent: "Zimbabwe is home to five UNESCO World Heritage sites, including Victoria Falls, one of the Seven Natural Wonders of the World. The country's varied landscapes range from lush forests to expansive savannahs.",
