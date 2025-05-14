@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -253,7 +252,7 @@ const DestinationsManagement: React.FC = () => {
     
     try {
       // Create an updates object that matches the required structure
-      const updates: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>> = {
+      const updates: Partial<DestinationInput> = {
         name: data.name,
         location: data.location,
         description: data.description,
@@ -282,8 +281,9 @@ const DestinationsManagement: React.FC = () => {
       });
       setIsEditDialogOpen(false);
       setAdditionalCosts([]);
-      fetchEvents();
+      fetchDestinations();
     } catch (error) {
+      console.error('Error updating destination:', error);
       toast({
         title: 'Error',
         description: 'Failed to update destination',

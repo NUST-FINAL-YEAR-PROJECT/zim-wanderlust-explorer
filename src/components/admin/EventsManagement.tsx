@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -222,7 +221,7 @@ const EventsManagement: React.FC = () => {
     
     try {
       // Create an updates object that matches the required structure
-      const updates: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at'>> = {
+      const updates: Partial<EventInput> = {
         title: data.title,
         description: data.description,
         location: data.location,
@@ -247,6 +246,7 @@ const EventsManagement: React.FC = () => {
       setTicketTypes([]);
       fetchEvents();
     } catch (error) {
+      console.error('Error updating event:', error);
       toast({
         title: 'Error',
         description: 'Failed to update event',
