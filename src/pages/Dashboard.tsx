@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,13 +15,17 @@ import {
   ArrowRight,
   Globe, 
   Star,
-  Sparkles
+  Sparkles,
+  List,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getUserBookings } from '@/models/Booking';
 import { getUserNotifications, markAllNotificationsAsRead } from '@/models/Notification';
+import { getUserItineraries } from '@/models/Itinerary';
 import { Booking } from '@/models/Booking';
 import { Notification } from '@/models/Notification';
+import { Itinerary } from '@/models/Itinerary';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from 'date-fns';
+import { format, parseISO, differenceInDays } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard: React.FC = () => {
@@ -42,20 +45,23 @@ const Dashboard: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
         try {
           setIsLoading(true);
-          const [fetchedBookings, fetchedNotifications] = await Promise.all([
+          const [fetchedBookings, fetchedNotifications, fetchedItineraries] = await Promise.all([
             getUserBookings(user.id),
-            getUserNotifications(user.id)
+            getUserNotifications(user.id),
+            getUserItineraries(user.id)
           ]);
           
           setBookings(fetchedBookings);
           setNotifications(fetchedNotifications);
           setUnreadCount(fetchedNotifications.filter(n => !n.is_read).length);
+          setItineraries(fetchedItineraries);
         } catch (error) {
           console.error("Error fetching user data:", error);
           toast({
@@ -234,6 +240,97 @@ const Dashboard: React.FC = () => {
             </Card>
           ))}
         </div>
+
+        {/* New Itineraries Section */}
+        <Card className="dashboard-card">
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">My Itineraries</CardTitle>
+              <CardDescription>Your planned travel routes</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate('/itineraries')}>
+              View All <ArrowRight className="h-4 w-4" />
+            </Button>
+          </CardHeader>
+          <CardContent className="pt-6">
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-md" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-3 w-1/4" />
+                    </div>
+                    <Skeleton className="h-8 w-24 rounded-md" />
+                  </div>
+                ))}
+              </div>
+            ) : itineraries.length === 0 ? (
+              <div className="text-center py-8">
+                <List className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                <p className="text-muted-foreground mb-4">You don't have any itineraries yet</p>
+                <Button onClick={() => navigate('/itineraries/create')}>
+                  Create New Itinerary
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {itineraries.slice(0, 3).map((itinerary) => {
+                  const totalDays = itinerary.destinations.length > 0
+                    ? differenceInDays(
+                        parseISO(itinerary.destinations[itinerary.destinations.length - 1].endDate),
+                        parseISO(itinerary.destinations[0].startDate)
+                      ) + 1
+                    : 0;
+                  
+                  return (
+                    <div 
+                      key={itinerary.id} 
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                      onClick={() => navigate(`/itinerary/${itinerary.id}`)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="bg-blue-100 p-2 rounded-md">
+                          <MapPin className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{itinerary.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {itinerary.destinations.length > 0 ? (
+                              <>
+                                {itinerary.destinations.length} {itinerary.destinations.length === 1 ? 'destination' : 'destinations'} • {totalDays} {totalDays === 1 ? 'day' : 'days'}
+                              </>
+                            ) : (
+                              'No destinations yet'
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  );
+                })}
+                
+                {itineraries.length > 3 && (
+                  <div className="text-center mt-4">
+                    <Button variant="outline" onClick={() => navigate('/itineraries')}>
+                      View All Itineraries
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {itineraries.length > 0 && itineraries.length <= 3 && (
+              <div className="mt-4 flex justify-center">
+                <Button variant="outline" onClick={() => navigate('/itineraries/create')}>
+                  Create New Itinerary
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Bookings Table */}
         <Card className="dashboard-card">
