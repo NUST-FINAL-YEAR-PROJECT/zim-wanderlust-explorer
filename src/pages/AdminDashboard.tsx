@@ -19,13 +19,22 @@ import {
   Settings, 
   Home, 
   Moon,
-  Sun
+  Sun,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/models/Auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('analytics');
@@ -356,44 +365,44 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </div>
           
-          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="sticky top-0 z-20 py-2 shadow-sm rounded-lg bg-[hsl(var(--admin-card))] border border-[hsl(var(--admin-border))]">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+          {/* New Top Tab Navigation Bar - similar to the image shown */}
+          <div className="w-full shadow-sm rounded-lg bg-white dark:bg-gray-800 mb-6 overflow-hidden">
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
                 {adminNavItems.map((item) => (
                   <TabsTrigger 
                     key={item.id}
                     value={item.id} 
-                    className="flex items-center gap-2 py-3 data-[state=active]:bg-[hsl(var(--admin-primary))] data-[state=active]:text-white"
+                    className="flex items-center justify-center gap-2"
                   >
                     <item.icon size={18} />
                     <span className="hidden sm:inline">{item.label}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
-            </div>
-            
-            <TabsContent value="analytics" className="border-none p-0 mt-6">
-              <AdminAnalytics />
-            </TabsContent>
-            
-            <TabsContent value="users" className="border-none p-0 mt-6">
-              <UsersManagement />
-            </TabsContent>
-            
-            <TabsContent value="destinations" className="border-none p-0 mt-6">
-              <DestinationsManagement />
-            </TabsContent>
-            
-            <TabsContent value="events" className="border-none p-0 mt-6">
-              <EventsManagement />
-            </TabsContent>
-            
-            <TabsContent value="bookings" className="border-none p-0 mt-6">
-              <BookingsManagement />
-            </TabsContent>
-          </Tabs>
+            </Tabs>
+          </div>
+          
+          {/* Tab Content */}
+          <div className="mt-6">
+            {activeTab === 'analytics' && <AdminAnalytics />}
+            {activeTab === 'users' && <UsersManagement />}
+            {activeTab === 'destinations' && <DestinationsManagement />}
+            {activeTab === 'events' && <EventsManagement />}
+            {activeTab === 'bookings' && <BookingsManagement />}
+          </div>
         </div>
       </main>
+
+      {/* Mobile menu button */}
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="fixed bottom-4 right-4 z-40 lg:hidden shadow-lg bg-[hsl(var(--admin-primary))] text-white hover:bg-[hsl(var(--admin-primary))/90]"
+        onClick={toggleMobileMenu}
+      >
+        <Menu />
+      </Button>
     </div>
   );
 };
