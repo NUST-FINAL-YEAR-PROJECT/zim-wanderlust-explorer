@@ -11,6 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { supabase } from '@/integrations/supabase/client';
+import { updateProfile } from '@/models/Profile';
+import { Camera, Upload, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface ProfileFormData {
   username: string;
@@ -18,6 +24,12 @@ interface ProfileFormData {
   firstName: string;
   lastName: string;
   phone: string;
+}
+
+interface PasswordFormData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 interface NotificationSettings {
@@ -31,13 +43,21 @@ const Settings = () => {
   const { toast } = useToast();
   const { user, profile } = useAuth();
   
-  const { register, handleSubmit, formState: { errors, isDirty } } = useForm<ProfileFormData>({
+  const { register, handleSubmit, formState: { errors, isDirty }, reset } = useForm<ProfileFormData>({
     defaultValues: {
       username: profile?.username || '',
       email: user?.email || '',
       firstName: '',
       lastName: '',
       phone: '',
+    }
+  });
+
+  const passwordForm = useForm<PasswordFormData>({
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     }
   });
 
@@ -49,18 +69,117 @@ const Settings = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
 
   const onUpdateProfile = async (data: ProfileFormData) => {
+    if (!user) return;
+    
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Handle avatar upload if there's a file
+      let avatar_url = profile?.avatar_url;
+      
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+        
+        // Upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, avatarFile);
+          
+        if (uploadError) {
+          throw new Error('Error uploading avatar: ' + uploadError.message);
+        }
+        
+        // Get the public URL
+        const { data: publicUrlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+          
+        avatar_url = publicUrlData.publicUrl;
+      }
+      
+      // Update profile in database
+      const updatedProfile = await updateProfile(user.id, {
+        username: data.username,
+        avatar_url,
+        // Add any other fields to update
+      });
+      
+      if (!updatedProfile) {
+        throw new Error('Failed to update profile');
+      }
+      
       toast({
         title: "Profile updated",
         description: "Your profile information has been updated successfully.",
       });
-    }, 1000);
+      
+      reset({
+        ...data,
+        email: user.email || '',
+      });
+      
+    } catch (error: any) {
+      toast({
+        title: "Error updating profile",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (data: PasswordFormData) => {
+    if (!user?.email) return;
+    
+    setIsPasswordLoading(true);
+    
+    try {
+      // Verify passwords match
+      if (data.newPassword !== data.confirmPassword) {
+        throw new Error('New passwords do not match');
+      }
+      
+      // Update password via Supabase Auth
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
+      
+      passwordForm.reset();
+      
+    } catch (error: any) {
+      toast({
+        title: "Error updating password",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    // In a real app, you would typically need admin privileges to delete users
+    // Here's a placeholder for the UI flow
+    toast({
+      title: "Account deletion requested",
+      description: "Please contact support to complete the account deletion process.",
+    });
   };
 
   const handleNotificationChange = (key: keyof NotificationSettings) => {
@@ -75,6 +194,30 @@ const Settings = () => {
       title: "Notification preferences updated",
       description: "Your notification preferences have been saved.",
     });
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const openAvatarDialog = () => {
+    setIsAvatarDialogOpen(true);
+  };
+
+  const closeAvatarDialog = () => {
+    setIsAvatarDialogOpen(false);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarPreview(null);
+    setAvatarFile(null);
   };
 
   return (
@@ -100,16 +243,62 @@ const Settings = () => {
               <CardContent>
                 <form onSubmit={handleSubmit(onUpdateProfile)} className="space-y-4">
                   <div className="flex items-center space-x-4 mb-6">
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src={profile?.avatar_url || undefined} />
+                    <Avatar className="h-20 w-20 cursor-pointer" onClick={openAvatarDialog}>
+                      <AvatarImage src={avatarPreview || profile?.avatar_url || undefined} />
                       <AvatarFallback className="bg-purple-100 text-purple-700 text-xl">
                         {profile?.username?.substring(0, 2).toUpperCase() || user?.email?.substring(0, 2).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <Button variant="outline" size="sm">
-                        Change Avatar
-                      </Button>
+                      <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" type="button">
+                            <Camera className="mr-2 h-4 w-4" />
+                            Change Avatar
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Update Profile Picture</DialogTitle>
+                            <DialogDescription>
+                              Upload a new profile picture or remove your current one.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex flex-col items-center justify-center space-y-4 py-4">
+                            <Avatar className="h-32 w-32">
+                              <AvatarImage src={avatarPreview || profile?.avatar_url || undefined} />
+                              <AvatarFallback className="bg-purple-100 text-purple-700 text-2xl">
+                                {profile?.username?.substring(0, 2).toUpperCase() || user?.email?.substring(0, 2).toUpperCase() || "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex gap-2">
+                              <label className="cursor-pointer">
+                                <div className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-white">
+                                  <Upload className="h-4 w-4" />
+                                  <span>Upload</span>
+                                  <input 
+                                    type="file" 
+                                    className="hidden" 
+                                    accept="image/*" 
+                                    onChange={handleAvatarChange} 
+                                  />
+                                </div>
+                              </label>
+                              <Button 
+                                variant="outline"
+                                onClick={handleRemoveAvatar}
+                                type="button"
+                                size="icon"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              JPG, GIF or PNG. Max size 1MB.
+                            </p>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                       <p className="text-xs text-muted-foreground mt-1">
                         JPG, GIF or PNG. Max size 1MB.
                       </p>
@@ -268,25 +457,71 @@ const Settings = () => {
                     </p>
                   </div>
                   
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input id="currentPassword" type="password" />
+                  <form onSubmit={passwordForm.handleSubmit(handlePasswordReset)}>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="currentPassword">Current Password</Label>
+                        <Input 
+                          id="currentPassword" 
+                          type="password"
+                          {...passwordForm.register("currentPassword", {
+                            required: "Current password is required"
+                          })}
+                        />
+                        {passwordForm.formState.errors.currentPassword && (
+                          <p className="text-sm text-red-500">
+                            {passwordForm.formState.errors.currentPassword.message}
+                          </p>
+                        )}
+                      </div>
+                      <div></div>
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <Input 
+                          id="newPassword" 
+                          type="password"
+                          {...passwordForm.register("newPassword", {
+                            required: "New password is required",
+                            minLength: {
+                              value: 6,
+                              message: "Password must be at least 6 characters"
+                            }
+                          })}
+                        />
+                        {passwordForm.formState.errors.newPassword && (
+                          <p className="text-sm text-red-500">
+                            {passwordForm.formState.errors.newPassword.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                        <Input 
+                          id="confirmPassword" 
+                          type="password"
+                          {...passwordForm.register("confirmPassword", {
+                            required: "Please confirm your password",
+                            validate: value => 
+                              value === passwordForm.watch("newPassword") || "Passwords do not match"
+                          })}
+                        />
+                        {passwordForm.formState.errors.confirmPassword && (
+                          <p className="text-sm text-red-500">
+                            {passwordForm.formState.errors.confirmPassword.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div></div>
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input id="newPassword" type="password" />
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button 
+                        type="submit"
+                        disabled={isPasswordLoading || !passwordForm.formState.isDirty}
+                      >
+                        {isPasswordLoading ? "Updating..." : "Change Password"}
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                      <Input id="confirmPassword" type="password" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button>Change Password</Button>
-                  </div>
+                  </form>
                 </div>
                 
                 <div className="pt-4 border-t">
@@ -296,7 +531,29 @@ const Settings = () => {
                     <p className="text-sm text-red-700 mb-4">
                       Once you delete your account, there is no going back. Please be certain.
                     </p>
-                    <Button variant="destructive" size="sm">Delete Account</Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">Delete Account</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your account
+                            and remove your data from our servers.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteAccount}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Yes, delete my account
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </CardContent>
