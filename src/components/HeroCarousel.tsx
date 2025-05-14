@@ -15,17 +15,22 @@ const heroImages = [
   {
     url: "/hwange.jpg",
     title: "Hwange National Park",
-    description: "Explore Zimbabwe's largest national park, home to over 100 mammal species"
+    description: "Explore Zimbabwe's largest wildlife sanctuary with incredible safari experiences"
   },
   {
-    url: "/matobo-hills.jpg", 
-    title: "Matobo Hills",
-    description: "Discover ancient rock formations and rich cultural heritage"
-  },
-  {
-    url: "/great-zimbabwe.jpg",
+    url: "/great-zimbabwe.jpg", 
     title: "Great Zimbabwe",
     description: "Visit the ancient stone city that gave Zimbabwe its name"
+  },
+  {
+    url: "/nyanga.jpg",
+    title: "Nyanga National Park",
+    description: "Discover scenic mountains, waterfalls and Zimbabwe's highest peak"
+  },
+  {
+    url: "/mana-pools.jpg",
+    title: "Mana Pools",
+    description: "Encounter wildlife in this UNESCO World Heritage Site along the Zambezi River"
   }
 ];
 
@@ -45,17 +50,17 @@ const HeroCarousel = () => {
     navigate(`/browse?search=${encodeURIComponent(query)}`);
   };
   
-  // Auto slide every 6 seconds
+  // Auto slide every 7 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       nextSlide();
-    }, 6000);
+    }, 7000);
     
     return () => clearInterval(timer);
   }, []);
   
   return (
-    <div className="relative h-[85vh] overflow-hidden">
+    <div className="relative h-[90vh] overflow-hidden">
       {/* Image Carousel */}
       <div className="absolute inset-0">
         {heroImages.map((image, index) => (
@@ -94,7 +99,7 @@ const HeroCarousel = () => {
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-5xl animate-fade-in">
-          <div className="mb-2 text-amber-400 font-medium tracking-widest">DISCOVER ZIMBABWE</div>
+          <div className="mb-2 text-amber-400 font-medium tracking-widest">EXPLORE ZIMBABWE</div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-md">
             {heroImages[currentSlide].title}
           </h1>

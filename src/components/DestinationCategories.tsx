@@ -7,21 +7,19 @@ import {
   Tent, 
   Building, 
   Palmtree, 
-  TreePine, 
   Camera, 
-  Compass 
+  Compass, 
+  Heart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const categories = [
-  { id: "national-parks", name: "National Parks", icon: TreePine },
+  { id: "national-parks", name: "National Parks", icon: Palmtree },
   { id: "cities", name: "Cities", icon: Building },
-  { id: "wildlife", name: "Wildlife", icon: Map },
+  { id: "safari", name: "Safari", icon: Map },
   { id: "mountains", name: "Mountains", icon: Mountain },
-  { id: "camping", name: "Camping", icon: Tent },
-  { id: "lakes", name: "Lakes", icon: Palmtree },
+  { id: "adventures", name: "Adventures", icon: Compass },
   { id: "photography", name: "Photography", icon: Camera },
-  { id: "adventure", name: "Adventure", icon: Compass },
 ];
 
 const DestinationCategories = () => {
@@ -35,7 +33,7 @@ const DestinationCategories = () => {
   
   return (
     <div className="w-full">
-      <h2 className="text-xl font-medium mb-6">Browse by category</h2>
+      <h2 className="text-xl font-medium mb-6">Browse by interest</h2>
       <div className="flex overflow-x-auto pb-4 gap-8 scrollbar-hide -mx-4 px-4">
         {categories.map((category) => {
           const Icon = category.icon;
@@ -51,7 +49,7 @@ const DestinationCategories = () => {
               <div className={cn(
                 "w-16 h-16 rounded-lg flex items-center justify-center mb-2 transition-all duration-200",
                 activeCategory === category.id 
-                  ? "bg-rose-100 text-rose-600" 
+                  ? "bg-amber-100 text-amber-600" 
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )}>
                 <Icon className="w-7 h-7" />

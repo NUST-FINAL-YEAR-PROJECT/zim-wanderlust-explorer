@@ -9,14 +9,10 @@ import Footer from "@/components/Footer";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
-import WhyZimbabwe from "@/components/WhyZimbabwe";
-import MapExplorer from "@/components/MapExplorer";
-import AiAssistant from "@/components/AiAssistant";
 import DestinationCategories from "@/components/DestinationCategories";
 import { Globe } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
-import StatsCounter from "@/components/StatsCounter";
-import TestimonialSlider from "@/components/TestimonialSlider";
+import AiAssistant from "@/components/AiAssistant";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -33,9 +29,9 @@ const Index = () => {
         const destinationsData = await getDestinations();
         const eventsData = await getEvents();
         
-        // Take just the first 6 for the preview
-        setDestinations(destinationsData.slice(0, 6));
-        setEvents(eventsData.slice(0, 6));
+        // Take just the first 4 for the preview
+        setDestinations(destinationsData.slice(0, 4));
+        setEvents(eventsData.slice(0, 4));
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -52,7 +48,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Hero Carousel - Replacement for static hero */}
+      {/* Hero Carousel - Main visual element */}
       <HeroCarousel />
       
       {/* Categories Section */}
@@ -92,20 +88,19 @@ const Index = () => {
             
             <TabsContent value="destinations" className="animate-fade-in">
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[1, 2, 3, 4].map(i => (
                     <div key={i} className="border rounded-lg overflow-hidden">
                       <Skeleton className="h-48 w-full" />
                       <div className="p-4 space-y-2">
                         <Skeleton className="h-6 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-full" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {destinations.map((destination) => (
                     <DestinationCard 
                       key={destination.id} 
@@ -119,20 +114,19 @@ const Index = () => {
             
             <TabsContent value="events" className="animate-fade-in">
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[1, 2, 3, 4].map(i => (
                     <div key={i} className="border rounded-lg overflow-hidden">
                       <Skeleton className="h-48 w-full" />
                       <div className="p-4 space-y-2">
                         <Skeleton className="h-6 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-full" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {events.map((event) => (
                     <EventCard 
                       key={event.id} 
@@ -146,22 +140,16 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Stats Counter - New section */}
-      <StatsCounter />
-      
-      {/* Testimonials - New section */}
-      <TestimonialSlider />
-      
       {/* Inspiration Section */}
       <div className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-semibold mb-10">Inspiration for your next adventure</h2>
+        <h2 className="text-3xl font-semibold mb-10">Inspiration for your trip</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="relative rounded-2xl overflow-hidden h-72 group">
             <img src="/victoria-falls.jpg" alt="Victoria Falls" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-6 text-white">
               <h3 className="text-2xl font-bold">Natural Wonders</h3>
-              <p className="mt-2">Experience breathtaking landscapes and natural beauty</p>
+              <p className="mt-2">Experience breathtaking landscapes</p>
             </div>
           </div>
           <div className="relative rounded-2xl overflow-hidden h-72 group">
@@ -169,7 +157,7 @@ const Index = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-6 text-white">
               <h3 className="text-2xl font-bold">Cultural Immersion</h3>
-              <p className="mt-2">Connect with local traditions and authentic experiences</p>
+              <p className="mt-2">Connect with local traditions</p>
             </div>
           </div>
           <div className="relative rounded-2xl overflow-hidden h-72 group">
@@ -177,53 +165,7 @@ const Index = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-6 text-white">
               <h3 className="text-2xl font-bold">Wildlife Safari</h3>
-              <p className="mt-2">Encounter majestic animals in their natural habitat</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <WhyZimbabwe />
-      
-      <MapExplorer />
-      
-      {/* Airbnb-style "Worldwide" section */}
-      <div className="bg-gray-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 mb-8">
-            <Globe className="h-8 w-8" />
-            <h2 className="text-3xl font-semibold">Travel Zimbabwe from anywhere</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="h-52 overflow-hidden">
-                <img src="/mana-pools.jpg" alt="Virtual Tour" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Virtual Tours</h3>
-                <p className="text-gray-600">Experience Zimbabwe's beauty through immersive 360° virtual tours.</p>
-                <Button className="mt-4 bg-black hover:bg-gray-800 text-white rounded-lg">Explore now</Button>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="h-52 overflow-hidden">
-                <img src="/carnival.jpg" alt="Online Experiences" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Online Experiences</h3>
-                <p className="text-gray-600">Join interactive sessions with local guides and cultural experts.</p>
-                <Button className="mt-4 bg-black hover:bg-gray-800 text-white rounded-lg">Join a session</Button>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="h-52 overflow-hidden">
-                <img src="/nyanga.jpg" alt="Travel Guides" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Travel Guides</h3>
-                <p className="text-gray-600">Access comprehensive guides curated by Zimbabwe travel experts.</p>
-                <Button className="mt-4 bg-black hover:bg-gray-800 text-white rounded-lg">Get guides</Button>
-              </div>
+              <p className="mt-2">Encounter majestic animals</p>
             </div>
           </div>
         </div>
