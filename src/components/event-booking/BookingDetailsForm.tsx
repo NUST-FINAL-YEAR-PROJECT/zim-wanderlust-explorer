@@ -50,6 +50,17 @@ const BookingDetailsForm = ({
     });
   }, []);
   
+  // Helper functions to handle number of people changes
+  const decrementPeople = () => {
+    if (numberOfPeople > 1) {
+      setNumberOfPeople(numberOfPeople - 1);
+    }
+  };
+  
+  const incrementPeople = () => {
+    setNumberOfPeople(numberOfPeople + 1);
+  };
+  
   return (
     <div className="space-y-4">
       <div>
@@ -80,7 +91,7 @@ const BookingDetailsForm = ({
                 type="button" 
                 variant="outline" 
                 size="icon" 
-                onClick={() => setNumberOfPeople(prev => Math.max(1, prev - 1))}
+                onClick={decrementPeople}
                 disabled={numberOfPeople <= 1}
               >
                 -
@@ -97,7 +108,7 @@ const BookingDetailsForm = ({
                 type="button" 
                 variant="outline" 
                 size="icon" 
-                onClick={() => setNumberOfPeople(prev => prev + 1)}
+                onClick={incrementPeople}
               >
                 +
               </Button>
