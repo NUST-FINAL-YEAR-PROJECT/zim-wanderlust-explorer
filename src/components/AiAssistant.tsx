@@ -69,6 +69,11 @@ const AiAssistant = () => {
         throw new Error(error.message);
       }
 
+      // Handle error returned with a 200 status code but contains error message
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       // Add AI response
       setMessages(prev => [...prev, { role: "assistant", content: data.message }]);
     } catch (error) {

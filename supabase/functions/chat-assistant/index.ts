@@ -34,6 +34,7 @@ serve(async (req) => {
     // Prepare full message history including system message
     const fullMessages = [systemMessage, ...messages];
 
+    // Use a more affordable model (gpt-3.5-turbo)
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -41,7 +42,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo', // Changed from gpt-4o-mini to a more affordable model
         messages: fullMessages,
         temperature: 0.7,
         max_tokens: 500,
@@ -61,7 +62,10 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in chat-assistant function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      message: "I'm sorry, I'm currently experiencing connectivity issues. Please try again later." 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
