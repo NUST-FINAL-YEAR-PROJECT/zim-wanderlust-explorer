@@ -4,7 +4,20 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Calendar, MapPin, CalendarDays, BookmarkIcon, UserIcon, Users, TrendingUp, Bell } from 'lucide-react';
+import { 
+  Calendar, 
+  MapPin, 
+  CalendarDays, 
+  Heart, 
+  UserIcon, 
+  Users, 
+  TrendingUp, 
+  Bell, 
+  ArrowRight,
+  Globe, 
+  Star,
+  Sparkles
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getUserBookings } from '@/models/Booking';
 import { getUserNotifications, markAllNotificationsAsRead } from '@/models/Notification';
@@ -19,6 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard: React.FC = () => {
   const { user, profile } = useAuth();
@@ -101,7 +115,7 @@ const Dashboard: React.FC = () => {
       value: totalBookings,
       description: "Across all destinations",
       icon: Calendar,
-      color: "bg-gradient-to-br from-blue-50 to-blue-100",
+      color: "bg-blue-50 border-blue-100",
       iconClass: "text-blue-600",
     },
     {
@@ -109,15 +123,15 @@ const Dashboard: React.FC = () => {
       value: upcomingTrips,
       description: "Scheduled for the future",
       icon: TrendingUp,
-      color: "bg-gradient-to-br from-green-50 to-green-100",
+      color: "bg-green-50 border-green-100",
       iconClass: "text-green-600",
     },
     {
-      title: "Destinations Visited",
+      title: "Places Visited",
       value: uniqueDestinations,
-      description: "Unique places explored",
-      icon: MapPin,
-      color: "bg-gradient-to-br from-amber-50 to-amber-100",
+      description: "Unique destinations explored",
+      icon: Globe,
+      color: "bg-amber-50 border-amber-100",
       iconClass: "text-amber-600",
     },
     {
@@ -125,18 +139,24 @@ const Dashboard: React.FC = () => {
       value: totalTravelers,
       description: "People in your bookings",
       icon: Users,
-      color: "bg-gradient-to-br from-purple-50 to-purple-100",
+      color: "bg-purple-50 border-purple-100",
       iconClass: "text-purple-600",
     },
   ];
+
+  const fullName = profile?.first_name && profile?.last_name 
+    ? `${profile.first_name} ${profile.last_name}`
+    : null;
+
+  const displayName = fullName || profile?.username || user?.email?.split('@')[0] || 'User';
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Greeting Section with Notification Bell */}
-        <div className="flex justify-between items-center rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
+        <div className="flex justify-between items-center rounded-xl gradient-purple p-6 text-white shadow-md">
           <div>
-            <h2 className="text-2xl font-bold">Welcome back, {profile?.username || user?.email?.split('@')[0]}</h2>
+            <h2 className="text-2xl font-bold">Welcome back, {displayName}</h2>
             <p className="mt-2 text-purple-100">Discover Zimbabwe's best destinations and events</p>
           </div>
           <Popover>
@@ -198,11 +218,13 @@ const Dashboard: React.FC = () => {
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((card) => (
-            <Card key={card.title} className={cn("overflow-hidden transition-all hover:shadow-md", card.color)}>
+            <Card key={card.title} className={cn("dashboard-stat-card", card.color)}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
-                  <card.icon className={cn("h-5 w-5", card.iconClass)} />
+                  <CardTitle className="text-lg font-medium">{card.title}</CardTitle>
+                  <div className={cn("rounded-full p-2", card.iconClass.replace("text-", "bg-").replace("600", "100"))}>
+                    <card.icon className={cn("h-5 w-5", card.iconClass)} />
+                  </div>
                 </div>
                 <CardDescription>{card.description}</CardDescription>
               </CardHeader>
@@ -214,25 +236,42 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Recent Bookings Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Bookings</CardTitle>
-            <CardDescription>Your booking history</CardDescription>
+        <Card className="dashboard-card">
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">Recent Bookings</CardTitle>
+              <CardDescription>Your recent travel activities</CardDescription>
+            </div>
+            {bookings.length > 0 && (
+              <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate('/bookings')}>
+                View All <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {isLoading ? (
-              <div className="flex justify-center py-8">
-                <p>Loading your bookings...</p>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-md" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-3 w-1/4" />
+                    </div>
+                    <Skeleton className="h-8 w-24 rounded-md" />
+                  </div>
+                ))}
               </div>
             ) : bookings.length === 0 ? (
               <div className="text-center py-8">
+                <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                 <p className="text-muted-foreground mb-4">You don't have any bookings yet</p>
                 <Button onClick={() => navigate('/destinations')}>
                   Explore Destinations
                 </Button>
               </div>
             ) : (
-              <div className="rounded-md border">
+              <div className="rounded-lg overflow-hidden border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -254,14 +293,16 @@ const Dashboard: React.FC = () => {
                           {booking.booking_date && format(new Date(booking.booking_date), 'MMM d, yyyy')}
                         </TableCell>
                         <TableCell>
-                          {booking.booking_details?.destinationName || 
-                           booking.booking_details?.eventName || 
-                           "Booking"}
+                          <div className="font-medium">
+                            {booking.booking_details?.destinationName || 
+                             booking.booking_details?.eventName || 
+                             "Booking"}
+                          </div>
                         </TableCell>
                         <TableCell>{booking.number_of_people}</TableCell>
                         <TableCell>
                           <span className={cn(
-                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                            "dashboard-badge",
                             booking.status === 'confirmed' && "bg-green-100 text-green-800",
                             booking.status === 'pending' && "bg-yellow-100 text-yellow-800",
                             booking.status === 'cancelled' && "bg-red-100 text-red-800",
@@ -292,60 +333,99 @@ const Dashboard: React.FC = () => {
 
         {/* Quick Links Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="overflow-hidden transition-all hover:shadow-lg bg-gradient-to-br from-green-50 to-green-100">
+          <Card className="dashboard-action-card border-green-100">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Explore Destinations</CardTitle>
-                <MapPin className="h-5 w-5 text-green-600" />
+                <CardTitle className="text-lg font-medium">Explore Destinations</CardTitle>
+                <div className="bg-green-100 text-green-600 p-2 rounded-full">
+                  <MapPin className="h-5 w-5" />
+                </div>
               </div>
-              <CardDescription>Discover new places to visit</CardDescription>
+              <CardDescription>Find your next adventure</CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
+              <p className="text-sm text-muted-foreground mb-4">
+                Discover Zimbabwe's most beautiful locations and plan your perfect trip.
+              </p>
               <Button 
                 onClick={() => navigate('/destinations')} 
-                className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
               >
                 View Destinations
               </Button>
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden transition-all hover:shadow-lg bg-gradient-to-br from-amber-50 to-amber-100">
+          <Card className="dashboard-action-card border-amber-100">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Upcoming Events</CardTitle>
-                <CalendarDays className="h-5 w-5 text-amber-600" />
+                <CardTitle className="text-lg font-medium">Upcoming Events</CardTitle>
+                <div className="bg-amber-100 text-amber-600 p-2 rounded-full">
+                  <CalendarDays className="h-5 w-5" />
+                </div>
               </div>
-              <CardDescription>Check out what's happening</CardDescription>
+              <CardDescription>Experience local culture</CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
+              <p className="text-sm text-muted-foreground mb-4">
+                Don't miss out on exciting festivals, exhibitions and cultural events.
+              </p>
               <Button 
                 onClick={() => navigate('/events')} 
-                className="mt-4 w-full bg-amber-600 hover:bg-amber-700 text-white"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white"
               >
                 View Events
               </Button>
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden transition-all hover:shadow-lg bg-gradient-to-br from-pink-50 to-pink-100">
+          <Card className="dashboard-action-card border-purple-100">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">My Wishlist</CardTitle>
-                <BookmarkIcon className="h-5 w-5 text-pink-600" />
+                <CardTitle className="text-lg font-medium">My Wishlist</CardTitle>
+                <div className="bg-purple-100 text-purple-600 p-2 rounded-full">
+                  <Heart className="h-5 w-5" />
+                </div>
               </div>
-              <CardDescription>Places you want to visit</CardDescription>
+              <CardDescription>Save for later</CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
+              <p className="text-sm text-muted-foreground mb-4">
+                Keep track of destinations and events you want to experience in the future.
+              </p>
               <Button 
                 onClick={() => navigate('/wishlist')} 
-                className="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white"
+                className="w-full gradient-purple hover:opacity-90 text-white"
               >
                 View Wishlist
               </Button>
             </CardContent>
           </Card>
         </div>
+
+        {/* Featured Section */}
+        <Card className="dashboard-card relative overflow-hidden border-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/90 to-blue-600/90 z-0"></div>
+          <CardContent className="p-6 relative z-10">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="text-white">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" /> Featured: Victoria Falls Experience
+                </h3>
+                <p className="mt-2 text-white/80 max-w-xl">
+                  Experience the majestic Victoria Falls, one of the Seven Natural Wonders of the World.
+                  Book now and get a special 15% discount on guided tours!
+                </p>
+              </div>
+              <Button 
+                onClick={() => navigate('/destination/victoria-falls')}
+                className="bg-white text-purple-700 hover:bg-white/90"
+              >
+                Learn More
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

@@ -1,7 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calendar, MapPin, CalendarDays, Settings, LogOut, Menu } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Calendar, 
+  MapPin, 
+  CalendarDays, 
+  Settings, 
+  LogOut, 
+  Menu, 
+  Bookmark,
+  Heart,
+  User,
+  HelpCircle
+} from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -20,8 +32,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/models/Auth';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -61,18 +74,57 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const navigationItems = [
-    { title: 'Home', path: '/dashboard', icon: Home },
-    { title: 'My Bookings', path: '/bookings', icon: Calendar },
-    { title: 'Destinations', path: '/destinations', icon: MapPin },
-    { title: 'Events', path: '/events', icon: CalendarDays },
-    { title: 'Settings', path: '/settings', icon: Settings }, // Updated path from /profile to /settings
+    { 
+      title: 'Dashboard', 
+      path: '/dashboard', 
+      icon: LayoutDashboard, 
+      description: 'Overview of your activity' 
+    },
+    { 
+      title: 'My Bookings', 
+      path: '/bookings', 
+      icon: Calendar, 
+      description: 'View and manage bookings' 
+    },
+    { 
+      title: 'Destinations', 
+      path: '/destinations', 
+      icon: MapPin, 
+      description: 'Explore travel destinations' 
+    },
+    { 
+      title: 'Events', 
+      path: '/events', 
+      icon: CalendarDays, 
+      description: 'Upcoming local events' 
+    },
+    { 
+      title: 'Wishlist', 
+      path: '/wishlist', 
+      icon: Heart, 
+      description: 'Places you want to visit' 
+    },
+    { 
+      title: 'Settings', 
+      path: '/settings', 
+      icon: Settings, 
+      description: 'Manage your account' 
+    },
   ];
 
-  const initials = profile?.username 
-    ? profile.username.substring(0, 2).toUpperCase()
-    : user?.email 
-      ? user.email.substring(0, 2).toUpperCase() 
-      : 'U';
+  const fullName = profile?.first_name && profile?.last_name 
+    ? `${profile.first_name} ${profile.last_name}`
+    : null;
+
+  const displayName = fullName || profile?.username || user?.email?.split('@')[0] || 'User';
+  
+  const initials = profile?.first_name && profile?.last_name
+    ? `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase()
+    : profile?.username 
+      ? profile.username.substring(0, 2).toUpperCase()
+      : user?.email 
+        ? user.email.substring(0, 2).toUpperCase() 
+        : 'U';
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
@@ -80,7 +132,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <Sidebar variant={isMobile ? "floating" : "sidebar"}>
           <SidebarHeader>
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="rounded-full bg-purple-700 p-1.5 text-white">
+              <div className="rounded-full gradient-purple p-1.5 text-white">
                 <MapPin size={20} />
               </div>
               <div className="flex flex-col">
@@ -96,23 +148,48 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <SidebarMenu>
                   {navigationItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={location.pathname === item.path}
-                        tooltip={item.title}
-                      >
-                        <Link to={item.path} className={cn(
-                          "transition-colors",
-                          location.pathname === item.path 
-                            ? "text-purple-700" 
-                            : "text-gray-600 hover:text-purple-600"
-                        )}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={location.pathname === item.path}
+                              tooltip={item.title}
+                            >
+                              <Link to={item.path} className={cn(
+                                "transition-colors",
+                                location.pathname === item.path 
+                                  ? "text-sidebar-primary font-medium" 
+                                  : "text-sidebar-foreground hover:text-sidebar-primary"
+                              )}>
+                                <item.icon className="dashboard-icon" />
+                                <span>{item.title}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            {item.description}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </SidebarMenuItem>
                   ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>Support</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <a href="#" className="text-sidebar-foreground hover:text-sidebar-primary">
+                        <HelpCircle className="dashboard-icon" />
+                        <span>Help & Support</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -122,10 +199,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-purple-100 text-purple-700">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <p className="text-sm font-medium">{profile?.username || user?.email?.split('@')[0]}</p>
+                  <p className="text-sm font-medium">{displayName}</p>
                   <p className="text-xs text-muted-foreground">{profile?.role || 'User'}</p>
                 </div>
               </div>
@@ -142,13 +219,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Sidebar>
         
         <div className="flex-1 overflow-auto">
-          <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-md py-3 px-6">
+          <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-md py-3 px-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="h-8 w-8" />
-                <h1 className="text-xl font-semibold">
-                  {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
-                </h1>
+                <div>
+                  <h1 className="text-xl font-semibold">
+                    {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
+                  </h1>
+                  <p className="text-sm text-muted-foreground hidden sm:block">
+                    {navigationItems.find(item => item.path === location.pathname)?.description || 'Welcome to Zimbabwe Tourism'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/settings">
+                    <User className="h-5 w-5" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </header>
