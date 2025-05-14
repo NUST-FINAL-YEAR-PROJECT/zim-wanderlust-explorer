@@ -47,17 +47,17 @@
     --sidebar-ring: 265 84% 50%;
     
     /* Admin dashboard dark blue theme */
-    --admin-bg: 215 50% 10%;
-    --admin-fg: 210 40% 98%;
-    --admin-card: 215 40% 15%;
-    --admin-card-fg: 210 40% 98%;
-    --admin-primary: 215 70% 40%;
-    --admin-primary-hover: 215 70% 35%;
-    --admin-secondary: 215 30% 20%;
-    --admin-accent: 200 80% 50%;
-    --admin-muted: 215 30% 25%;
-    --admin-muted-fg: 210 20% 80%;
-    --admin-border: 215 30% 25%;
+    --admin-bg: 215 30% 95%;
+    --admin-fg: 215 50% 20%;
+    --admin-card: 215 30% 98%;
+    --admin-card-fg: 215 50% 20%;
+    --admin-primary: 215 70% 50%;
+    --admin-primary-hover: 215 70% 45%;
+    --admin-secondary: 215 30% 90%;
+    --admin-accent: 200 80% 60%;
+    --admin-muted: 215 30% 85%;
+    --admin-muted-fg: 215 30% 40%;
+    --admin-border: 215 30% 80%;
     --admin-highlight: 200 80% 60%;
   }
 
