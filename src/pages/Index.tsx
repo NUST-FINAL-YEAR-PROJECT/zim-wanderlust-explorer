@@ -8,7 +8,84 @@ import DestinationCard from "@/components/DestinationCard";
 import EventCard from "@/components/EventCard";
 import SearchBar from "@/components/SearchBar";
 import Footer from "@/components/Footer";
-import { destinations, events } from "@/lib/data";
+import { Destination } from "@/models/Destination";
+import { events } from "@/lib/data";
+
+// Map the mock data to match the Destination type
+const destinations: Destination[] = [
+  {
+    id: "1",
+    name: "Victoria Falls",
+    description: "One of the Seven Natural Wonders of the World, Victoria Falls is a spectacular waterfall on the Zambezi River.",
+    location: "Matabeleland North",
+    price: 45,
+    image_url: "/victoria-falls.jpg",
+    activities: ["Bungee jumping", "White water rafting", "Helicopter tours"],
+    best_time_to_visit: "February to May",
+    duration_recommended: "2-3 days",
+    difficulty_level: "Easy",
+    amenities: ["Guided tours", "Restaurants", "Viewpoints"],
+    what_to_bring: ["Camera", "Raincoat", "Comfortable shoes"],
+    highlights: ["Devil's Pool", "Lunar Rainbow", "Knife-edge Bridge"],
+    weather_info: "The falls are at their fullest from February to May after the summer rains.",
+    getting_there: "Fly into Victoria Falls Airport, then take a shuttle to the falls.",
+    categories: ["Natural Wonder", "Adventure"],
+    additional_images: ["/victoria-falls.jpg"],
+    is_featured: true,
+    payment_url: null,
+    created_at: "",
+    updated_at: "",
+    additional_costs: null
+  },
+  {
+    id: "2",
+    name: "Great Zimbabwe",
+    description: "Ancient stone ruins and UNESCO World Heritage site dating back to the 11th century.",
+    location: "Masvingo",
+    price: 20,
+    image_url: "/great-zimbabwe.jpg",
+    activities: ["Guided tours", "Archaeological exploration"],
+    best_time_to_visit: "May to October",
+    duration_recommended: "1 day",
+    difficulty_level: "Easy",
+    amenities: ["Museum", "Gift shop", "Guides"],
+    what_to_bring: ["Hat", "Sunscreen", "Water"],
+    highlights: ["Great Enclosure", "Hill Complex", "Valley Ruins"],
+    weather_info: "Dry and sunny during May to October, making exploration comfortable.",
+    getting_there: "Drive from Harare (4 hours) or Bulawayo (3 hours).",
+    categories: ["Historical", "Cultural"],
+    additional_images: ["/great-zimbabwe.jpg"],
+    is_featured: true,
+    payment_url: null,
+    created_at: "",
+    updated_at: "",
+    additional_costs: null
+  },
+  {
+    id: "3",
+    name: "Hwange National Park",
+    description: "Zimbabwe's largest national park, home to over 100 mammal species and 400 bird species.",
+    location: "Matabeleland North",
+    price: 30,
+    image_url: "/hwange.jpg",
+    activities: ["Game drives", "Bird watching", "Walking safaris"],
+    best_time_to_visit: "July to October",
+    duration_recommended: "3-4 days",
+    difficulty_level: "Moderate",
+    amenities: ["Lodges", "Camping sites", "Guides"],
+    what_to_bring: ["Binoculars", "Camera", "Safari clothing"],
+    highlights: ["Elephant herds", "Lion prides", "Painted dogs"],
+    weather_info: "Dry season (July to October) is best for wildlife viewing as animals gather around water holes.",
+    getting_there: "Drive from Bulawayo (4 hours) or Victoria Falls (2 hours).",
+    categories: ["Wildlife", "Safari"],
+    additional_images: ["/hwange.jpg"],
+    is_featured: true,
+    payment_url: null,
+    created_at: "",
+    updated_at: "",
+    additional_costs: null
+  }
+];
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");

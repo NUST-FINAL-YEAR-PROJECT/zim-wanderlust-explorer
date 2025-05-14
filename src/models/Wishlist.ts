@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { getDestination } from "./Destination";
 
 export interface Wishlist {
   id: string;
@@ -27,7 +28,7 @@ export interface WishlistItem {
 export async function getUserWishlist(userId: string) {
   const { data, error } = await supabase
     .from('wishlists')
-    .select('*, destinations(*)')
+    .select('*')
     .eq('user_id', userId);
   
   if (error) {
@@ -35,7 +36,26 @@ export async function getUserWishlist(userId: string) {
     return [];
   }
   
-  return data as WishlistItem[];
+  // For each wishlist item, fetch the destination details
+  const wishlistItemsWithDestinations = await Promise.all(
+    data.map(async (item) => {
+      const destination = await getDestination(item.destination_id);
+      return {
+        ...item,
+        destinations: destination ? {
+          id: destination.id,
+          name: destination.name,
+          description: destination.description || "",
+          location: destination.location,
+          price: destination.price,
+          image_url: destination.image_url || ""
+        } : null
+      };
+    })
+  );
+  
+  // Filter out items with null destinations
+  return wishlistItemsWithDestinations.filter(item => item.destinations) as WishlistItem[];
 }
 
 export async function addToWishlist(userId: string, destinationId: string) {

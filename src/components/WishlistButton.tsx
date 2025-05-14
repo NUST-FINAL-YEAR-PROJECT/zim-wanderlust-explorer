@@ -12,9 +12,16 @@ interface WishlistButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  onRemove?: () => void; // Add this prop
 }
 
-export function WishlistButton({ destinationId, variant = 'outline', size = 'icon', className = '' }: WishlistButtonProps) {
+export function WishlistButton({ 
+  destinationId, 
+  variant = 'outline', 
+  size = 'icon', 
+  className = '',
+  onRemove
+}: WishlistButtonProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -52,6 +59,9 @@ export function WishlistButton({ destinationId, variant = 'outline', size = 'ico
         const success = await removeFromWishlist(user.id, destinationId);
         if (success) {
           setIsWishlisted(false);
+          if (onRemove) {
+            onRemove(); // Call the onRemove callback if provided
+          }
         }
       } else {
         const added = await addToWishlist(user.id, destinationId);
