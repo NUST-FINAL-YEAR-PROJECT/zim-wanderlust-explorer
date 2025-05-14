@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,7 +217,6 @@ const BookingsManagement: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Name / Location</TableHead>
@@ -249,7 +247,6 @@ const BookingsManagement: React.FC = () => {
               <TableBody>
                 {sortedBookings.map((booking) => (
                   <TableRow key={booking.id}>
-                    <TableCell className="font-mono text-xs">{booking.id.slice(0, 8)}...</TableCell>
                     <TableCell>
                       <div className="font-medium">{booking.contact_name}</div>
                       <div className="text-xs text-gray-500">
