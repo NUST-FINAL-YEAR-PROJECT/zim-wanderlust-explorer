@@ -3,12 +3,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import HomepageSearchBar from "@/components/HomepageSearchBar";
 import DestinationCard from "@/components/DestinationCard";
 import EventCard from "@/components/EventCard";
 import Footer from "@/components/Footer";
-import { Destination } from "@/models/Destination";
-import { Event } from "@/models/Event";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,10 +14,13 @@ import MapExplorer from "@/components/MapExplorer";
 import AiAssistant from "@/components/AiAssistant";
 import DestinationCategories from "@/components/DestinationCategories";
 import { Globe } from "lucide-react";
+import HeroCarousel from "@/components/HeroCarousel";
+import StatsCounter from "@/components/StatsCounter";
+import TestimonialSlider from "@/components/TestimonialSlider";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
-  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [destinations, setDestinations] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -52,18 +52,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Hero Section with Airbnb-style search */}
-      <div className="relative h-[80vh] bg-cover bg-center" style={{ backgroundImage: "url('/hero.jpg')" }}>
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 max-w-3xl">
-            Discover the Heart of Zimbabwe
-          </h1>
-          <div className="w-full max-w-4xl bg-white rounded-full shadow-lg p-2 mb-8">
-            <HomepageSearchBar />
-          </div>
-        </div>
-      </div>
+      {/* Hero Carousel - Replacement for static hero */}
+      <HeroCarousel />
       
       {/* Categories Section */}
       <div className="py-12 container mx-auto px-4">
@@ -155,6 +145,12 @@ const Index = () => {
           </Tabs>
         </div>
       </div>
+      
+      {/* Stats Counter - New section */}
+      <StatsCounter />
+      
+      {/* Testimonials - New section */}
+      <TestimonialSlider />
       
       {/* Inspiration Section */}
       <div className="container mx-auto px-4 py-12">
