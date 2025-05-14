@@ -19,7 +19,7 @@ export interface Destination {
   getting_there: string | null;
   categories: string[] | null;
   additional_images: string[] | null;
-  additional_costs: Record<string, any> | null;
+  additional_costs: Record<string, any> | any[] | null;
   is_featured: boolean | null;
   payment_url: string | null;
   created_at: string;

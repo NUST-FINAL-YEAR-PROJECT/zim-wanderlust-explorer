@@ -9,7 +9,7 @@ export interface Event {
   start_date: string | null;
   end_date: string | null;
   price: number | null;
-  ticket_types: Record<string, any> | null;
+  ticket_types: any[] | Record<string, any> | null;
   image_url: string | null;
   event_type: string | null;
   program_type: string | null;
