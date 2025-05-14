@@ -14,6 +14,10 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Bookings from "./pages/Bookings";
 import Destinations from "./pages/Destinations";
+import DestinationDetails from "./pages/DestinationDetails";
+import BookingForm from "./pages/BookingForm";
+import PaymentPage from "./pages/PaymentPage";
+import InvoicePage from "./pages/InvoicePage";
 import Events from "./pages/Events";
 import Settings from "./pages/Settings";
 
@@ -58,6 +62,38 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Destinations />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/destination/:id" 
+              element={
+                <ProtectedRoute>
+                  <DestinationDetails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/booking/:id" 
+              element={
+                <ProtectedRoute>
+                  <BookingForm />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/payment/:id" 
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/invoice/:id" 
+              element={
+                <ProtectedRoute>
+                  <InvoicePage />
                 </ProtectedRoute>
               } 
             />

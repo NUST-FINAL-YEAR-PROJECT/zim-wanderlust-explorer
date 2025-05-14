@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Destinations = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [priceFilter, setPriceFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
@@ -43,6 +45,10 @@ const Destinations = () => {
     
     return matchesSearch && matchesPrice && matchesLocation;
   });
+
+  const handleViewDestination = (id: string) => {
+    navigate(`/destination/${id}`);
+  };
 
   return (
     <DashboardLayout>
@@ -168,7 +174,10 @@ const Destinations = () => {
                             {destination.description}
                           </p>
                           <div className="mt-4">
-                            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
+                            <Button 
+                              className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                              onClick={() => handleViewDestination(destination.id)}
+                            >
                               View Details
                             </Button>
                           </div>
@@ -197,7 +206,11 @@ const Destinations = () => {
                             </div>
                             <div className="text-right">
                               <span className="font-medium text-green-700 block mb-2">${destination.price}</span>
-                              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                              <Button 
+                                size="sm" 
+                                className="bg-amber-600 hover:bg-amber-700 text-white"
+                                onClick={() => handleViewDestination(destination.id)}
+                              >
                                 View
                               </Button>
                             </div>
