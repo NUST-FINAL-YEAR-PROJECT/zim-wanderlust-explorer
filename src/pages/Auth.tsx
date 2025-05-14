@@ -17,14 +17,18 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
-    // Redirect to dashboard if user is already logged in
+    // Redirect to appropriate dashboard if user is already logged in
     if (user) {
-      navigate('/dashboard');
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +39,8 @@ const Auth: React.FC = () => {
         title: 'Success',
         description: 'Signed in successfully.',
       });
-      navigate('/dashboard');
+      // No need to navigate here as the useEffect will handle it
+      // based on the user role after auth state changes
     } catch (error: any) {
       toast({
         title: 'Error',
