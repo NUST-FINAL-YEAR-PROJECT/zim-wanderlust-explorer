@@ -4,6 +4,8 @@ import { MessageCircle, X, Tent, Drum, Binoculars, TentTree } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const AiAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +18,7 @@ const AiAssistant = () => {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [assistantIcon, setAssistantIcon] = useState<React.ReactNode>(<MessageCircle size={24} />);
+  const { toast } = useToast();
   
   // Cycle through icons for a dynamic effect
   useEffect(() => {
@@ -41,7 +44,7 @@ const AiAssistant = () => {
     setIsOpen(!isOpen);
   };
   
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
     
@@ -51,25 +54,39 @@ const AiAssistant = () => {
     setInput("");
     setIsTyping(true);
     
-    // Simulate AI response
-    setTimeout(() => {
-      let response = "";
+    try {
+      // Get all messages except the initial welcome message to maintain conversation context
+      const messageHistory = messages.length > 1 
+        ? messages.slice(1).concat(userMessage) 
+        : [userMessage];
       
-      if (input.toLowerCase().includes("victoria falls")) {
-        response = "Victoria Falls is stunning year-round, but the best time to visit is from February to May when water flow is at its peak. Are you interested in adventure activities there like bungee jumping or white water rafting?";
-      } else if (input.toLowerCase().includes("safari") || input.toLowerCase().includes("wildlife")) {
-        response = "Zimbabwe offers incredible safari experiences! Hwange National Park and Mana Pools are top destinations. The dry season (May to October) is best for wildlife viewing. Would you like more specific information?";
-      } else if (input.toLowerCase().includes("weather") || input.toLowerCase().includes("best time")) {
-        response = "Zimbabwe has a pleasant climate year-round. The dry season (May-October) is best for wildlife viewing with mild days and cool nights. The green season (November-April) brings occasional rain and lush landscapes.";
-      } else if (input.toLowerCase().includes("accommodation") || input.toLowerCase().includes("stay") || input.toLowerCase().includes("hotel")) {
-        response = "Zimbabwe offers diverse accommodation ranging from luxury safari lodges to boutique hotels and eco-camps. Popular areas include Victoria Falls, Harare, and lodges within national parks. What's your budget and preferred style?";
-      } else {
-        response = "Thanks for your question about Zimbabwe! I'd be happy to help with information about destinations, activities, accommodation, or travel tips. Could you provide a bit more detail about what you're looking for?";
+      // Call Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('chat-assistant', {
+        body: { messages: messageHistory },
+      });
+
+      if (error) {
+        throw new Error(error.message);
       }
+
+      // Add AI response
+      setMessages(prev => [...prev, { role: "assistant", content: data.message }]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast({
+        title: "Connection error",
+        description: "Couldn't reach Kombirai at the moment. Please try again.",
+        variant: "destructive",
+      });
       
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      // Add fallback response
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment." 
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
   
   return (
@@ -160,7 +177,11 @@ const AiAssistant = () => {
               placeholder="Ask about Zimbabwe travel..."
               className="flex-1 p-3 border rounded-l-lg focus:outline-none focus:ring-1 focus:ring-green-500 bg-gray-50"
             />
-            <Button type="submit" className="rounded-l-none bg-green-700 hover:bg-green-800 px-4">
+            <Button 
+              type="submit" 
+              className="rounded-l-none bg-green-700 hover:bg-green-800 px-4"
+              disabled={isTyping}
+            >
               Send
             </Button>
           </form>
