@@ -44,65 +44,10 @@ const Index = () => {
     navigate(`/browse?tab=${activeTab}`);
   };
 
-  const features = [
-    {
-      title: "Victoria Falls",
-      description: "Experience the majestic Victoria Falls, one of the Seven Natural Wonders of the World",
-      image: "/victoria-falls.jpg"
-    },
-    {
-      title: "Great Zimbabwe",
-      description: "Visit the ancient stone city that gave Zimbabwe its name",
-      image: "/great-zimbabwe.jpg"
-    },
-    {
-      title: "Hwange National Park",
-      description: "Explore Zimbabwe's largest wildlife sanctuary with incredible safari experiences",
-      image: "/hwange.jpg"
-    }
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-[#F1F0FB]">
       {/* Hero Carousel */}
       <HeroCarousel />
-      
-      {/* Featured Destinations Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="mb-10 text-center">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 text-gray-800">Featured Destinations</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Discover the most beautiful spots Zimbabwe has to offer
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300 bg-white border border-gray-100">
-                <div className="h-56 overflow-hidden relative">
-                  <img 
-                    src={feature.image} 
-                    alt={feature.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-display font-bold mb-2 text-gray-800">{feature.title}</h3>
-                  <p className="text-gray-600 mb-4">{feature.description}</p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate("/browse")}
-                    className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-                  >
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
       
       {/* Popular Destinations/Events Section */}
       <div className="container mx-auto px-4 py-16">
