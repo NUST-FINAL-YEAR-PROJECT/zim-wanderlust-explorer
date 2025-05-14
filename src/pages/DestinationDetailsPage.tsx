@@ -78,6 +78,16 @@ export default function DestinationDetails() {
     navigate("/itineraries/create", { state: { selectedDestination: destination } });
   };
 
+  // Helper function to check if capacity exists in additional_costs
+  const hasCapacity = () => {
+    if (!destination.additional_costs) return false;
+    if (Array.isArray(destination.additional_costs)) return false;
+    
+    // Check if it's an object with capacity property
+    return typeof destination.additional_costs === 'object' && 
+           'capacity' in destination.additional_costs;
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
@@ -148,11 +158,11 @@ export default function DestinationDetails() {
                   </span>
                 </div>
                 
-                {/* Only show if we have this data */}
-                {destination.additional_costs && destination.additional_costs.capacity && (
+                {/* Only show if capacity exists in additional_costs */}
+                {hasCapacity() && (
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-2" />
-                    Capacity: {destination.additional_costs.capacity}
+                    Capacity: {(destination.additional_costs as Record<string, any>).capacity}
                   </div>
                 )}
               </div>

@@ -77,7 +77,7 @@ export async function searchEvents(query: string) {
   return data as Event[];
 }
 
-export async function addEvent(event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) {
+export async function addEvent(event: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at'>>) {
   const { data, error } = await supabase
     .from('events')
     .insert([event])

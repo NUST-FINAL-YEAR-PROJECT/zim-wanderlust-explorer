@@ -82,10 +82,21 @@ export async function searchDestinations(query: string) {
   return data as Destination[];
 }
 
-export async function addDestination(destination: Omit<Destination, 'id' | 'created_at' | 'updated_at'>) {
+export async function addDestination(destination: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>>) {
+  // Ensure all array fields are properly set to empty arrays if they're null or undefined
+  const sanitizedDestination = {
+    ...destination,
+    activities: destination.activities || [],
+    amenities: destination.amenities || [],
+    what_to_bring: destination.what_to_bring || [],
+    highlights: destination.highlights || [],
+    categories: destination.categories || [],
+    additional_images: destination.additional_images || [],
+  };
+
   const { data, error } = await supabase
     .from('destinations')
-    .insert([destination])
+    .insert([sanitizedDestination])
     .select()
     .single();
   
@@ -98,9 +109,20 @@ export async function addDestination(destination: Omit<Destination, 'id' | 'crea
 }
 
 export async function updateDestination(id: string, updates: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>>) {
+  // Ensure we don't send null values for array fields
+  const sanitizedUpdates = { ...updates };
+  
+  // Only set array fields if they exist in the updates
+  if ('activities' in updates) sanitizedUpdates.activities = updates.activities || [];
+  if ('amenities' in updates) sanitizedUpdates.amenities = updates.amenities || [];
+  if ('what_to_bring' in updates) sanitizedUpdates.what_to_bring = updates.what_to_bring || [];
+  if ('highlights' in updates) sanitizedUpdates.highlights = updates.highlights || [];
+  if ('categories' in updates) sanitizedUpdates.categories = updates.categories || [];
+  if ('additional_images' in updates) sanitizedUpdates.additional_images = updates.additional_images || [];
+
   const { data, error } = await supabase
     .from('destinations')
-    .update(updates)
+    .update(sanitizedUpdates)
     .eq('id', id)
     .select()
     .single();
