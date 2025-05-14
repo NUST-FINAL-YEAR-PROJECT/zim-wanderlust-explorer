@@ -14,48 +14,63 @@ serve(async (req) => {
   }
 
   try {
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is required');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is required');
     }
 
     const { messages } = await req.json();
 
-    // Add system instructions specific to Zimbabwe tourism
+    // Format messages for Gemini API
+    const formattedMessages = messages.map((msg: any) => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }]
+    }));
+    
+    // Add system instruction as the first message
     const systemMessage = {
-      role: "system", 
-      content: `You are Kombirai, a helpful AI travel assistant specializing in Zimbabwe tourism. 
-      Provide accurate, concise, and helpful information about Zimbabwe's attractions, accommodations, 
-      travel tips, events, wildlife, and culture. Use a friendly, professional tone. 
-      If you don't know something specific about Zimbabwe, acknowledge it and provide general travel advice.
-      Include local terminology when appropriate to enhance authenticity.`
+      role: "model",
+      parts: [{ 
+        text: `You are Kombirai, a helpful AI travel assistant specializing in Zimbabwe tourism. 
+        Provide accurate, concise, and helpful information about Zimbabwe's attractions, accommodations, 
+        travel tips, events, wildlife, and culture. Use a friendly, professional tone. 
+        If you don't know something specific about Zimbabwe, acknowledge it and provide general travel advice.
+        Include local terminology when appropriate to enhance authenticity.`
+      }]
     };
 
     // Prepare full message history including system message
-    const fullMessages = [systemMessage, ...messages];
+    const fullMessages = [systemMessage, ...formattedMessages];
 
-    // Use a more affordable model (gpt-3.5-turbo)
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call Gemini API
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo', // Changed from gpt-4o-mini to a more affordable model
-        messages: fullMessages,
-        temperature: 0.7,
-        max_tokens: 500,
+        contents: fullMessages,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500,
+        },
       }),
     });
 
     const data = await response.json();
     
-    if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to get response from OpenAI');
+    if (!response.ok || data.error) {
+      console.error('Gemini API error:', data.error);
+      throw new Error(data.error?.message || 'Failed to get response from Gemini API');
     }
 
-    const assistantMessage = data.choices[0].message.content;
+    // Extract the assistant's response text
+    const assistantMessage = data.candidates[0]?.content?.parts[0]?.text;
+
+    if (!assistantMessage) {
+      throw new Error('No valid response from Gemini API');
+    }
 
     return new Response(JSON.stringify({ message: assistantMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
