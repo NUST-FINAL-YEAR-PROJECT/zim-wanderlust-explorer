@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Destination, getDestinations } from "@/models/Destination";
+import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DestinationSelectorProps {
   value: Destination | null;
@@ -34,11 +35,12 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
       setError(null);
       try {
         const data = await getDestinations();
-        // Ensure destinations is always an array, even if API returns null or undefined
+        // Initialize as empty array to prevent undefined errors
         setDestinations(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Error fetching destinations:', err);
         setError('Failed to load destinations');
+        // Always ensure destinations is an array
         setDestinations([]);
       } finally {
         setIsLoading(false);
@@ -47,6 +49,16 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
 
     fetchDestinations();
   }, []);
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -65,40 +77,38 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
       <PopoverContent className="w-[300px] p-0" align="start">
         <Command>
           <CommandInput placeholder="Search destinations..." />
-          {error ? (
-            <CommandEmpty>{error}</CommandEmpty>
-          ) : (
-            <>
-              <CommandEmpty>No destination found.</CommandEmpty>
-              <CommandGroup className="max-h-[300px] overflow-y-auto">
-                {destinations.length > 0 ? (
-                  destinations.map((destination) => (
-                    <CommandItem
-                      key={destination.id}
-                      value={destination.name}
-                      onSelect={() => {
-                        onChange(destination.id === value?.id ? null : destination);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value?.id === destination.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {destination.name}
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {destination.location}
-                      </span>
-                    </CommandItem>
-                  ))
-                ) : (
-                  <CommandItem disabled>No destinations available</CommandItem>
-                )}
-              </CommandGroup>
-            </>
-          )}
+          <CommandEmpty>
+            {error ? error : "No destination found."}
+          </CommandEmpty>
+          <CommandGroup className="max-h-[300px] overflow-y-auto">
+            {destinations && destinations.length > 0 ? (
+              destinations.map((destination) => (
+                <CommandItem
+                  key={destination.id}
+                  value={destination.name}
+                  onSelect={() => {
+                    onChange(destination.id === value?.id ? null : destination);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value?.id === destination.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {destination.name}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {destination.location}
+                  </span>
+                </CommandItem>
+              ))
+            ) : (
+              <CommandItem disabled>
+                {isLoading ? "Loading destinations..." : "No destinations available"}
+              </CommandItem>
+            )}
+          </CommandGroup>
         </Command>
       </PopoverContent>
     </Popover>

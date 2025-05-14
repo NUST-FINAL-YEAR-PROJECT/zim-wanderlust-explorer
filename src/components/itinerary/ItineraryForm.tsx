@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -36,7 +35,11 @@ const formSchema = z.object({
   description: z.string().optional(),
 });
 
-export function ItineraryForm() {
+interface ItineraryFormProps {
+  onError?: (error: Error) => void;
+}
+
+export function ItineraryForm({ onError }: ItineraryFormProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,8 +79,11 @@ export function ItineraryForm() {
       }
     } catch (error) {
       console.error("Error loading pre-selected destination:", error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
     }
-  }, [location.state, form]);
+  }, [location.state, form, onError]);
 
   const addDestination = () => {
     setDestinations([
@@ -91,11 +97,18 @@ export function ItineraryForm() {
   };
 
   const updateDestination = (index: number, destination: Destination | null) => {
-    setDestinations((current) => {
-      const updated = [...current];
-      updated[index] = { ...updated[index], destination };
-      return updated;
-    });
+    try {
+      setDestinations((current) => {
+        const updated = [...current];
+        updated[index] = { ...updated[index], destination };
+        return updated;
+      });
+    } catch (error) {
+      console.error("Error updating destination:", error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
+    }
   };
 
   const updateStartDate = (index: number, date: Date | undefined) => {
@@ -196,6 +209,10 @@ export function ItineraryForm() {
         description: "Failed to create itinerary. Please try again later.",
         variant: "destructive",
       });
+      
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
     } finally {
       setIsSubmitting(false);
     }
