@@ -128,22 +128,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full bg-white">
-        <Sidebar className="border-r border-[#36B5FF]/20">
+      <div className="flex min-h-screen w-full bg-[#F1F0FB]">
+        <Sidebar className="border-r border-[#E2E8F0]">
           <SidebarHeader>
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="rounded-full bg-[#5E35B1] p-1.5 text-white">
+              <div className="rounded-full bg-[#6366F1] p-1.5 text-white">
                 <MapPin size={20} />
               </div>
               <div className="flex flex-col">
-                <h3 className="font-bold text-lg tracking-tight text-[#5E35B1]">Zimbabwe Tourism</h3>
-                <p className="text-xs text-[#5E35B1]/70">Discover the beauty</p>
+                <h3 className="font-bold text-lg tracking-tight text-[#6366F1] font-display">Zimbabwe Tourism</h3>
+                <p className="text-xs text-[#6366F1]/70 font-body">Discover the beauty</p>
               </div>
             </div>
           </SidebarHeader>
           <SidebarContent className="pb-6">
             <SidebarGroup>
-              <SidebarGroupLabel className="text-[#5E35B1]/70">Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-[#6366F1]/70 font-body">Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => (
@@ -157,18 +157,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                               tooltip={item.title}
                             >
                               <Link to={item.path} className={cn(
-                                "transition-colors",
+                                "transition-all duration-300",
                                 location.pathname === item.path 
-                                  ? "text-[#5E35B1] font-medium" 
-                                  : "text-[#5E35B1]/70 hover:text-[#5E35B1]"
+                                  ? "text-[#6366F1] font-medium" 
+                                  : "text-[#6366F1]/70 hover:text-[#6366F1]"
                               )}>
                                 <item.icon className="dashboard-icon" />
-                                <span>{item.title}</span>
+                                <span className="font-body">{item.title}</span>
                               </Link>
                             </SidebarMenuButton>
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-[#5E35B1] text-white">
-                            {item.description}
+                          <TooltipContent side="right" className="bg-[#6366F1] text-white">
+                            <span className="font-body">{item.description}</span>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -179,14 +179,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </SidebarGroup>
             
             <SidebarGroup>
-              <SidebarGroupLabel className="text-[#5E35B1]/70">Support</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-[#6366F1]/70 font-body">Support</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <a href="#" className="text-[#5E35B1]/70 hover:text-[#5E35B1]">
+                      <a href="#" className="text-[#6366F1]/70 hover:text-[#6366F1] transition-all duration-300">
                         <HelpCircle className="dashboard-icon" />
-                        <span>Help & Support</span>
+                        <span className="font-body">Help & Support</span>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -194,47 +194,47 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter className="border-t border-[#36B5FF]/20 pt-2">
+          <SidebarFooter className="border-t border-[#E2E8F0] pt-2">
             <div className="mb-3 px-3 py-2">
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-[#F1F7FF] text-[#5E35B1]">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-[#F1F0FB] text-[#6366F1]">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <p className="text-sm font-medium text-[#5E35B1]">{displayName}</p>
-                  <p className="text-xs text-[#5E35B1]/70">{profile?.role || 'User'}</p>
+                  <p className="text-sm font-medium text-[#6366F1] font-body">{displayName}</p>
+                  <p className="text-xs text-[#6366F1]/70 font-body">{profile?.role || 'User'}</p>
                 </div>
               </div>
             </div>
             <Button 
               variant="outline" 
-              className="w-full flex items-center gap-2 text-[#5E35B1] border-[#5E35B1]/40 hover:bg-[#F1F7FF]" 
+              className="w-full flex items-center gap-2 text-[#6366F1] border-[#6366F1]/40 hover:bg-[#F1F0FB] transition-all duration-300" 
               onClick={handleSignOut}
             >
               <LogOut size={16} />
-              <span>Sign Out</span>
+              <span className="font-body">Sign Out</span>
             </Button>
           </SidebarFooter>
         </Sidebar>
         
         <div className="flex-1 overflow-auto">
-          <header className="sticky top-0 z-10 border-b border-[#36B5FF]/20 bg-white/80 backdrop-blur-md py-3 px-6 shadow-sm">
+          <header className="sticky top-0 z-10 border-b border-[#E2E8F0] bg-white/80 backdrop-blur-md py-3 px-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="h-8 w-8 text-[#5E35B1]" />
+                <SidebarTrigger className="h-8 w-8 text-[#6366F1]" />
                 <div>
-                  <h1 className="text-xl font-semibold text-[#5E35B1]">
+                  <h1 className="text-xl font-semibold text-[#6366F1] font-display">
                     {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
                   </h1>
-                  <p className="text-sm text-[#5E35B1]/70 hidden sm:block">
+                  <p className="text-sm text-[#6366F1]/70 hidden sm:block font-body">
                     {navigationItems.find(item => item.path === location.pathname)?.description || 'Welcome to Zimbabwe Tourism'}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" asChild className="text-[#5E35B1] hover:bg-[#F1F7FF]">
+                <Button variant="ghost" size="icon" asChild className="text-[#6366F1] hover:bg-[#F1F0FB] transition-all duration-300">
                   <Link to="/settings">
                     <User className="h-5 w-5" />
                   </Link>

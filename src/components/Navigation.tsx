@@ -10,23 +10,23 @@ const Navigation = () => {
   return (
     <div className="absolute top-0 left-0 right-0 z-30 py-4 px-6">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold text-white">
+        <Link to="/" className="text-xl font-display font-bold text-white">
           Discover Zimbabwe
         </Link>
         
         <div className="flex items-center gap-4">
           {user ? (
             <Link to="/dashboard">
-              <Button variant="ghost" className="text-white hover:bg-white/20 flex items-center gap-2">
+              <Button variant="ghost" className="text-white hover:bg-white/20 flex items-center gap-2 transition-all duration-300">
                 <UserCircle size={20} />
-                <span className="hidden md:inline">My Account</span>
+                <span className="hidden md:inline font-medium">My Account</span>
               </Button>
             </Link>
           ) : (
             <Link to="/auth">
-              <Button variant="ghost" className="text-white hover:bg-white/20 flex items-center gap-2">
+              <Button variant="ghost" className="text-white hover:bg-white/20 flex items-center gap-2 transition-all duration-300">
                 <LogIn size={20} />
-                <span className="hidden md:inline">Sign In</span>
+                <span className="hidden md:inline font-medium">Sign In</span>
               </Button>
             </Link>
           )}

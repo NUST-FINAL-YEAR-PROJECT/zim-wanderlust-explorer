@@ -113,19 +113,19 @@ const Auth: React.FC = () => {
   // Show loading state if auth state is still being determined
   if (isLoading && user) {
     return <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#5E35B1] mr-2"></div>
-      <span>Authenticating...</span>
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6366F1] mr-2"></div>
+      <span className="font-body">Authenticating...</span>
     </div>;
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F1F0FB]">
       {/* Back button */}
       <div className="absolute top-4 left-4 z-10">
         <Link to="/">
-          <Button variant="ghost" className="flex items-center gap-2 text-white md:text-gray-700">
+          <Button variant="ghost" className="flex items-center gap-2 text-white md:text-[#1E293B] transition-all duration-300">
             <ArrowLeft size={20} />
-            <span>Back to Home</span>
+            <span className="font-body">Back to Home</span>
           </Button>
         </Link>
       </div>
@@ -133,18 +133,18 @@ const Auth: React.FC = () => {
       {/* Banner section */}
       <div className="md:w-1/2 relative p-8 flex flex-col justify-center overflow-hidden">
         <div className="absolute inset-0 bg-[url('/victoria-falls.jpg')] bg-cover bg-center">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#5E35B1]/80 via-[#5E35B1]/60 to-[#5E35B1]/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#6366F1]/80 via-[#6366F1]/60 to-[#6366F1]/40"></div>
         </div>
         <div className="relative z-10 text-white max-w-md mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-full bg-white/20 p-2">
               <MapPin size={32} />
             </div>
-            <h1 className="text-4xl font-bold">Zimbabwe Tourism</h1>
+            <h1 className="text-4xl font-bold font-display">Zimbabwe Tourism</h1>
           </div>
-          <p className="text-xl mb-8">Experience the breathtaking beauty of Zimbabwe's landscapes, rich culture, and unforgettable adventures.</p>
+          <p className="text-xl mb-8 font-body">Experience the breathtaking beauty of Zimbabwe's landscapes, rich culture, and unforgettable adventures.</p>
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-            <p className="italic text-white/90 text-lg">"Zimbabwe is not just a destination; it's an experience that stays with you forever."</p>
+            <p className="italic text-white/90 text-lg font-body">"Zimbabwe is not just a destination; it's an experience that stays with you forever."</p>
           </div>
         </div>
       </div>
@@ -154,14 +154,14 @@ const Auth: React.FC = () => {
         <div className="w-full max-w-md">
           <Card className="w-full shadow-lg border-0">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-bold text-[#5E35B1]">Welcome</CardTitle>
+              <CardTitle className="text-2xl font-bold text-[#6366F1]">Welcome</CardTitle>
               <CardDescription>Sign in to your account or create a new one</CardDescription>
             </CardHeader>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-4">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                <TabsTrigger value="admin" className="bg-[#F1F7FF] text-[#5E35B1]">Admin</TabsTrigger>
+                <TabsTrigger value="admin" className="bg-[#F1F0FB] text-[#6366F1]">Admin</TabsTrigger>
               </TabsList>
               
               {/* Regular User Sign In */}
@@ -176,7 +176,7 @@ const Auth: React.FC = () => {
                         value={email} 
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@example.com" 
-                        className="bg-slate-50"
+                        className="bg-slate-50 input-modern"
                         required
                       />
                     </div>
@@ -187,13 +187,13 @@ const Auth: React.FC = () => {
                         type="password" 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 
-                        className="bg-slate-50"
+                        className="bg-slate-50 input-modern"
                         required
                       />
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col space-y-3">
-                    <Button type="submit" className="w-full bg-[#5E35B1] hover:bg-[#4527A0] text-white" disabled={loading}>
+                    <Button type="submit" className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white transition-all duration-300" disabled={loading}>
                       {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
                     <div className="relative w-full">
@@ -207,7 +207,7 @@ const Auth: React.FC = () => {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      className="w-full border-gray-300" 
+                      className="w-full border-gray-300 transition-all duration-300" 
                       onClick={handleGoogleSignIn}
                       disabled={loading}
                     >
@@ -237,7 +237,7 @@ const Auth: React.FC = () => {
                         value={email} 
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@example.com" 
-                        className="bg-slate-50"
+                        className="bg-slate-50 input-modern"
                         required
                       />
                     </div>
@@ -248,13 +248,13 @@ const Auth: React.FC = () => {
                         type="password" 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)}
-                        className="bg-slate-50"
+                        className="bg-slate-50 input-modern"
                         required 
                       />
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col space-y-3">
-                    <Button type="submit" className="w-full bg-[#5E35B1] hover:bg-[#4527A0] text-white" disabled={loading}>
+                    <Button type="submit" className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white transition-all duration-300" disabled={loading}>
                       {loading ? 'Creating Account...' : 'Create Account'}
                     </Button>
                     <div className="relative w-full">
@@ -268,7 +268,7 @@ const Auth: React.FC = () => {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      className="w-full border-gray-300" 
+                      className="w-full border-gray-300 transition-all duration-300" 
                       onClick={handleGoogleSignIn}
                       disabled={loading}
                     >
@@ -291,13 +291,13 @@ const Auth: React.FC = () => {
                 <form onSubmit={handleAdminSignIn}>
                   <CardContent className="space-y-4 pt-2">
                     <div className="flex justify-center mb-4">
-                      <div className="rounded-full bg-[#F1F7FF] p-3">
-                        <ShieldCheck className="h-6 w-6 text-[#5E35B1]" />
+                      <div className="rounded-full bg-[#F1F0FB] p-3">
+                        <ShieldCheck className="h-6 w-6 text-[#6366F1]" />
                       </div>
                     </div>
                     <div className="text-center mb-4">
-                      <h3 className="font-medium">Admin Access</h3>
-                      <p className="text-sm text-gray-500">Sign in with your admin credentials</p>
+                      <h3 className="font-medium font-display">Admin Access</h3>
+                      <p className="text-sm text-gray-500 font-body">Sign in with your admin credentials</p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="admin-email">Email</Label>
@@ -307,7 +307,7 @@ const Auth: React.FC = () => {
                         value={email} 
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="admin@example.com" 
-                        className="bg-slate-50"
+                        className="bg-slate-50 input-modern"
                         required
                       />
                     </div>
@@ -318,7 +318,7 @@ const Auth: React.FC = () => {
                         type="password" 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 
-                        className="bg-slate-50"
+                        className="bg-slate-50 input-modern"
                         required
                       />
                     </div>
@@ -326,12 +326,12 @@ const Auth: React.FC = () => {
                   <CardFooter className="flex flex-col">
                     <Button 
                       type="submit" 
-                      className="w-full bg-[#36B5FF] hover:bg-[#2196F3] text-white" 
+                      className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white transition-all duration-300" 
                       disabled={loading}
                     >
                       {loading ? 'Authenticating...' : 'Access Admin Panel'}
                     </Button>
-                    <p className="text-xs text-center mt-4 text-gray-500">
+                    <p className="text-xs text-center mt-4 text-gray-500 font-body">
                       Only authorized administrators can access the management dashboard.
                     </p>
                   </CardFooter>
@@ -341,7 +341,7 @@ const Auth: React.FC = () => {
           </Card>
           
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>By continuing, you agree to our Terms of Service and Privacy Policy.</p>
+            <p className="font-body">By continuing, you agree to our Terms of Service and Privacy Policy.</p>
           </div>
         </div>
       </div>

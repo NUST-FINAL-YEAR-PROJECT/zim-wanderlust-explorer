@@ -20,48 +20,48 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: '#36B5FF',
-				input: '#5E35B1',
-				ring: '#36B5FF',
-				background: '#FFFFFF',
-				foreground: '#333333',
+				border: '#E2E8F0',
+				input: '#6366F1',
+				ring: '#8B5CF6',
+				background: '#F1F0FB',
+				foreground: '#1E293B',
 				primary: {
-					DEFAULT: '#5E35B1',
+					DEFAULT: '#6366F1',
 					foreground: '#FFFFFF'
 				},
 				secondary: {
-					DEFAULT: '#F1F7FF', 
-					foreground: '#5E35B1'
+					DEFAULT: '#8B5CF6', 
+					foreground: '#FFFFFF'
 				},
 				destructive: {
 					DEFAULT: '#FF4A6D',
 					foreground: '#FFFFFF'
 				},
 				muted: {
-					DEFAULT: '#F1F7FF', 
-					foreground: '#5E35B1'
+					DEFAULT: '#F1F5F9', 
+					foreground: '#64748B'
 				},
 				accent: {
-					DEFAULT: '#36B5FF', 
+					DEFAULT: '#8B5CF6', 
 					foreground: '#FFFFFF'
 				},
 				popover: {
 					DEFAULT: '#FFFFFF',
-					foreground: '#333333'
+					foreground: '#1E293B'
 				},
 				card: {
 					DEFAULT: '#FFFFFF',
-					foreground: '#333333'
+					foreground: '#1E293B'
 				},
 				sidebar: {
-					DEFAULT: '#5E35B1',
+					DEFAULT: '#6366F1',
 					foreground: '#FFFFFF',
-					primary: '#36B5FF',
+					primary: '#8B5CF6',
 					'primary-foreground': '#FFFFFF',
-					accent: '#F1F7FF',
-					'accent-foreground': '#5E35B1',
-					border: '#7D5DCE',
-					ring: '#36B5FF'
+					accent: '#F1F0FB',
+					'accent-foreground': '#6366F1',
+					border: '#818CF8',
+					ring: '#8B5CF6'
 				}
 			},
 			borderRadius: {
@@ -132,10 +132,14 @@ export default {
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
 			},
 			boxShadow: {
-				'card-hover': '0 15px 30px -10px rgba(54, 181, 255, 0.15), 0 8px 10px -5px rgba(54, 181, 255, 0.08)',
-				'elevation-1': '0 1px 3px rgba(94, 53, 177, 0.12), 0 1px 2px rgba(94, 53, 177, 0.24)',
-				'elevation-2': '0 3px 6px rgba(94, 53, 177, 0.16), 0 3px 6px rgba(94, 53, 177, 0.23)',
-				'elevation-3': '0 10px 20px rgba(94, 53, 177, 0.19), 0 6px 6px rgba(94, 53, 177, 0.23)',
+				'card-hover': '0 15px 30px -10px rgba(99, 102, 241, 0.15), 0 8px 10px -5px rgba(99, 102, 241, 0.08)',
+				'elevation-1': '0 1px 3px rgba(99, 102, 241, 0.12), 0 1px 2px rgba(99, 102, 241, 0.24)',
+				'elevation-2': '0 3px 6px rgba(99, 102, 241, 0.16), 0 3px 6px rgba(99, 102, 241, 0.23)',
+				'elevation-3': '0 10px 20px rgba(99, 102, 241, 0.19), 0 6px 6px rgba(99, 102, 241, 0.23)',
+			},
+			fontFamily: {
+				'display': ['Montserrat', 'sans-serif'],
+				'body': ['Open Sans', 'sans-serif'],
 			}
 		}
 	},
