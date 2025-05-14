@@ -20,48 +20,48 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: '#D0A676',
-				input: '#8B5E34',
-				ring: '#D0A676',
+				border: '#36B5FF',
+				input: '#5E35B1',
+				ring: '#36B5FF',
 				background: '#FFFFFF',
-				foreground: '#2C1810',
+				foreground: '#333333',
 				primary: {
-					DEFAULT: '#8B5E34',
+					DEFAULT: '#5E35B1',
 					foreground: '#FFFFFF'
 				},
 				secondary: {
-					DEFAULT: '#F4EBE2', 
-					foreground: '#8B5E34'
+					DEFAULT: '#F1F7FF', 
+					foreground: '#5E35B1'
 				},
 				destructive: {
-					DEFAULT: '#C25450',
+					DEFAULT: '#FF4A6D',
 					foreground: '#FFFFFF'
 				},
 				muted: {
-					DEFAULT: '#F4EBE2', 
-					foreground: '#8B5E34'
+					DEFAULT: '#F1F7FF', 
+					foreground: '#5E35B1'
 				},
 				accent: {
-					DEFAULT: '#D0A676', 
-					foreground: '#2C1810'
+					DEFAULT: '#36B5FF', 
+					foreground: '#FFFFFF'
 				},
 				popover: {
 					DEFAULT: '#FFFFFF',
-					foreground: '#2C1810'
+					foreground: '#333333'
 				},
 				card: {
 					DEFAULT: '#FFFFFF',
-					foreground: '#2C1810'
+					foreground: '#333333'
 				},
 				sidebar: {
-					DEFAULT: '#2C1810',
-					foreground: '#F4EBE2',
-					primary: '#D0A676',
-					'primary-foreground': '#2C1810',
-					accent: '#F4EBE2',
-					'accent-foreground': '#2C1810',
-					border: '#D0A676',
-					ring: '#D0A676'
+					DEFAULT: '#5E35B1',
+					foreground: '#FFFFFF',
+					primary: '#36B5FF',
+					'primary-foreground': '#FFFFFF',
+					accent: '#F1F7FF',
+					'accent-foreground': '#5E35B1',
+					border: '#7D5DCE',
+					ring: '#36B5FF'
 				}
 			},
 			borderRadius: {
@@ -132,10 +132,10 @@ export default {
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
 			},
 			boxShadow: {
-				'card-hover': '0 15px 30px -10px rgba(208, 166, 118, 0.1), 0 8px 10px -5px rgba(208, 166, 118, 0.04)',
-				'elevation-1': '0 1px 3px rgba(139, 94, 52, 0.12), 0 1px 2px rgba(139, 94, 52, 0.24)',
-				'elevation-2': '0 3px 6px rgba(139, 94, 52, 0.16), 0 3px 6px rgba(139, 94, 52, 0.23)',
-				'elevation-3': '0 10px 20px rgba(139, 94, 52, 0.19), 0 6px 6px rgba(139, 94, 52, 0.23)',
+				'card-hover': '0 15px 30px -10px rgba(54, 181, 255, 0.15), 0 8px 10px -5px rgba(54, 181, 255, 0.08)',
+				'elevation-1': '0 1px 3px rgba(94, 53, 177, 0.12), 0 1px 2px rgba(94, 53, 177, 0.24)',
+				'elevation-2': '0 3px 6px rgba(94, 53, 177, 0.16), 0 3px 6px rgba(94, 53, 177, 0.23)',
+				'elevation-3': '0 10px 20px rgba(94, 53, 177, 0.19), 0 6px 6px rgba(94, 53, 177, 0.23)',
 			}
 		}
 	},

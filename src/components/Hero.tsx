@@ -13,7 +13,7 @@ const Hero = () => {
   return (
     <div className="relative h-[600px] overflow-hidden">
       <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center bg-no-repeat">
-        <div className="absolute inset-0 bg-[#004AAD] opacity-75"></div>
+        <div className="absolute inset-0 bg-[#5E35B1] opacity-75"></div>
       </div>
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-3xl">
@@ -28,7 +28,7 @@ const Hero = () => {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              className="bg-white hover:bg-[#E6F0FF] text-[#004AAD] px-8 py-6 text-lg"
+              className="bg-white hover:bg-[#F1F7FF] text-[#5E35B1] px-8 py-6 text-lg"
               onClick={() => navigate("/browse?tab=destinations")}
             >
               Explore Destinations

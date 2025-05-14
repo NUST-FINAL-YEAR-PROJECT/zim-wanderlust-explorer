@@ -6,88 +6,88 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 23 32% 12%;
+    --foreground: 0 0% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 23 32% 12%;
+    --card-foreground: 0 0% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 23 32% 12%;
+    --popover-foreground: 0 0% 20%;
 
-    /* Warm earthy primary colors */
-    --primary: 28 45% 37%;
+    /* Bright purple primary colors */
+    --primary: 263 55% 47%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 27 51% 92%;
-    --secondary-foreground: 28 45% 37%;
+    --secondary: 210 100% 97%;
+    --secondary-foreground: 263 55% 47%;
 
-    --muted: 27 51% 92%;
-    --muted-foreground: 28 40% 40%;
+    --muted: 210 100% 97%;
+    --muted-foreground: 263 40% 60%;
 
-    /* Light golden accent colors */
-    --accent: 35 53% 62%;
-    --accent-foreground: 23 32% 12%;
+    /* Light blue accent colors */
+    --accent: 200 100% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 3 42% 54%;
+    --destructive: 343 100% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 53% 62%;
-    --input: 28 45% 37%;
-    --ring: 35 53% 62%;
+    --border: 200 100% 60%;
+    --input: 263 55% 47%;
+    --ring: 200 100% 60%;
 
     --radius: 0.75rem;
 
-    /* Dark brown sidebar colors */
-    --sidebar-background: 23 32% 12%;
-    --sidebar-foreground: 27 51% 92%;
-    --sidebar-primary: 35 53% 62%;
-    --sidebar-primary-foreground: 23 32% 12%;
-    --sidebar-accent: 27 51% 92%;
-    --sidebar-accent-foreground: 23 32% 12%;
-    --sidebar-border: 35 53% 62%;
-    --sidebar-ring: 35 53% 62%;
+    /* Sidebar theme colors */
+    --sidebar-background: 263 55% 47%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 200 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 100% 97%;
+    --sidebar-accent-foreground: 263 55% 47%;
+    --sidebar-border: 263 35% 65%;
+    --sidebar-ring: 200 100% 60%;
   }
 
   .dark {
-    --background: 23 32% 12%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 100%;
 
-    --card: 23 32% 15%;
+    --card: 0 0% 15%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 23 32% 15%;
+    --popover: 0 0% 15%;
     --popover-foreground: 0 0% 100%;
 
-    /* Dark earthy primary colors */
-    --primary: 35 53% 62%;
-    --primary-foreground: 23 32% 12%;
+    /* Dark mode purple theme */
+    --primary: 200 100% 60%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 28 25% 25%;
+    --secondary: 263 30% 30%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 28 25% 25%;
-    --muted-foreground: 27 40% 80%;
+    --muted: 263 30% 30%;
+    --muted-foreground: 263 40% 80%;
 
-    /* Golden accent colors */
-    --accent: 28 25% 25%;
+    /* Dark mode accent colors */
+    --accent: 263 30% 30%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 3 60% 65%;
+    --destructive: 343 90% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 28 30% 30%;
-    --input: 28 30% 30%;
-    --ring: 35 53% 62%;
+    --border: 263 30% 30%;
+    --input: 263 30% 30%;
+    --ring: 200 100% 60%;
 
     /* Darker sidebar colors */
-    --sidebar-background: 23 32% 10%;
+    --sidebar-background: 263 55% 32%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 35 53% 62%;
-    --sidebar-primary-foreground: 23 32% 12%;
-    --sidebar-accent: 28 25% 25%;
+    --sidebar-primary: 200 100% 60%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 263 30% 30%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 28 30% 30%;
-    --sidebar-ring: 35 53% 62%;
+    --sidebar-border: 263 30% 30%;
+    --sidebar-ring: 200 100% 60%;
   }
 }
 
@@ -133,22 +133,22 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   
-  /* Earthy color gradient classes replacing previous ones */
-  .gradient-warm-light {
-    @apply bg-gradient-to-r from-[#8B5E34] to-[#D0A676];
+  /* Bright color gradient classes replacing previous ones */
+  .gradient-bright-primary {
+    @apply bg-gradient-to-r from-[#5E35B1] to-[#9575CD];
   }
   
-  .gradient-warm-dark {
-    @apply bg-gradient-to-r from-[#2C1810] to-[#8B5E34];
+  .gradient-bright-accent {
+    @apply bg-gradient-to-r from-[#36B5FF] to-[#92D7FF];
   }
   
-  /* Admin Dashboard specific styles - updated for warm theme */
+  /* Admin Dashboard specific styles - updated for bright theme */
   .admin-layout {
-    @apply bg-white text-[#2C1810];
+    @apply bg-white text-[#333333];
   }
   
   .admin-card {
-    @apply rounded-lg border border-[#D0A676]/20 bg-white text-[#2C1810] shadow-md hover:shadow-lg transition-all duration-200;
+    @apply rounded-lg border border-[#36B5FF]/20 bg-white text-[#333333] shadow-md hover:shadow-lg transition-all duration-200;
   }
   
   .admin-stats-card {
@@ -156,27 +156,27 @@
   }
   
   .admin-btn-primary {
-    @apply bg-[#8B5E34] hover:bg-[#6A4828] text-white py-2 px-4 rounded-md transition-colors;
+    @apply bg-[#5E35B1] hover:bg-[#4527A0] text-white py-2 px-4 rounded-md transition-colors;
   }
   
   .admin-btn-secondary {
-    @apply bg-[#F4EBE2] hover:bg-[#E9D8C6] text-[#8B5E34] py-2 px-4 rounded-md transition-colors;
+    @apply bg-[#F1F7FF] hover:bg-[#D6E8FF] text-[#5E35B1] py-2 px-4 rounded-md transition-colors;
   }
   
   .admin-header {
-    @apply bg-white border-b border-[#D0A676]/20 backdrop-blur-md;
+    @apply bg-white border-b border-[#36B5FF]/20 backdrop-blur-md;
   }
   
   .admin-tabs {
-    @apply bg-[#F4EBE2] text-[#8B5E34];
+    @apply bg-[#F1F7FF] text-[#5E35B1];
   }
   
   .admin-tab-active {
-    @apply bg-[#8B5E34] text-white;
+    @apply bg-[#5E35B1] text-white;
   }
   
   .admin-gradient {
-    @apply bg-gradient-to-r from-[#8B5E34] to-[#D0A676];
+    @apply bg-gradient-to-r from-[#5E35B1] to-[#9575CD];
   }
   
   .admin-table {
@@ -184,15 +184,15 @@
   }
   
   .admin-table th {
-    @apply bg-[#F4EBE2] text-[#8B5E34] p-3 text-left;
+    @apply bg-[#F1F7FF] text-[#5E35B1] p-3 text-left;
   }
   
   .admin-table td {
-    @apply border-t border-[#D0A676]/20 p-3;
+    @apply border-t border-[#36B5FF]/20 p-3;
   }
   
   .admin-table tr:hover {
-    @apply bg-[#F4EBE2]/60;
+    @apply bg-[#F1F7FF]/60;
   }
   
   /* Added dark mode transition */
@@ -200,17 +200,17 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   
-  /* Warm-themed custom classes for tourism site */
+  /* Light-themed custom classes for tourism site */
   .luxury-card {
-    @apply rounded-xl border border-[#D0A676]/10 bg-white shadow-elevation-1 hover:shadow-card-hover transition-all duration-300 overflow-hidden;
+    @apply rounded-xl border border-[#36B5FF]/10 bg-white shadow-elevation-1 hover:shadow-card-hover transition-all duration-300 overflow-hidden;
   }
   
-  .warm-gradient {
-    @apply bg-gradient-to-br from-[#F4EBE2] via-[#D0A676] to-[#8B5E34] text-white;
+  .bright-gradient {
+    @apply bg-gradient-to-br from-[#F1F7FF] via-[#36B5FF] to-[#5E35B1] text-white;
   }
   
-  .warm-light-gradient {
-    @apply bg-gradient-to-br from-white via-[#F4EBE2] to-[#E9D8C6] text-[#8B5E34];
+  .light-gradient {
+    @apply bg-gradient-to-br from-white via-[#F1F7FF] to-[#D6E8FF] text-[#5E35B1];
   }
     
   .image-hover-zoom {
@@ -226,11 +226,11 @@
   }
   
   .section-title {
-    @apply text-3xl font-bold mb-2 text-center text-[#8B5E34];
+    @apply text-3xl font-bold mb-2 text-center text-[#5E35B1];
   }
   
   .section-subtitle {
-    @apply text-center text-[#8B5E34]/70 mb-8 max-w-2xl mx-auto;
+    @apply text-center text-[#5E35B1]/70 mb-8 max-w-2xl mx-auto;
   }
   
   /* Hide scrollbar for Chrome, Safari and Opera */
