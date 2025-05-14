@@ -185,7 +185,7 @@ const AdminAnalytics: React.FC = () => {
     ];
   };
 
-  // Fix the chartConfig to match ChartConfig type
+  // Chart config
   const chartConfig = {
     users: { color: '#8884d8' },
     bookings: { color: '#82ca9d' },
@@ -317,7 +317,7 @@ const AdminAnalytics: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Export All Charts Button */}
       <div className="flex justify-end">
         <Button 
@@ -330,7 +330,7 @@ const AdminAnalytics: React.FC = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6 grid grid-cols-3 w-full max-w-md mx-auto">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <ChartBar size={16} />
@@ -347,9 +347,9 @@ const AdminAnalytics: React.FC = () => {
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview">
+        <TabsContent value="overview" className="w-full">
           {/* Summary Cards Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <Card className="bg-white hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -385,8 +385,8 @@ const AdminAnalytics: React.FC = () => {
             </Card>
           </div>
 
-          {/* Main Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Main Charts - Fixed heights and proper containers to prevent overlap */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <Card className="bg-white hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -405,26 +405,31 @@ const AdminAnalytics: React.FC = () => {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="h-[250px]" ref={chartRefs.userGrowth}>
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={analyticsData.userStats} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Legend wrapperStyle={{ fontSize: '12px' }} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="users" 
-                        name="Users" 
-                        stroke="#8884d8" 
-                        activeDot={{ r: 8 }} 
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <CardContent className="p-0 px-2 pb-4">
+                <div className="h-[280px] w-full" ref={chartRefs.userGrowth}>
+                  <ChartContainer config={chartConfig} className="w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart 
+                        data={analyticsData.userStats} 
+                        margin={{ top: 20, right: 20, bottom: 20, left: 10 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
+                        <Line 
+                          type="monotone" 
+                          dataKey="users" 
+                          name="Users" 
+                          stroke="#8884d8" 
+                          activeDot={{ r: 8 }} 
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
               </CardContent>
             </Card>
 
@@ -446,34 +451,38 @@ const AdminAnalytics: React.FC = () => {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="h-[250px]" ref={chartRefs.destinationPopularity}>
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={analyticsData.destinationPopularity}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, value, percent }) => `${name.substring(0, 10)}${name.length > 10 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {analyticsData.destinationPopularity.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value, name, props) => [`${value} bookings`, props.payload.name]} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <CardContent className="p-0 px-2 pb-4">
+                <div className="h-[280px] w-full" ref={chartRefs.destinationPopularity}>
+                  <ChartContainer config={chartConfig} className="w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                        <Pie
+                          data={analyticsData.destinationPopularity}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={90}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, value, percent }) => 
+                            `${name.substring(0, 8)}${name.length > 8 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`
+                          }
+                        >
+                          {analyticsData.destinationPopularity.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value, name, props) => [`${value} bookings`, props.payload.name]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Booking Trends Chart - Full Width */}
-          <Card className="bg-white hover:shadow-md transition-shadow">
+          {/* Booking Trends Chart - Full Width with proper height */}
+          <Card className="bg-white hover:shadow-md transition-shadow mb-4">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
@@ -491,30 +500,36 @@ const AdminAnalytics: React.FC = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="h-[300px]" ref={chartRefs.bookingTrends}>
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analyticsData.bookingData} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Bar 
-                      dataKey="bookings" 
-                      name="Bookings" 
-                      fill="#82ca9d"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            <CardContent className="p-0 px-2 pb-4">
+              <div className="h-[320px] w-full" ref={chartRefs.bookingTrends}>
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart 
+                      data={analyticsData.bookingData} 
+                      margin={{ top: 20, right: 20, bottom: 20, left: 10 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
+                      <Bar 
+                        dataKey="bookings" 
+                        name="Bookings" 
+                        fill="#82ca9d"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Users Tab */}
-        <TabsContent value="users">
-          <Card className="bg-white hover:shadow-md transition-shadow">
+        <TabsContent value="users" className="w-full">
+          <Card className="bg-white hover:shadow-md transition-shadow mb-4">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
@@ -532,33 +547,38 @@ const AdminAnalytics: React.FC = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="h-[400px]">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={analyticsData.userStats} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="users" 
-                      name="New Users" 
-                      stroke="#8884d8" 
-                      activeDot={{ r: 8 }} 
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            <CardContent className="p-0 px-2 pb-4">
+              <div className="h-[400px] w-full">
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart 
+                      data={analyticsData.userStats} 
+                      margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        dataKey="users" 
+                        name="New Users" 
+                        stroke="#8884d8" 
+                        activeDot={{ r: 8 }} 
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Bookings Tab */}
-        <TabsContent value="bookings">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent value="bookings" className="w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card className="bg-white hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -577,19 +597,29 @@ const AdminAnalytics: React.FC = () => {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="h-[300px]">
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={analyticsData.bookingData} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="bookings" name="Bookings" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <CardContent className="p-0 px-2 pb-4">
+                <div className="h-[300px] w-full">
+                  <ChartContainer config={chartConfig} className="w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart 
+                        data={analyticsData.bookingData} 
+                        margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar 
+                          dataKey="bookings" 
+                          name="Bookings" 
+                          fill="#82ca9d"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
               </CardContent>
             </Card>
 
@@ -611,28 +641,32 @@ const AdminAnalytics: React.FC = () => {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="h-[300px]">
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={analyticsData.destinationPopularity}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, value, percent }) => `${name.substring(0, 10)}${name.length > 10 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {analyticsData.destinationPopularity.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value, name, props) => [`${value} bookings`, props.payload.name]} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+              <CardContent className="p-0 px-2 pb-4">
+                <div className="h-[300px] w-full">
+                  <ChartContainer config={chartConfig} className="w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                        <Pie
+                          data={analyticsData.destinationPopularity}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, value, percent }) => 
+                            `${name.substring(0, 8)}${name.length > 8 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`
+                          }
+                        >
+                          {analyticsData.destinationPopularity.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value, name, props) => [`${value} bookings`, props.payload.name]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
