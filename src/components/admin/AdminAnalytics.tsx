@@ -57,16 +57,15 @@ const AdminAnalytics: React.FC = () => {
   const totalRevenue = 45600;
   const activeEvents = 12;
 
+  // Fix the chartConfig to match ChartConfig type
   const chartConfig = {
     users: { color: '#8884d8' },
     bookings: { color: '#82ca9d' },
-    destinations: {
-      victoria: { color: '#0088FE' },
-      hwange: { color: '#00C49F' },
-      zimbabwe: { color: '#FFBB28' },
-      mana: { color: '#FF8042' },
-      nyanga: { color: '#8884D8' },
-    }
+    victoria_falls: { color: '#0088FE' },
+    hwange: { color: '#00C49F' },
+    great_zimbabwe: { color: '#FFBB28' },
+    mana_pools: { color: '#FF8042' },
+    nyanga: { color: '#8884D8' }
   };
 
   return (
