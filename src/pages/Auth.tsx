@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { signIn, signUp } from '@/models/Auth';
 import { useAuth } from '@/contexts/AuthContext';
+import { MapPin } from 'lucide-react';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -67,35 +68,22 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
-      {/* Banner section */}
-      <div className="md:w-1/2 bg-gradient-to-br from-amber-500 to-orange-600 p-8 flex flex-col justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/mana-pools.jpg')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
-        <div className="relative z-10 text-white max-w-md mx-auto">
-          <h1 className="text-4xl font-bold mb-6">Discover Zimbabwe</h1>
-          <p className="text-xl mb-8">Experience the breathtaking beauty of Zimbabwe's landscapes, rich culture, and unforgettable adventures.</p>
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="h-20 rounded-lg overflow-hidden">
-              <img src="/victoria-falls.jpg" alt="Victoria Falls" className="w-full h-full object-cover" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md">
+        {/* Logo/Branding Header */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="rounded-full gradient-purple p-1.5 text-white">
+              <MapPin size={24} />
             </div>
-            <div className="h-20 rounded-lg overflow-hidden">
-              <img src="/hwange.jpg" alt="Hwange National Park" className="w-full h-full object-cover" />
-            </div>
-            <div className="h-20 rounded-lg overflow-hidden">
-              <img src="/gonarezhou.jpg" alt="Gonarezhou" className="w-full h-full object-cover" />
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Zimbabwe Tourism</h1>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
-            <p className="italic text-white/90">"Zimbabwe is not just a destination; it's an experience that stays with you forever."</p>
-          </div>
+          <p className="text-muted-foreground">Discover the beauty of Zimbabwe</p>
         </div>
-      </div>
-
-      {/* Auth form section */}
-      <div className="md:w-1/2 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md shadow-lg border-0">
+        
+        <Card className="w-full shadow-lg border-0">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl font-bold text-amber-600">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-bold text-purple-600">Welcome</CardTitle>
             <CardDescription>Sign in to your account or create a new one</CardDescription>
           </CardHeader>
           <Tabs defaultValue="signin" className="w-full">
@@ -131,7 +119,7 @@ const Auth: React.FC = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700" disabled={loading}>
+                  <Button type="submit" className="w-full gradient-purple hover:opacity-90" disabled={loading}>
                     {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </CardFooter>
@@ -165,7 +153,7 @@ const Auth: React.FC = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700" disabled={loading}>
+                  <Button type="submit" className="w-full gradient-purple hover:opacity-90" disabled={loading}>
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </CardFooter>
@@ -173,6 +161,10 @@ const Auth: React.FC = () => {
             </TabsContent>
           </Tabs>
         </Card>
+        
+        <div className="mt-6 text-center text-sm text-muted-foreground">
+          <p>By continuing, you agree to our Terms of Service and Privacy Policy.</p>
+        </div>
       </div>
     </div>
   );
