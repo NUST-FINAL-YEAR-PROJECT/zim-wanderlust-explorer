@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking } from '@/models/Booking';
 import { getPayment } from '@/models/Payment';
@@ -17,6 +17,8 @@ const InvoicePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [downloadingImage, setDownloadingImage] = useState(false);
   
   // Fetch booking details
   const { data: booking, isLoading: bookingLoading } = useQuery({
@@ -36,8 +38,12 @@ const InvoicePage = () => {
 
   useEffect(() => {
     // Show console logs to debug
-    console.log('Booking data:', booking);
-    console.log('Payment data:', payment);
+    if (booking) {
+      console.log('Booking data:', booking);
+    }
+    if (payment) {
+      console.log('Payment data:', payment);
+    }
   }, [booking, payment]);
 
   const downloadAsPDF = async () => {
@@ -46,13 +52,14 @@ const InvoicePage = () => {
       return;
     }
 
+    setDownloadingPdf(true);
     toast.info("Preparing PDF download...");
     
     try {
       // Use scale of 2 for better quality
       const canvas = await html2canvas(invoiceRef.current, { 
         scale: 2,
-        logging: true,
+        logging: false,
         useCORS: true,
         allowTaint: true
       });
@@ -75,6 +82,8 @@ const InvoicePage = () => {
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error("Failed to generate PDF. Please try again.");
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
@@ -84,13 +93,14 @@ const InvoicePage = () => {
       return;
     }
 
+    setDownloadingImage(true);
     toast.info("Preparing image download...");
     
     try {
       // Use scale of 2 for better quality
       const canvas = await html2canvas(invoiceRef.current, { 
         scale: 2,
-        logging: true,
+        logging: false,
         useCORS: true,
         allowTaint: true
       });
@@ -100,7 +110,7 @@ const InvoicePage = () => {
       // Create a temporary link element to trigger download
       const link = document.createElement('a');
       link.href = imgData;
-      link.download = `invoice-${booking?.id.slice(0, 8)}.png`;
+      link.download = `invoice-${booking?.id ? booking.id.slice(0, 8) : 'download'}.png`;
       document.body.appendChild(link); // This is important for Firefox
       link.click();
       document.body.removeChild(link); // Clean up
@@ -109,6 +119,8 @@ const InvoicePage = () => {
     } catch (error) {
       console.error('Error generating image:', error);
       toast.error("Failed to generate image. Please try again.");
+    } finally {
+      setDownloadingImage(false);
     }
   };
 
@@ -138,6 +150,18 @@ const InvoicePage = () => {
     );
   }
 
+  const bookingDate = booking.preferred_date 
+    ? new Date(booking.preferred_date).toLocaleDateString() 
+    : 'Not specified';
+
+  const createdDate = booking.created_at
+    ? new Date(booking.created_at).toLocaleDateString()
+    : new Date().toLocaleDateString();
+
+  const paymentDate = payment.updated_at 
+    ? new Date(payment.updated_at).toLocaleDateString() 
+    : 'Pending';
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -150,14 +174,18 @@ const InvoicePage = () => {
             <Button 
               variant="outline"
               onClick={downloadAsImage}
+              disabled={downloadingImage}
             >
-              <FileDown className="mr-2 h-4 w-4" /> Download as Image
+              <FileDown className="mr-2 h-4 w-4" /> 
+              {downloadingImage ? "Downloading..." : "Download as Image"}
             </Button>
             <Button 
               onClick={downloadAsPDF}
               className="bg-amber-600 hover:bg-amber-700 text-white"
+              disabled={downloadingPdf}
             >
-              <FileDown className="mr-2 h-4 w-4" /> Download as PDF
+              <FileDown className="mr-2 h-4 w-4" /> 
+              {downloadingPdf ? "Downloading..." : "Download as PDF"}
             </Button>
           </div>
         </div>
@@ -174,8 +202,8 @@ const InvoicePage = () => {
                 </div>
                 <div className="text-right">
                   <h3 className="text-xl font-bold">INVOICE</h3>
-                  <p className="text-muted-foreground">#{booking.id.slice(0, 8)}</p>
-                  <p className="text-muted-foreground">Date: {new Date(booking.created_at).toLocaleDateString()}</p>
+                  <p className="text-muted-foreground">#{booking.id ? booking.id.slice(0, 8) : 'N/A'}</p>
+                  <p className="text-muted-foreground">Date: {createdDate}</p>
                 </div>
               </div>
 
@@ -183,9 +211,9 @@ const InvoicePage = () => {
                 <div className="flex justify-between mb-4">
                   <div>
                     <h3 className="font-bold">Bill To:</h3>
-                    <p>{booking.contact_name}</p>
-                    <p>{booking.contact_email}</p>
-                    <p>{booking.contact_phone}</p>
+                    <p>{booking.contact_name || 'N/A'}</p>
+                    <p>{booking.contact_email || 'N/A'}</p>
+                    <p>{booking.contact_phone || 'N/A'}</p>
                   </div>
                   <div className="text-right">
                     <h3 className="font-bold">Payment Status:</h3>
@@ -194,9 +222,9 @@ const InvoicePage = () => {
                       payment.status === 'processing' ? 'text-amber-600' : 
                       'text-blue-600'
                     }`}>
-                      {payment.status}
+                      {payment.status || 'pending'}
                     </p>
-                    <p>Payment Date: {payment.updated_at ? new Date(payment.updated_at).toLocaleDateString() : 'Pending'}</p>
+                    <p>Payment Date: {paymentDate}</p>
                   </div>
                 </div>
 
@@ -219,17 +247,23 @@ const InvoicePage = () => {
                     <td className="py-2">
                       {booking.booking_details?.destination_name || "Destination Booking"}
                       <div className="text-sm text-muted-foreground">
-                        Travel Date: {new Date(booking.preferred_date || "").toLocaleDateString()}
+                        Travel Date: {bookingDate}
                       </div>
                     </td>
-                    <td className="text-right py-2">{booking.number_of_people}</td>
-                    <td className="text-right py-2">${booking.booking_details?.price_per_person || (booking.total_price / booking.number_of_people).toFixed(2)}</td>
-                    <td className="text-right py-2">${booking.total_price.toFixed(2)}</td>
+                    <td className="text-right py-2">{booking.number_of_people || 1}</td>
+                    <td className="text-right py-2">
+                      $
+                      {booking.booking_details?.price_per_person || 
+                        ((booking.total_price && booking.number_of_people) 
+                          ? (booking.total_price / booking.number_of_people).toFixed(2) 
+                          : '0.00')}
+                    </td>
+                    <td className="text-right py-2">${booking.total_price ? booking.total_price.toFixed(2) : '0.00'}</td>
                   </tr>
                   
                   <tr className="font-bold">
                     <td colSpan={3} className="text-right py-4">Total</td>
-                    <td className="text-right py-4">${booking.total_price.toFixed(2)}</td>
+                    <td className="text-right py-4">${booking.total_price ? booking.total_price.toFixed(2) : '0.00'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -238,7 +272,7 @@ const InvoicePage = () => {
                 <div>
                   <h3 className="font-bold mb-2">Payment Information:</h3>
                   <p>Payment Method: {payment.payment_method || "Online Payment"}</p>
-                  <p>Payment ID: {payment.id.slice(0, 8)}</p>
+                  <p>Payment ID: {payment.id ? payment.id.slice(0, 8) : 'N/A'}</p>
                 </div>
                 
                 <div>

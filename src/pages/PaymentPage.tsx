@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '@/models/Booking';
 import { getPayment, updatePayment } from '@/models/Payment';
@@ -33,54 +33,82 @@ const PaymentPage = () => {
 
   const isLoading = bookingLoading || paymentLoading;
 
+  // Log data for debugging
+  useEffect(() => {
+    if (booking) {
+      console.log('Booking details:', booking);
+    }
+    if (payment) {
+      console.log('Payment details:', payment);
+    }
+  }, [booking, payment]);
+
   // Get the payment URL from the booking record
   const getPaymentUrl = () => {
-    // First try to get the payment URL from the booking details
-    if (booking?.booking_details?.payment_url) {
-      return booking.booking_details.payment_url;
+    try {
+      // First try to get the payment URL from the booking details
+      if (booking?.booking_details?.payment_url) {
+        return booking.booking_details.payment_url;
+      }
+      
+      // Then try to get the payment reference from the payment record
+      if (payment?.payment_gateway_reference) {
+        return payment.payment_gateway_reference;
+      }
+      
+      // If there's a destination ID, we can use it to construct a URL to get the payment URL
+      if (booking?.destination_id) {
+        return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/destinations?id=eq.${booking.destination_id}&select=payment_url`;
+      }
+      
+      // If there's an event ID, we can use it to construct a URL to get the payment URL
+      if (booking?.event_id) {
+        return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/events?id=eq.${booking.event_id}&select=payment_url`;
+      }
+      
+      // If we couldn't find a payment URL, return null
+      return null;
+    } catch (error) {
+      console.error('Error getting payment URL:', error);
+      return null;
     }
-    
-    // Then try to get the payment reference from the payment record
-    if (payment?.payment_gateway_reference) {
-      return payment.payment_gateway_reference;
-    }
-    
-    // If there's a destination ID, we can use it to construct a URL to get the payment URL
-    if (booking?.destination_id) {
-      return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/destinations?id=eq.${booking.destination_id}&select=payment_url`;
-    }
-    
-    // If there's an event ID, we can use it to construct a URL to get the payment URL
-    if (booking?.event_id) {
-      return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/events?id=eq.${booking.event_id}&select=payment_url`;
-    }
-    
-    // If we couldn't find a payment URL, return null
-    return null;
   };
 
   const copyPaymentLink = () => {
-    const paymentUrl = getPaymentUrl();
-    if (paymentUrl) {
-      navigator.clipboard.writeText(paymentUrl);
-      toast.success("Payment link copied to clipboard!");
-    } else {
-      toast.error("Payment link not found. Please contact support.");
+    try {
+      const paymentUrl = getPaymentUrl();
+      if (paymentUrl) {
+        navigator.clipboard.writeText(paymentUrl);
+        toast.success("Payment link copied to clipboard!");
+      } else {
+        toast.error("Payment link not found. Please contact support.");
+      }
+    } catch (error) {
+      console.error('Error copying payment link:', error);
+      toast.error('Failed to copy payment link. Please try again.');
     }
   };
 
   const goToPayment = () => {
-    const paymentUrl = getPaymentUrl();
-    if (paymentUrl) {
-      window.open(paymentUrl, '_blank');
-    } else {
-      toast.error("Payment link not found. Please contact support.");
+    try {
+      const paymentUrl = getPaymentUrl();
+      if (paymentUrl) {
+        window.open(paymentUrl, '_blank');
+      } else {
+        toast.error("Payment link not found. Please contact support.");
+      }
+    } catch (error) {
+      console.error('Error navigating to payment:', error);
+      toast.error('Failed to open payment page. Please try again.');
     }
   };
 
   const handleUploadProof = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !booking) return;
+    if (!file || !booking) {
+      toast.error('No file selected or booking information is missing.');
+      return;
+    }
 
     setIsUploading(true);
     try {
@@ -88,12 +116,34 @@ const PaymentPage = () => {
       const fileName = `${booking.id}-proof.${fileExt}`;
       const filePath = `payment_proofs/${fileName}`;
 
-      // File upload logic goes here
-      toast.success("Payment proof uploaded successfully!");
+      // Create the storage bucket if it doesn't exist
+      const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('payment_proofs');
+      
+      if (bucketError && bucketError.message.includes('not found')) {
+        await supabase.storage.createBucket('payment_proofs', {
+          public: false,
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'],
+          fileSizeLimit: 5242880, // 5MB
+        });
+      }
+      
+      // Upload file
+      const { data, error } = await supabase.storage
+        .from('payment_proofs')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (error) {
+        throw error;
+      }
+
+      const fileUrl = `${supabase.storageUrl}/object/public/payment_proofs/${fileName}`;
       
       // Update booking and payment records
       await updateBooking(booking.id, {
-        payment_proof_url: filePath,
+        payment_proof_url: fileUrl,
         payment_proof_uploaded_at: new Date().toISOString(),
       });
 
@@ -106,6 +156,8 @@ const PaymentPage = () => {
         }
       });
 
+      toast.success("Payment proof uploaded successfully!");
+      
       // Refetch data
       refetchBooking();
       refetchPayment();
@@ -119,7 +171,10 @@ const PaymentPage = () => {
 
   // For demo purposes - let's simulate payment completion
   const simulatePaymentCompletion = async () => {
-    if (!booking || !payment) return;
+    if (!booking || !payment) {
+      toast.error('Booking or payment information is missing.');
+      return;
+    }
     
     try {
       toast.info("Processing payment...");
@@ -243,7 +298,7 @@ const PaymentPage = () => {
               <div className="flex items-center justify-center p-4 border rounded-lg">
                 <div className={`text-center ${payment?.status === 'completed' ? 'text-green-600' : payment?.status === 'processing' ? 'text-amber-600' : 'text-blue-600'}`}>
                   <div className="text-lg font-bold uppercase mb-1">
-                    {payment?.status}
+                    {payment?.status || 'pending'}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {payment?.status === 'completed' ? 
