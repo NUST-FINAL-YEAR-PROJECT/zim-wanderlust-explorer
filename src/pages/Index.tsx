@@ -59,10 +59,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="mb-10">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-semibold">Popular in Zimbabwe</h2>
+            <h2 className="text-3xl font-semibold text-[#004AAD]">Popular in Zimbabwe</h2>
             <Button 
               variant="outline" 
-              className="flex items-center gap-2 rounded-full border-gray-300 hover:bg-gray-50"
+              className="flex items-center gap-2 rounded-full border-[#004AAD] text-[#004AAD] hover:bg-[#E6F0FF]"
               onClick={handleExploreMore}
             >
               <span>Show all</span>
@@ -70,16 +70,16 @@ const Index = () => {
           </div>
           
           <Tabs defaultValue="destinations" className="mb-8" onValueChange={setActiveTab}>
-            <TabsList className="border-b w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-6 px-0">
+            <TabsList className="border-b border-[#004AAD]/20 w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-6 px-0">
               <TabsTrigger 
                 value="destinations" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-[#004AAD] data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-[#004AAD]"
               >
                 Destinations
               </TabsTrigger>
               <TabsTrigger 
                 value="events"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-[#004AAD] data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-[#004AAD]"
               >
                 Experiences
               </TabsTrigger>
@@ -89,11 +89,11 @@ const Index = () => {
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="border rounded-lg overflow-hidden">
-                      <Skeleton className="h-48 w-full" />
+                    <div key={i} className="border border-[#004AAD]/10 rounded-lg overflow-hidden">
+                      <Skeleton className="h-48 w-full bg-[#E6F0FF]" />
                       <div className="p-4 space-y-2">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-6 w-3/4 bg-[#E6F0FF]" />
+                        <Skeleton className="h-4 w-1/2 bg-[#E6F0FF]" />
                       </div>
                     </div>
                   ))}
@@ -104,7 +104,7 @@ const Index = () => {
                     <DestinationCard 
                       key={destination.id} 
                       destination={destination}
-                      className="hover:shadow-md transition-all duration-300" 
+                      className="hover:shadow-md transition-all duration-300 border-[#004AAD]/10" 
                     />
                   ))}
                 </div>
@@ -115,11 +115,11 @@ const Index = () => {
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="border rounded-lg overflow-hidden">
-                      <Skeleton className="h-48 w-full" />
+                    <div key={i} className="border border-[#004AAD]/10 rounded-lg overflow-hidden">
+                      <Skeleton className="h-48 w-full bg-[#E6F0FF]" />
                       <div className="p-4 space-y-2">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-6 w-3/4 bg-[#E6F0FF]" />
+                        <Skeleton className="h-4 w-1/2 bg-[#E6F0FF]" />
                       </div>
                     </div>
                   ))}
@@ -130,6 +130,7 @@ const Index = () => {
                     <EventCard 
                       key={event.id} 
                       event={event}
+                      className="border-[#004AAD]/10"
                     />
                   ))}
                 </div>
@@ -141,7 +142,7 @@ const Index = () => {
       
       {/* CTA Section */}
       <section className="py-16 bg-cover bg-center relative" style={{ backgroundImage: "url('/hero.jpg')" }}>
-        <div className="absolute inset-0 bg-black opacity-60"></div>
+        <div className="absolute inset-0 bg-[#004AAD] opacity-80"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready for Your Zimbabwe Adventure?</h2>
@@ -150,7 +151,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                className="bg-white hover:bg-gray-100 text-black text-lg px-8 py-6 rounded-xl"
+                className="bg-white hover:bg-[#E6F0FF] text-[#004AAD] text-lg px-8 py-6 rounded-xl"
                 onClick={() => navigate("/auth")}
               >
                 Start Planning

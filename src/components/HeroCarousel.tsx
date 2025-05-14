@@ -76,7 +76,7 @@ const HeroCarousel = () => {
             )}
             style={{ backgroundImage: `url(${image.url})` }}
           >
-            <div className="absolute inset-0 bg-black opacity-40"></div>
+            <div className="absolute inset-0 bg-[#004AAD] opacity-70"></div>
           </div>
         ))}
       </div>
@@ -85,7 +85,7 @@ const HeroCarousel = () => {
       <Button 
         variant="ghost" 
         size="icon" 
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-[#004AAD]/30 hover:bg-[#004AAD]/50 text-white"
         onClick={prevSlide}
       >
         <ChevronLeft size={24} />
@@ -94,7 +94,7 @@ const HeroCarousel = () => {
       <Button 
         variant="ghost" 
         size="icon" 
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-[#004AAD]/30 hover:bg-[#004AAD]/50 text-white"
         onClick={nextSlide}
       >
         <ChevronRight size={24} />
@@ -103,7 +103,7 @@ const HeroCarousel = () => {
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-5xl animate-fade-in">
-          <div className="mb-2 text-amber-400 font-medium tracking-widest">EXPLORE ZIMBABWE</div>
+          <div className="mb-2 text-[#B3D1FF] font-medium tracking-widest">EXPLORE ZIMBABWE</div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-md">
             {heroImages[currentSlide].title}
           </h1>
@@ -117,7 +117,7 @@ const HeroCarousel = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg"
+              className="bg-white hover:bg-[#E6F0FF] text-[#004AAD] px-8 py-6 text-lg"
               onClick={() => navigate("/browse?tab=destinations")}
             >
               Explore Destinations
