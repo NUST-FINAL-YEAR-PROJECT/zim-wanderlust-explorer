@@ -41,3 +41,66 @@
 .read-the-docs {
   color: #004AAD;
 }
+
+/* Blue-themed Button Styles */
+.btn-blue {
+  background-color: #004AAD;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-blue:hover {
+  background-color: #003c8a;
+}
+
+.btn-blue-outline {
+  background-color: transparent;
+  color: #004AAD;
+  border: 1px solid #004AAD;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-blue-outline:hover {
+  background-color: #E6F0FF;
+}
+
+/* Blue-themed Border Styles */
+.border-blue {
+  border-color: #004AAD;
+}
+
+/* Blue-themed Text Styles */
+.text-blue {
+  color: #004AAD;
+}
+
+.text-blue-light {
+  color: #E6F0FF;
+}
+
+/* Blue-themed Background Styles */
+.bg-blue {
+  background-color: #004AAD;
+}
+
+.bg-blue-light {
+  background-color: #E6F0FF;
+}
+
+/* Blue-themed Hover Effects */
+.hover-bg-blue:hover {
+  background-color: #004AAD;
+  color: white;
+}
+
+.hover-bg-blue-light:hover {
+  background-color: #E6F0FF;
+  color: #004AAD;
+}

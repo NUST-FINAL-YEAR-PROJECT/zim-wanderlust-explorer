@@ -130,7 +130,6 @@ const Index = () => {
                     <EventCard 
                       key={event.id} 
                       event={event}
-                      className="border-[#004AAD]/10"
                     />
                   ))}
                 </div>
