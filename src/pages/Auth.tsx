@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,16 +17,18 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAdmin } = useAuth();
+
+  // Get the intended destination from location state, or default routes
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
+  const defaultRedirect = isAdmin ? '/admin' : '/dashboard';
+  const redirectPath = from || defaultRedirect;
 
   useEffect(() => {
     // Redirect to appropriate dashboard if user is already logged in
     if (user) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
   }, [user, isAdmin, navigate]);
 
@@ -40,7 +42,6 @@ const Auth: React.FC = () => {
         description: 'Signed in successfully.',
       });
       // No need to navigate here as the useEffect will handle it
-      // based on the user role after auth state changes
     } catch (error: any) {
       toast({
         title: 'Error',
