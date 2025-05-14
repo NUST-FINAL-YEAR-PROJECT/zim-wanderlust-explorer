@@ -99,7 +99,7 @@ const Index = () => {
                     <DestinationCard 
                       key={destination.id} 
                       destination={destination}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100" 
+                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 transform hover:scale-105" 
                     />
                   ))}
                 </div>
@@ -125,7 +125,7 @@ const Index = () => {
                     <EventCard 
                       key={event.id} 
                       event={event}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100"
+                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 transform hover:scale-105"
                     />
                   ))}
                 </div>

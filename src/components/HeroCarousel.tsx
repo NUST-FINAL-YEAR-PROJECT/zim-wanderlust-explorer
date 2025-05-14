@@ -1,11 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
-import { LogIn } from "lucide-react";
 
 // Using images from the database (mapped from the available images in the project)
 const heroImages = [
@@ -43,6 +42,9 @@ const heroImages = [
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
   
   const nextSlide = () => {
@@ -54,7 +56,20 @@ const HeroCarousel = () => {
   };
   
   const handleSearch = (query: string) => {
-    navigate(`/browse?search=${encodeURIComponent(query)}`);
+    setSearchQuery(query);
+    if (query.trim()) {
+      setShowResults(true);
+      // You would fetch actual results here
+    } else {
+      setShowResults(false);
+    }
+  };
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      navigate(`/browse?search=${encodeURIComponent(searchQuery)}`);
+      setShowResults(false);
+    }
   };
   
   // Auto slide every 7 seconds
@@ -64,6 +79,13 @@ const HeroCarousel = () => {
     }, 7000);
     
     return () => clearInterval(timer);
+  }, []);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setShowResults(false);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
   return (
@@ -98,7 +120,7 @@ const HeroCarousel = () => {
         <Button 
           variant="outline" 
           onClick={() => navigate("/auth")}
-          className="bg-indigo-600/80 hover:bg-indigo-700 border-indigo-500 text-white hover:text-white transition-all duration-300 flex items-center gap-2"
+          className="bg-indigo-600/80 hover:bg-indigo-700 border-indigo-500 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
         >
           <LogIn className="h-4 w-4" />
           Sign In
@@ -135,8 +157,68 @@ const HeroCarousel = () => {
             {heroImages[currentSlide].description}
           </p>
           
-          <div className="w-full max-w-3xl mx-auto mb-10">
-            <SearchBar onSearch={handleSearch} />
+          {/* Search Bar with Results Panel */}
+          <div className="w-full max-w-3xl mx-auto mb-10 relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1 bg-white rounded-lg overflow-hidden shadow-md">
+                <input
+                  type="text"
+                  placeholder="Where would you like to explore?"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-12 py-6 text-base w-full shadow-sm border-0 focus-visible:ring-indigo-500 rounded-lg"
+                />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-indigo-500">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+              </div>
+              <Button 
+                onClick={handleSearchSubmit}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white h-[52px] px-6 rounded-lg shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/40"
+              >
+                Search
+              </Button>
+            </div>
+            
+            {/* Search Results Panel */}
+            {showResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+                <div className="p-4">
+                  <h3 className="font-medium text-lg mb-2">Quick Results</h3>
+                  <div className="space-y-2">
+                    <div 
+                      className="p-2 hover:bg-sky-50 rounded cursor-pointer flex items-center"
+                      onClick={() => navigate('/browse?search=victoria+falls')}
+                    >
+                      <div className="w-10 h-10 rounded bg-sky-100 mr-3 flex-shrink-0"></div>
+                      <div className="flex-grow">
+                        <p className="font-medium">Victoria Falls</p>
+                        <p className="text-sm text-gray-500">Popular destination</p>
+                      </div>
+                    </div>
+                    <div 
+                      className="p-2 hover:bg-sky-50 rounded cursor-pointer flex items-center"
+                      onClick={() => navigate('/browse?search=hwange')}
+                    >
+                      <div className="w-10 h-10 rounded bg-sky-100 mr-3 flex-shrink-0"></div>
+                      <div className="flex-grow">
+                        <p className="font-medium">Hwange National Park</p>
+                        <p className="text-sm text-gray-500">Wildlife sanctuary</p>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <Button 
+                        variant="link" 
+                        onClick={handleSearchSubmit} 
+                        className="text-indigo-600"
+                      >
+                        See all results
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
