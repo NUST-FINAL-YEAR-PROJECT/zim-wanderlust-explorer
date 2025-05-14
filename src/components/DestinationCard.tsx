@@ -10,6 +10,7 @@ import { getDestinationRating } from '@/models/Review';
 import { RatingDisplay } from './RatingDisplay';
 import { WishlistButton } from './WishlistButton';
 import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 
 interface DestinationCardProps {
   destination: Destination;
@@ -18,6 +19,7 @@ interface DestinationCardProps {
 
 const DestinationCard = ({ destination, className = '' }: DestinationCardProps) => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const { data: rating = { average: 0, count: 0 }, isError } = useQuery({
     queryKey: ['destinationRating', destination.id],
@@ -27,8 +29,14 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
   });
 
   // Check if user is authenticated
-  const { data: { session } } = await supabase.auth.getSession();
-  const isAuthenticated = !!session?.user;
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session?.user);
+    };
+    
+    checkAuth();
+  }, []);
 
   const handleViewDetails = () => {
     if (isAuthenticated) {
