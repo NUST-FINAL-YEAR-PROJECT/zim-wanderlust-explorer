@@ -502,8 +502,11 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string | null
+          first_name: string | null
           id: string
           is_locked: boolean | null
+          last_name: string | null
+          phone: string | null
           role: string | null
           updated_at: string
           username: string | null
@@ -512,8 +515,11 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          first_name?: string | null
           id: string
           is_locked?: boolean | null
+          last_name?: string | null
+          phone?: string | null
           role?: string | null
           updated_at?: string
           username?: string | null
@@ -522,8 +528,11 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          first_name?: string | null
           id?: string
           is_locked?: boolean | null
+          last_name?: string | null
+          phone?: string | null
           role?: string | null
           updated_at?: string
           username?: string | null
