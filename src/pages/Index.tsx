@@ -11,6 +11,7 @@ import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
+import StatsCounter from "@/components/StatsCounter";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -45,7 +46,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F1F0FB]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 to-indigo-50">
       {/* Hero Carousel */}
       <HeroCarousel />
       
@@ -53,10 +54,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="mb-10">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-display font-bold text-gray-800">Popular in Zimbabwe</h2>
+            <h2 className="text-3xl font-display font-bold text-indigo-900">Popular in Zimbabwe</h2>
             <Button 
               variant="outline" 
-              className="flex items-center gap-2 rounded-xl border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50"
+              className="flex items-center gap-2 rounded-xl border-indigo-300 hover:border-indigo-400 hover:bg-indigo-50 text-indigo-700"
               onClick={handleExploreMore}
             >
               <span>Show all</span>
@@ -67,13 +68,13 @@ const Index = () => {
             <TabsList className="border-b w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-8 px-0">
               <TabsTrigger 
                 value="destinations" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-gray-600"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-indigo-500"
               >
                 Destinations
               </TabsTrigger>
               <TabsTrigger 
                 value="events"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-gray-600"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-indigo-500"
               >
                 Experiences
               </TabsTrigger>
@@ -98,7 +99,7 @@ const Index = () => {
                     <DestinationCard 
                       key={destination.id} 
                       destination={destination}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden" 
+                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100" 
                     />
                   ))}
                 </div>
@@ -124,7 +125,7 @@ const Index = () => {
                     <EventCard 
                       key={event.id} 
                       event={event}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden"
+                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100"
                     />
                   ))}
                 </div>
@@ -134,9 +135,11 @@ const Index = () => {
         </div>
       </div>
       
+      {/* Stats Counter Section */}
+      <StatsCounter />
+      
       {/* CTA Section */}
-      <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: "url('/hero.jpg')" }}>
-        <div className="absolute inset-0 bg-indigo-900/70 backdrop-blur-sm"></div>
+      <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: "linear-gradient(rgba(49, 91, 170, 0.8), rgba(39, 70, 133, 0.9)), url('/hero.jpg')" }}>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Ready for Your Zimbabwe Adventure?</h2>
