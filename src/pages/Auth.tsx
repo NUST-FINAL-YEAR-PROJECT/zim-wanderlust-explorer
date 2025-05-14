@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { signIn, signUp, signInWithGoogle } from '@/models/Auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { MapPin } from 'lucide-react';
+import { MapPin, ShieldCheck } from 'lucide-react';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -42,6 +43,28 @@ const Auth: React.FC = () => {
         description: 'Signed in successfully.',
       });
       // No need to navigate here as the useEffect will handle it
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to sign in. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdminSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await signIn(email, password);
+      // We don't check for admin role here - the redirect will be handled by the useEffect
+      // based on the user's actual role
+      toast({
+        title: 'Success',
+        description: 'Signed in successfully.',
+      });
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -121,10 +144,13 @@ const Auth: React.FC = () => {
               <CardDescription>Sign in to your account or create a new one</CardDescription>
             </CardHeader>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="admin" className="bg-purple-100 text-purple-800">Admin</TabsTrigger>
               </TabsList>
+              
+              {/* Regular User Sign In */}
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn}>
                   <CardContent className="space-y-4 pt-2">
@@ -184,6 +210,8 @@ const Auth: React.FC = () => {
                   </CardFooter>
                 </form>
               </TabsContent>
+              
+              {/* Sign Up Tab */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp}>
                   <CardContent className="space-y-4 pt-2">
@@ -240,6 +268,58 @@ const Auth: React.FC = () => {
                       </svg>
                       Google
                     </Button>
+                  </CardFooter>
+                </form>
+              </TabsContent>
+              
+              {/* Admin Sign In Tab */}
+              <TabsContent value="admin">
+                <form onSubmit={handleAdminSignIn}>
+                  <CardContent className="space-y-4 pt-2">
+                    <div className="flex justify-center mb-4">
+                      <div className="rounded-full bg-purple-100 p-3">
+                        <ShieldCheck className="h-6 w-6 text-purple-800" />
+                      </div>
+                    </div>
+                    <div className="text-center mb-4">
+                      <h3 className="font-medium">Admin Access</h3>
+                      <p className="text-sm text-gray-500">Sign in with your admin credentials</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-email">Email</Label>
+                      <Input 
+                        id="admin-email" 
+                        type="email" 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="admin@example.com" 
+                        className="bg-slate-50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-password">Password</Label>
+                      <Input 
+                        id="admin-password" 
+                        type="password" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        className="bg-slate-50"
+                        required
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-col">
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-purple-700 hover:bg-purple-800 text-white" 
+                      disabled={loading}
+                    >
+                      {loading ? 'Authenticating...' : 'Access Admin Panel'}
+                    </Button>
+                    <p className="text-xs text-center mt-4 text-gray-500">
+                      Only authorized administrators can access the management dashboard.
+                    </p>
                   </CardFooter>
                 </form>
               </TabsContent>
