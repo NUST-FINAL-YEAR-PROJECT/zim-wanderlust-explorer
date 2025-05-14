@@ -3,3 +3,7 @@ project_id = "gduzxexxpbibimtiycur"
 
 [functions.send-email]
 verify_jwt = true
+
+[functions.chat-assistant]
+verify_jwt = false
+
