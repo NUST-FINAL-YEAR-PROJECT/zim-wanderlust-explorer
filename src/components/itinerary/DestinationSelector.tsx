@@ -32,9 +32,10 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
       setIsLoading(true);
       try {
         const data = await getDestinations();
-        setDestinations(data);
+        setDestinations(data || []);
       } catch (error) {
         console.error('Error fetching destinations:', error);
+        setDestinations([]);
       } finally {
         setIsLoading(false);
       }
@@ -62,27 +63,31 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
           <CommandInput placeholder="Search destinations..." />
           <CommandEmpty>No destination found.</CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {destinations.map((destination) => (
-              <CommandItem
-                key={destination.id}
-                value={destination.name}
-                onSelect={() => {
-                  onChange(destination.id === value?.id ? null : destination);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value?.id === destination.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {destination.name}
-                <span className="ml-2 text-xs text-muted-foreground">
-                  {destination.location}
-                </span>
-              </CommandItem>
-            ))}
+            {Array.isArray(destinations) && destinations.length > 0 ? (
+              destinations.map((destination) => (
+                <CommandItem
+                  key={destination.id}
+                  value={destination.name}
+                  onSelect={() => {
+                    onChange(destination.id === value?.id ? null : destination);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value?.id === destination.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {destination.name}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {destination.location}
+                  </span>
+                </CommandItem>
+              ))
+            ) : (
+              <CommandItem disabled>No destinations available</CommandItem>
+            )}
           </CommandGroup>
         </Command>
       </PopoverContent>

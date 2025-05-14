@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -57,20 +58,24 @@ export function ItineraryForm() {
 
   // Handle pre-selected destination if passed from another page
   useEffect(() => {
-    const selectedDestination = location.state?.selectedDestination;
-    if (selectedDestination) {
-      // Add the pre-selected destination
-      setDestinations([
-        {
-          destination: selectedDestination,
-          startDate: undefined,
-          endDate: undefined,
-          notes: "",
-        },
-      ]);
-      
-      // Pre-populate the title
-      form.setValue('title', `Trip to ${selectedDestination.name}`);
+    try {
+      const selectedDestination = location.state?.selectedDestination;
+      if (selectedDestination) {
+        // Add the pre-selected destination
+        setDestinations([
+          {
+            destination: selectedDestination,
+            startDate: undefined,
+            endDate: undefined,
+            notes: "",
+          },
+        ]);
+        
+        // Pre-populate the title
+        form.setValue('title', `Trip to ${selectedDestination.name}`);
+      }
+    } catch (error) {
+      console.error("Error loading pre-selected destination:", error);
     }
   }, [location.state, form]);
 
