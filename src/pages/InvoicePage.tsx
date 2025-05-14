@@ -10,7 +10,7 @@ import { AlertCircle, FileDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
-import html2canvas from 'html2canvas'; // Fixed the import
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const InvoicePage = () => {
@@ -35,12 +35,22 @@ const InvoicePage = () => {
   const isLoading = bookingLoading || paymentLoading;
 
   const downloadAsPDF = async () => {
-    if (!invoiceRef.current) return;
+    if (!invoiceRef.current) {
+      toast.error("Cannot find invoice content to download");
+      return;
+    }
 
     toast.info("Preparing PDF download...");
     
     try {
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2 });
+      // Use scale of 2 for better quality
+      const canvas = await html2canvas(invoiceRef.current, { 
+        scale: 2,
+        logging: true,
+        useCORS: true,
+        allowTaint: true
+      });
+      
       const imgData = canvas.toDataURL('image/png');
       
       const pdf = new jsPDF({
@@ -63,18 +73,31 @@ const InvoicePage = () => {
   };
 
   const downloadAsImage = async () => {
-    if (!invoiceRef.current) return;
+    if (!invoiceRef.current) {
+      toast.error("Cannot find invoice content to download");
+      return;
+    }
 
     toast.info("Preparing image download...");
     
     try {
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2 });
+      // Use scale of 2 for better quality
+      const canvas = await html2canvas(invoiceRef.current, { 
+        scale: 2,
+        logging: true,
+        useCORS: true,
+        allowTaint: true
+      });
+      
       const imgData = canvas.toDataURL('image/png');
       
+      // Create a temporary link element to trigger download
       const link = document.createElement('a');
       link.href = imgData;
       link.download = `invoice-${booking?.id.slice(0, 8)}.png`;
+      document.body.appendChild(link); // This is important for Firefox
       link.click();
+      document.body.removeChild(link); // Clean up
       
       toast.success("Image downloaded successfully!");
     } catch (error) {
