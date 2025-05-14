@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
+import { LogIn } from "lucide-react";
 
 const heroImages = [
   {
@@ -72,25 +73,37 @@ const HeroCarousel = () => {
             )}
             style={{ backgroundImage: `url(${image.url})` }}
           >
-            <div className="absolute inset-0 bg-black opacity-40"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
           </div>
         ))}
       </div>
       
+      {/* Sign In Button */}
+      <div className="absolute top-6 right-6 z-20">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate("/auth")}
+          className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:text-white transition-all duration-300 flex items-center gap-2"
+        >
+          <LogIn className="h-4 w-4" />
+          Sign In
+        </Button>
+      </div>
+      
       {/* Navigation Arrows */}
       <Button 
-        variant="ghost" 
+        variant="outline" 
         size="icon" 
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 border-white/20 backdrop-blur-md text-white"
         onClick={prevSlide}
       >
         <ChevronLeft size={24} />
       </Button>
       
       <Button 
-        variant="ghost" 
+        variant="outline" 
         size="icon" 
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/30 hover:bg-black/50 text-white"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 border-white/20 backdrop-blur-md text-white"
         onClick={nextSlide}
       >
         <ChevronRight size={24} />
@@ -99,28 +112,28 @@ const HeroCarousel = () => {
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-5xl animate-fade-in">
-          <div className="mb-2 text-amber-400 font-medium tracking-widest">EXPLORE ZIMBABWE</div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 drop-shadow-md">
+          <div className="mb-2 text-indigo-300 font-medium tracking-widest">EXPLORE ZIMBABWE</div>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 drop-shadow-lg">
             {heroImages[currentSlide].title}
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto drop-shadow-md">
+          <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto">
             {heroImages[currentSlide].description}
           </p>
           
-          <div className="w-full max-w-2xl mx-auto mb-6">
+          <div className="w-full max-w-3xl mx-auto mb-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
             <SearchBar onSearch={handleSearch} />
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all duration-300"
               onClick={() => navigate("/browse?tab=destinations")}
             >
               Explore Destinations
             </Button>
             <Button 
               variant="outline" 
-              className="bg-transparent border-white text-white hover:bg-white/20 px-8 py-6 text-lg"
+              className="bg-transparent border-white text-white hover:bg-white/20 px-8 py-6 text-lg rounded-xl transition-all duration-300"
               onClick={() => navigate("/browse?tab=events")}
             >
               Upcoming Events
@@ -130,13 +143,15 @@ const HeroCarousel = () => {
       </div>
       
       {/* Indicator dots */}
-      <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center space-x-2">
+      <div className="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-3">
         {heroImages.map((_, index) => (
           <button
             key={index}
             className={cn(
               "w-3 h-3 rounded-full transition-all",
-              index === currentSlide ? "bg-white scale-125" : "bg-white/50 hover:bg-white/70"
+              index === currentSlide 
+                ? "bg-white scale-125 w-10 h-3" 
+                : "bg-white/50 hover:bg-white/70"
             )}
             onClick={() => setCurrentSlide(index)}
           />
