@@ -1,7 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '@/models/Booking';
 import { getPayment, updatePayment } from '@/models/Payment';
+import { getDestination } from '@/models/Destination';
+import { getEvent } from '@/models/Event';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -15,6 +18,7 @@ const PaymentPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
   // Fetch booking details
   const { data: booking, isLoading: bookingLoading, refetch: refetchBooking } = useQuery({
@@ -30,7 +34,28 @@ const PaymentPage = () => {
     enabled: !!booking?.payment_id
   });
 
+  // Fetch destination or event details to get payment_url
+  const { data: destinationData } = useQuery({
+    queryKey: ['destination', booking?.destination_id],
+    queryFn: () => getDestination(booking?.destination_id as string),
+    enabled: !!booking?.destination_id
+  });
+
+  const { data: eventData } = useQuery({
+    queryKey: ['event', booking?.event_id],
+    queryFn: () => getEvent(booking?.event_id as string),
+    enabled: !!booking?.event_id
+  });
+
   const isLoading = bookingLoading || paymentLoading;
+
+  // Use effect to set payment URL when data is loaded
+  useEffect(() => {
+    const fetchedPaymentUrl = getPaymentUrl();
+    if (fetchedPaymentUrl && fetchedPaymentUrl !== paymentUrl) {
+      setPaymentUrl(fetchedPaymentUrl);
+    }
+  }, [booking, payment, destinationData, eventData]);
 
   // Log data for debugging
   useEffect(() => {
@@ -40,7 +65,13 @@ const PaymentPage = () => {
     if (payment) {
       console.log('Payment details:', payment);
     }
-  }, [booking, payment]);
+    if (destinationData) {
+      console.log('Destination details:', destinationData);
+    }
+    if (eventData) {
+      console.log('Event details:', eventData);
+    }
+  }, [booking, payment, destinationData, eventData]);
 
   // Initialize payment_proofs bucket if needed
   useEffect(() => {
@@ -74,26 +105,26 @@ const PaymentPage = () => {
   }, []);
 
   // Get the payment URL from the booking record
-  const getPaymentUrl = () => {
+  const getPaymentUrl = (): string | null => {
     try {
       // First try to get the payment URL from the booking details
       if (booking?.booking_details?.payment_url) {
         return booking.booking_details.payment_url;
       }
       
+      // Check if we have a destination with payment_url
+      if (destinationData?.payment_url) {
+        return destinationData.payment_url;
+      }
+      
+      // Check if we have an event with payment_url
+      if (eventData?.payment_url) {
+        return eventData.payment_url;
+      }
+      
       // Then try to get the payment reference from the payment record
       if (payment?.payment_gateway_reference) {
         return payment.payment_gateway_reference;
-      }
-      
-      // If there's a destination ID, we can use it to construct a URL to get the payment URL
-      if (booking?.destination_id) {
-        return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/destinations?id=eq.${booking.destination_id}&select=payment_url`;
-      }
-      
-      // If there's an event ID, we can use it to construct a URL to get the payment URL
-      if (booking?.event_id) {
-        return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/events?id=eq.${booking.event_id}&select=payment_url`;
       }
       
       // If we couldn't find a payment URL, return null
@@ -106,7 +137,6 @@ const PaymentPage = () => {
 
   const copyPaymentLink = () => {
     try {
-      const paymentUrl = getPaymentUrl();
       if (paymentUrl) {
         navigator.clipboard.writeText(paymentUrl);
         toast.success("Payment link copied to clipboard!");
@@ -121,7 +151,6 @@ const PaymentPage = () => {
 
   const goToPayment = () => {
     try {
-      const paymentUrl = getPaymentUrl();
       if (paymentUrl) {
         window.open(paymentUrl, '_blank');
       } else {
@@ -352,7 +381,7 @@ const PaymentPage = () => {
                     <Button 
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
                       onClick={goToPayment}
-                      disabled={!getPaymentUrl()}
+                      disabled={!paymentUrl}
                     >
                       <ExternalLink className="mr-2 h-4 w-4" /> Go to Payment
                     </Button>
@@ -370,7 +399,7 @@ const PaymentPage = () => {
                         variant="outline" 
                         className="flex-1"
                         onClick={copyPaymentLink}
-                        disabled={!getPaymentUrl()}
+                        disabled={!paymentUrl}
                       >
                         <Copy className="mr-2 h-4 w-4" /> Copy Payment Link
                       </Button>

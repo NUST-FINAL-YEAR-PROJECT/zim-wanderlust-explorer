@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -105,7 +104,8 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
         payment_details: {
           event_id: eventId,
           ticket_type: selectedTicketType,
-          number_of_people: numberOfPeople
+          number_of_people: numberOfPeople,
+          payment_url: eventDetails?.payment_url || null
         }
       };
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -141,7 +140,13 @@ const BookingForm = () => {
       const payment = await createPayment({
         booking_id: booking.id,
         amount: totalPrice,
-        status: 'pending'
+        status: 'pending',
+        payment_gateway: 'manual',
+        payment_details: {
+          destination_id: destination!.id,
+          payment_url: destination!.payment_url || null,
+          number_of_people: numberOfPeople
+        }
       });
       
       console.log("Payment created:", payment);
