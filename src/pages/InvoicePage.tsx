@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking } from '@/models/Booking';
 import { getPayment } from '@/models/Payment';
@@ -33,6 +33,12 @@ const InvoicePage = () => {
   });
 
   const isLoading = bookingLoading || paymentLoading;
+
+  useEffect(() => {
+    // Show console logs to debug
+    console.log('Booking data:', booking);
+    console.log('Payment data:', payment);
+  }, [booking, payment]);
 
   const downloadAsPDF = async () => {
     if (!invoiceRef.current) {
@@ -220,8 +226,6 @@ const InvoicePage = () => {
                     <td className="text-right py-2">${booking.booking_details?.price_per_person || (booking.total_price / booking.number_of_people).toFixed(2)}</td>
                     <td className="text-right py-2">${booking.total_price.toFixed(2)}</td>
                   </tr>
-                  
-                  {/* Add any additional costs here if needed */}
                   
                   <tr className="font-bold">
                     <td colSpan={3} className="text-right py-4">Total</td>

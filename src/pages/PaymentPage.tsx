@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '@/models/Booking';
@@ -84,6 +83,37 @@ const PaymentPage = () => {
     }
   };
 
+  // For demo purposes - let's simulate payment completion
+  const simulatePaymentCompletion = async () => {
+    if (!booking || !payment) return;
+    
+    try {
+      toast.info("Processing payment...");
+      
+      // Update payment status to completed
+      await updatePayment(payment.id, {
+        status: 'completed',
+        updated_at: new Date().toISOString(),
+        payment_details: {
+          ...payment.payment_details,
+          completed_at: new Date().toISOString()
+        }
+      });
+      
+      // Update booking payment status
+      await updateBooking(booking.id, {
+        payment_status: 'completed'
+      });
+      
+      toast.success("Payment completed successfully!");
+      refetchBooking();
+      refetchPayment();
+    } catch (error) {
+      console.error('Error completing payment:', error);
+      toast.error('Error completing payment. Please try again.');
+    }
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -127,68 +157,71 @@ const PaymentPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* First card - booking summary */}
           <Card>
             <CardHeader>
               <CardTitle>Booking Summary</CardTitle>
               <CardDescription>
-                Booking #{booking.id.slice(0, 8)}
+                Booking #{booking?.id.slice(0, 8)}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* ... keep existing code (booking summary details) */}
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Destination:</span>
-                  <span className="font-medium">{booking.booking_details?.destination_name || "Not specified"}</span>
+                  <span className="font-medium">{booking?.booking_details?.destination_name || "Not specified"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Date:</span>
-                  <span className="font-medium">{new Date(booking.preferred_date || "").toLocaleDateString()}</span>
+                  <span className="font-medium">{new Date(booking?.preferred_date || "").toLocaleDateString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Number of people:</span>
-                  <span className="font-medium">{booking.number_of_people}</span>
+                  <span className="font-medium">{booking?.number_of_people}</span>
                 </div>
                 <div className="flex justify-between font-bold mt-2 pt-2 border-t">
                   <span>Total Amount:</span>
-                  <span className="text-green-700">${booking.total_price.toFixed(2)}</span>
+                  <span className="text-green-700">${booking?.total_price.toFixed(2)}</span>
                 </div>
               </div>
               
               <div className="pt-2">
                 <h3 className="font-medium mb-2">Contact Information</h3>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-muted-foreground">Name:</span> {booking.contact_name}</p>
-                  <p><span className="text-muted-foreground">Email:</span> {booking.contact_email}</p>
-                  <p><span className="text-muted-foreground">Phone:</span> {booking.contact_phone}</p>
+                  <p><span className="text-muted-foreground">Name:</span> {booking?.contact_name}</p>
+                  <p><span className="text-muted-foreground">Email:</span> {booking?.contact_email}</p>
+                  <p><span className="text-muted-foreground">Phone:</span> {booking?.contact_phone}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
+          {/* Second card - payment status */}
           <Card>
             <CardHeader>
               <CardTitle>Payment Status</CardTitle>
               <CardDescription>
-                Payment #{payment.id.slice(0, 8)}
+                Payment #{payment?.id.slice(0, 8)}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-center p-4 border rounded-lg">
-                <div className={`text-center ${payment.status === 'completed' ? 'text-green-600' : payment.status === 'processing' ? 'text-amber-600' : 'text-blue-600'}`}>
+                <div className={`text-center ${payment?.status === 'completed' ? 'text-green-600' : payment?.status === 'processing' ? 'text-amber-600' : 'text-blue-600'}`}>
                   <div className="text-lg font-bold uppercase mb-1">
-                    {payment.status}
+                    {payment?.status}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {payment.status === 'completed' ? 
+                    {payment?.status === 'completed' ? 
                       'Your payment has been processed successfully.' : 
-                      payment.status === 'processing' ? 
+                      payment?.status === 'processing' ? 
                       'Your payment is being processed.' : 
                       'Payment is pending. Please complete your payment.'}
                   </div>
                 </div>
               </div>
               
-              {payment.status === 'pending' && (
+              {payment?.status === 'pending' && (
                 <div className="space-y-4 pt-2">
                   <div className="bg-muted rounded-md p-4">
                     <h3 className="font-medium mb-2">Payment Instructions</h3>
@@ -203,9 +236,17 @@ const PaymentPage = () => {
                   <div className="flex flex-col space-y-3">
                     <Button 
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => window.open(booking.booking_details?.payment_url || payment.payment_gateway_reference || '#', '_blank')}
+                      onClick={() => window.open(booking?.booking_details?.payment_url || payment?.payment_gateway_reference || '#', '_blank')}
                     >
                       <ExternalLink className="mr-2 h-4 w-4" /> Go to Payment
+                    </Button>
+                    
+                    {/* For demo purposes - simulate payment completion */}
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={simulatePaymentCompletion}
+                    >
+                      <Check className="mr-2 h-4 w-4" /> Simulate Payment Completion
                     </Button>
                     
                     <div className="flex space-x-2">
@@ -239,7 +280,7 @@ const PaymentPage = () => {
                 </div>
               )}
               
-              {payment.status === 'processing' && (
+              {payment?.status === 'processing' && (
                 <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
                   <h3 className="font-medium mb-2">Payment Verification</h3>
                   <p className="text-sm">
@@ -248,7 +289,7 @@ const PaymentPage = () => {
                 </div>
               )}
               
-              {payment.status === 'completed' && (
+              {payment?.status === 'completed' && (
                 <div className="bg-green-50 border border-green-200 rounded-md p-4">
                   <div className="flex items-center mb-2">
                     <Check className="h-5 w-5 text-green-600 mr-2" />
@@ -260,9 +301,9 @@ const PaymentPage = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => navigate(`/invoice/${booking.id}`)}
+                    onClick={() => navigate(`/invoice/${booking?.id}`)}
                   >
-                    <FileDown className="mr-2 h-4 w-4" /> Download Invoice
+                    <FileDown className="mr-2 h-4 w-4" /> View Invoice
                   </Button>
                 </div>
               )}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -6,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { getDestination } from '@/models/Destination';
-import { createBooking, updateBooking } from '@/models/Booking'; // Added the import here
+import { createBooking, updateBooking } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -102,13 +101,17 @@ const BookingForm = () => {
   const onSubmit = async (data: z.infer<typeof bookingSchema>) => {
     setIsSubmitting(true);
     try {
+      console.log("Form submitted with data:", data);
+      
       // Calculate total price based on number of people
       const numberOfPeople = parseInt(data.numberOfPeople);
-      const totalPrice = destination.price * numberOfPeople;
+      const totalPrice = destination!.price * numberOfPeople;
+      
+      console.log("Creating booking with total price:", totalPrice);
       
       // Create booking
       const booking = await createBooking({
-        destination_id: destination.id,
+        destination_id: destination!.id,
         user_id: user?.id || null,
         booking_date: new Date().toISOString(),
         number_of_people: numberOfPeople,
@@ -120,11 +123,14 @@ const BookingForm = () => {
         status: 'pending',
         payment_status: 'pending',
         booking_details: {
-          destination_name: destination.name,
-          destination_location: destination.location,
-          price_per_person: destination.price
+          destination_name: destination!.name,
+          destination_location: destination!.location,
+          price_per_person: destination!.price,
+          payment_url: destination!.payment_url || null
         }
       });
+      
+      console.log("Booking created:", booking);
       
       if (!booking) {
         throw new Error('Failed to create booking');
@@ -137,6 +143,8 @@ const BookingForm = () => {
         status: 'pending'
       });
       
+      console.log("Payment created:", payment);
+      
       if (!payment) {
         throw new Error('Failed to create payment record');
       }
@@ -148,6 +156,7 @@ const BookingForm = () => {
       
       toast.success("Booking created successfully!");
       // Navigate to payment page
+      console.log("Navigating to payment page:", `/payment/${booking.id}`);
       navigate(`/payment/${booking.id}`);
     } catch (error) {
       console.error("Error creating booking:", error);
