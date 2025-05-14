@@ -16,11 +16,8 @@ import {
   BarChart2, 
   BookOpen, 
   LogOut, 
-  Bell, 
   Settings, 
   Home, 
-  Menu,
-  Search,
   Moon,
   Sun
 } from 'lucide-react';
@@ -28,15 +25,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/models/Auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  NavigationMenu, 
-  NavigationMenuContent, 
-  NavigationMenuItem, 
-  NavigationMenuList, 
-  NavigationMenuTrigger,
-  NavigationMenuLink
-} from '@/components/ui/navigation-menu';
-import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const AdminDashboard: React.FC = () => {
@@ -134,6 +122,7 @@ const AdminDashboard: React.FC = () => {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
   };
 
   return (
@@ -161,6 +150,24 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-xs text-[hsl(var(--admin-muted-fg))]">{profile?.role || 'Administrator'}</p>
               </div>
             </div>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={toggleDarkMode}
+                    className="absolute top-4 right-4"
+                  >
+                    {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>Toggle theme</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           
           <nav>
@@ -195,6 +202,12 @@ const AdminDashboard: React.FC = () => {
               <Button variant="outline" className="w-full justify-start" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
+              </Button>
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to="/">
+                  <Home className="mr-2 h-4 w-4" />
+                  Go to Homepage
+                </Link>
               </Button>
             </div>
           </div>
@@ -256,6 +269,15 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-xs text-[hsl(var(--admin-muted-fg))]">{profile?.role || 'Administrator'}</p>
               </div>
             </div>
+            
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={toggleDarkMode}
+              className="absolute top-16 right-4"
+            >
+              {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+            </Button>
           </div>
           
           <nav>
@@ -293,133 +315,18 @@ const AdminDashboard: React.FC = () => {
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to="/" onClick={toggleMobileMenu}>
+                <Home className="mr-2 h-4 w-4" />
+                Go to Homepage
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
       
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-30 border-b border-[hsl(var(--admin-border))] bg-[hsl(var(--admin-card))] shadow-sm">
-        <div className="flex items-center justify-between h-16 px-4 lg:pl-64">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" onClick={toggleMobileMenu} className="lg:hidden">
-              <Menu size={20} />
-            </Button>
-            <h1 className="text-xl font-semibold hidden sm:inline-block">Admin Dashboard</h1>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Button variant="ghost" size="icon">
-                <Search size={20} />
-              </Button>
-            </div>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
-                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle theme</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <div className="relative">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Bell size={20} />
-                      <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-[hsl(var(--admin-primary))]">
-                        <span className="text-xs">3</span>
-                      </Badge>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Notifications</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-                    <Home size={20} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Go to homepage</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-transparent hover:bg-[hsl(var(--admin-secondary))]">
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={profile?.avatar_url || undefined} />
-                        <AvatarFallback className="bg-gradient-to-r from-[hsl(var(--admin-primary))] to-[hsl(var(--admin-accent))] text-white">{initials}</AvatarFallback>
-                      </Avatar>
-                      <span className="hidden md:inline-block">{fullName}</span>
-                    </div>
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-[hsl(var(--admin-card))] border border-[hsl(var(--admin-border))]">
-                    <ul className="grid w-[200px] gap-1 p-2">
-                      <li className="row-span-3">
-                        <NavigationMenuLink asChild>
-                          <a
-                            className="flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-r from-[hsl(var(--admin-primary))] to-[hsl(var(--admin-accent))] p-4 no-underline outline-none focus:shadow-md"
-                            href="/settings"
-                          >
-                            <div className="mt-4 mb-2 text-lg font-medium text-white">
-                              {fullName}
-                            </div>
-                            <p className="text-sm text-white/80">
-                              {profile?.role || 'Administrator'}
-                            </p>
-                          </a>
-                        </NavigationMenuLink>
-                      </li>
-                      <li>
-                        <NavigationMenuLink asChild>
-                          <a
-                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[hsl(var(--admin-secondary))] focus:bg-[hsl(var(--admin-secondary))]"
-                            href="/settings"
-                          >
-                            <div className="text-sm font-medium leading-none flex items-center gap-2">
-                              <Settings size={16} />
-                              Settings
-                            </div>
-                          </a>
-                        </NavigationMenuLink>
-                      </li>
-                      <li>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-[hsl(var(--destructive))] hover:text-[hsl(var(--destructive))] hover:bg-[hsl(var(--admin-secondary))]"
-                          onClick={handleSignOut}
-                        >
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Sign Out
-                        </Button>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-          </div>
-        </div>
-      </header>
-
-      <main className="lg:pl-64 pt-4">
+      {/* Main Content */}
+      <main className="lg:pl-64">
         <div className="container mx-auto px-4 py-6">
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
@@ -450,7 +357,7 @@ const AdminDashboard: React.FC = () => {
           </div>
           
           <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="sticky top-16 z-20 shadow-sm rounded-lg bg-[hsl(var(--admin-card))] border border-[hsl(var(--admin-border))]">
+            <div className="sticky top-0 z-20 py-2 shadow-sm rounded-lg bg-[hsl(var(--admin-card))] border border-[hsl(var(--admin-border))]">
               <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
                 {adminNavItems.map((item) => (
                   <TabsTrigger 

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -46,19 +47,19 @@
     --sidebar-border: 265 30% 90%;
     --sidebar-ring: 265 84% 50%;
     
-    /* Admin dashboard dark blue theme */
-    --admin-bg: 215 30% 95%;
+    /* Admin dashboard theme - improved with more vibrant colors */
+    --admin-bg: 215 30% 98%;
     --admin-fg: 215 50% 20%;
-    --admin-card: 215 30% 98%;
+    --admin-card: 0 0% 100%;
     --admin-card-fg: 215 50% 20%;
-    --admin-primary: 215 70% 50%;
-    --admin-primary-hover: 215 70% 45%;
-    --admin-secondary: 215 30% 90%;
-    --admin-accent: 200 80% 60%;
-    --admin-muted: 215 30% 85%;
+    --admin-primary: 215 80% 50%;
+    --admin-primary-hover: 215 80% 45%;
+    --admin-secondary: 215 30% 95%;
+    --admin-accent: 200 90% 60%;
+    --admin-muted: 215 30% 90%;
     --admin-muted-fg: 215 30% 40%;
-    --admin-border: 215 30% 80%;
-    --admin-highlight: 200 80% 60%;
+    --admin-border: 215 30% 90%;
+    --admin-highlight: 200 90% 60%;
   }
 
   .dark {
@@ -101,6 +102,20 @@
     --sidebar-accent-foreground: 265 30% 90%;
     --sidebar-border: 265 30% 25%;
     --sidebar-ring: 265 84% 60%;
+    
+    /* Admin dashboard dark mode theme - more vibrant */
+    --admin-bg: 215 30% 10%;
+    --admin-fg: 210 40% 98%;
+    --admin-card: 215 30% 15%;
+    --admin-card-fg: 210 40% 98%;
+    --admin-primary: 215 80% 50%;
+    --admin-primary-hover: 215 80% 55%;
+    --admin-secondary: 215 30% 20%;
+    --admin-accent: 200 90% 60%;
+    --admin-muted: 215 30% 25%;
+    --admin-muted-fg: 215 30% 70%;
+    --admin-border: 215 30% 25%;
+    --admin-highlight: 200 90% 60%;
   }
 }
 
@@ -207,5 +222,10 @@
   
   .admin-table tr:hover {
     @apply bg-[hsl(var(--admin-muted))]/40;
+  }
+  
+  /* Added dark mode transition */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
