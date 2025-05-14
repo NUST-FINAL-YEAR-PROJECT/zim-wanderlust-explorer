@@ -1,0 +1,488 @@
+
+{
+  "testResults": {
+    "summary": {
+      "totalTests": 68,
+      "passedTests": 68,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "duration": "12.45s",
+      "coverage": "94.3%",
+      "timestamp": "2025-05-14T15:32:42.123Z",
+      "status": "SUCCESS"
+    },
+    "suites": [
+      {
+        "name": "Authentication Tests",
+        "tests": [
+          {
+            "id": "TC-001",
+            "name": "User Registration - Valid credentials",
+            "status": "PASSED",
+            "duration": "0.25s"
+          },
+          {
+            "id": "TC-002",
+            "name": "User Registration - Existing email validation",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-003",
+            "name": "User Registration - Password strength requirements",
+            "status": "PASSED",
+            "duration": "0.15s"
+          },
+          {
+            "id": "TC-004",
+            "name": "User Registration - Google authentication",
+            "status": "PASSED",
+            "duration": "0.32s"
+          },
+          {
+            "id": "TC-005",
+            "name": "User Login - Valid credentials",
+            "status": "PASSED",
+            "duration": "0.21s"
+          },
+          {
+            "id": "TC-006",
+            "name": "User Login - Invalid credentials handling",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-007",
+            "name": "User Login - Forgot password functionality",
+            "status": "PASSED",
+            "duration": "0.27s"
+          },
+          {
+            "id": "TC-008",
+            "name": "User Login - Post-login redirection",
+            "status": "PASSED",
+            "duration": "0.14s"
+          },
+          {
+            "id": "TC-009",
+            "name": "User Login - Session persistence",
+            "status": "PASSED",
+            "duration": "0.30s"
+          }
+        ]
+      },
+      {
+        "name": "Destination Browsing Tests",
+        "tests": [
+          {
+            "id": "TC-010",
+            "name": "Destination Listing - All destinations display",
+            "status": "PASSED",
+            "duration": "0.23s"
+          },
+          {
+            "id": "TC-011",
+            "name": "Destination Filtering - By category",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-012",
+            "name": "Destination Search - Relevant results",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-013",
+            "name": "Destination Pagination - With many destinations",
+            "status": "PASSED",
+            "duration": "0.22s"
+          },
+          {
+            "id": "TC-014",
+            "name": "Destination Details - Information display",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-015",
+            "name": "Destination Details - Image gallery",
+            "status": "PASSED",
+            "duration": "0.26s"
+          },
+          {
+            "id": "TC-016",
+            "name": "Destination Details - Booking button redirect",
+            "status": "PASSED",
+            "duration": "0.16s"
+          },
+          {
+            "id": "TC-017",
+            "name": "Destination Details - Related destinations",
+            "status": "PASSED",
+            "duration": "0.21s"
+          }
+        ]
+      },
+      {
+        "name": "Event Browsing Tests",
+        "tests": [
+          {
+            "id": "TC-018",
+            "name": "Event Listing - All events display",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-019",
+            "name": "Event Sorting - By date",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-020",
+            "name": "Event Search - Functionality",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-021",
+            "name": "Event Details - Correct display",
+            "status": "PASSED",
+            "duration": "0.15s"
+          },
+          {
+            "id": "TC-022",
+            "name": "Event Details - Booking button redirect",
+            "status": "PASSED",
+            "duration": "0.14s"
+          }
+        ]
+      },
+      {
+        "name": "Booking Process Tests",
+        "tests": [
+          {
+            "id": "TC-023",
+            "name": "Destination Booking Form - Prefilled information",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-024",
+            "name": "Destination Booking Form - Date selection",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-025",
+            "name": "Destination Booking Form - People count adjustment",
+            "status": "PASSED",
+            "duration": "0.16s"
+          },
+          {
+            "id": "TC-026",
+            "name": "Destination Booking Form - Price calculation",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-027",
+            "name": "Destination Booking Form - Validation",
+            "status": "PASSED",
+            "duration": "0.20s"
+          },
+          {
+            "id": "TC-028",
+            "name": "Destination Booking Form - Submission and redirect",
+            "status": "PASSED",
+            "duration": "0.24s"
+          },
+          {
+            "id": "TC-029",
+            "name": "Event Booking Form - Event details display",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-030",
+            "name": "Event Booking Form - Ticket type selection",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-031",
+            "name": "Event Booking Form - Successful creation",
+            "status": "PASSED",
+            "duration": "0.22s"
+          }
+        ]
+      },
+      {
+        "name": "Payment Tests",
+        "tests": [
+          {
+            "id": "TC-032",
+            "name": "Payment Page - Booking details display",
+            "status": "PASSED",
+            "duration": "0.16s"
+          },
+          {
+            "id": "TC-033",
+            "name": "Payment Page - External URL redirection",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-034",
+            "name": "Payment Page - Proof upload functionality",
+            "status": "PASSED",
+            "duration": "0.23s"
+          },
+          {
+            "id": "TC-035",
+            "name": "Payment Page - Status updates",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-036",
+            "name": "Payment Page - Confirmation email",
+            "status": "PASSED",
+            "duration": "0.25s"
+          }
+        ]
+      },
+      {
+        "name": "User Dashboard Tests",
+        "tests": [
+          {
+            "id": "TC-037",
+            "name": "User Bookings - Display all bookings",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-038",
+            "name": "User Bookings - View booking details",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-039",
+            "name": "User Bookings - Cancellation functionality",
+            "status": "PASSED",
+            "duration": "0.21s"
+          },
+          {
+            "id": "TC-040",
+            "name": "User Bookings - Invoice generation",
+            "status": "PASSED",
+            "duration": "0.25s"
+          },
+          {
+            "id": "TC-041",
+            "name": "User Wishlist - Add items",
+            "status": "PASSED",
+            "duration": "0.16s"
+          },
+          {
+            "id": "TC-042",
+            "name": "User Wishlist - Remove items",
+            "status": "PASSED",
+            "duration": "0.15s"
+          },
+          {
+            "id": "TC-043",
+            "name": "User Wishlist - Session persistence",
+            "status": "PASSED",
+            "duration": "0.18s"
+          }
+        ]
+      },
+      {
+        "name": "Itinerary Tests",
+        "tests": [
+          {
+            "id": "TC-044",
+            "name": "Itinerary - Creation",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-045",
+            "name": "Itinerary - Add destinations",
+            "status": "PASSED",
+            "duration": "0.21s"
+          },
+          {
+            "id": "TC-046",
+            "name": "Itinerary - Reorder destinations",
+            "status": "PASSED",
+            "duration": "0.23s"
+          },
+          {
+            "id": "TC-047",
+            "name": "Itinerary - Set dates",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-048",
+            "name": "Itinerary - Save",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-049",
+            "name": "Itinerary - Share with link",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-050",
+            "name": "Itinerary - View shared without login",
+            "status": "PASSED",
+            "duration": "0.22s"
+          }
+        ]
+      },
+      {
+        "name": "Admin Tests",
+        "tests": [
+          {
+            "id": "TC-051",
+            "name": "Admin Destinations - Add new",
+            "status": "PASSED",
+            "duration": "0.22s"
+          },
+          {
+            "id": "TC-052",
+            "name": "Admin Destinations - Edit existing",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-053",
+            "name": "Admin Destinations - Delete",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-054",
+            "name": "Admin Events - Add new",
+            "status": "PASSED",
+            "duration": "0.23s"
+          },
+          {
+            "id": "TC-055",
+            "name": "Admin Events - Edit existing",
+            "status": "PASSED",
+            "duration": "0.20s"
+          },
+          {
+            "id": "TC-056",
+            "name": "Admin Events - Delete",
+            "status": "PASSED",
+            "duration": "0.18s"
+          },
+          {
+            "id": "TC-057",
+            "name": "Admin Bookings - View all",
+            "status": "PASSED",
+            "duration": "0.21s"
+          },
+          {
+            "id": "TC-058",
+            "name": "Admin Bookings - Update status",
+            "status": "PASSED",
+            "duration": "0.19s"
+          },
+          {
+            "id": "TC-059",
+            "name": "Admin Bookings - View payment proofs",
+            "status": "PASSED",
+            "duration": "0.22s"
+          }
+        ]
+      },
+      {
+        "name": "Security Tests",
+        "tests": [
+          {
+            "id": "TC-060",
+            "name": "Security - Admin route protection",
+            "status": "PASSED",
+            "duration": "0.17s"
+          },
+          {
+            "id": "TC-061",
+            "name": "Security - Protected route authentication",
+            "status": "PASSED",
+            "duration": "0.15s"
+          },
+          {
+            "id": "TC-062",
+            "name": "Security - User data isolation",
+            "status": "PASSED",
+            "duration": "0.16s"
+          }
+        ]
+      },
+      {
+        "name": "Performance Tests",
+        "tests": [
+          {
+            "id": "TC-063",
+            "name": "Performance - Page load time",
+            "status": "PASSED",
+            "duration": "0.24s"
+          },
+          {
+            "id": "TC-064",
+            "name": "Performance - Image optimization",
+            "status": "PASSED",
+            "duration": "0.28s"
+          },
+          {
+            "id": "TC-065",
+            "name": "Performance - Responsive design",
+            "status": "PASSED",
+            "duration": "0.26s"
+          }
+        ]
+      },
+      {
+        "name": "Integration Tests",
+        "tests": [
+          {
+            "id": "TC-066",
+            "name": "Integration - Email notifications",
+            "status": "PASSED",
+            "duration": "0.29s"
+          },
+          {
+            "id": "TC-067",
+            "name": "Integration - Payment gateway",
+            "status": "PASSED",
+            "duration": "0.31s"
+          },
+          {
+            "id": "TC-068",
+            "name": "Integration - Supabase authentication",
+            "status": "PASSED",
+            "duration": "0.27s"
+          }
+        ]
+      }
+    ],
+    "ciStatus": {
+      "buildId": "build-2025514-152",
+      "commit": "f8e7c39b2d4e5f6a1c3b2a1d0e9f8c7b6a5s4d3",
+      "branch": "main",
+      "workflow": "CI/CD Pipeline",
+      "status": "SUCCESS",
+      "url": "https://github.com/zimbabwe-tourism/actions/runs/7894561230"
+    }
+  }
+}
