@@ -65,7 +65,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { title: 'My Bookings', path: '/bookings', icon: Calendar },
     { title: 'Destinations', path: '/destinations', icon: MapPin },
     { title: 'Events', path: '/events', icon: CalendarDays },
-    { title: 'Settings', path: '/profile', icon: Settings },
+    { title: 'Settings', path: '/settings', icon: Settings }, // Updated path from /profile to /settings
   ];
 
   const initials = profile?.username 

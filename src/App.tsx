@@ -118,7 +118,7 @@ const App = () => (
               path="/profile" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Settings />
                 </ProtectedRoute>
               } 
             />
