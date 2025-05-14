@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format, parseISO, isAfter, isBefore } from 'date-fns';
 
 const Events = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('all');
@@ -69,6 +70,13 @@ const Events = () => {
     
     return matchesSearch && matchesLocation && matchesTime;
   });
+
+  // Add a function to handle booking
+  const handleBookEvent = (event: Event) => {
+    navigate(`/booking/event/${event.id}`, { 
+      state: { eventDetails: event }
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -205,7 +213,10 @@ const Events = () => {
                             {event.description}
                           </p>
                           <div className="mt-4">
-                            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
+                            <Button 
+                              className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                              onClick={() => handleBookEvent(event)}
+                            >
                               Book Now
                             </Button>
                           </div>
@@ -246,7 +257,11 @@ const Events = () => {
                               {event.price !== null && (
                                 <span className="font-medium text-green-700 block mb-2">${event.price}</span>
                               )}
-                              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                              <Button 
+                                size="sm" 
+                                className="bg-amber-600 hover:bg-amber-700 text-white"
+                                onClick={() => handleBookEvent(event)}
+                              >
                                 Book
                               </Button>
                             </div>

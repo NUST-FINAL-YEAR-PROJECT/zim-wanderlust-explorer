@@ -19,6 +19,7 @@ import BookingForm from "./pages/BookingForm";
 import PaymentPage from "./pages/PaymentPage";
 import InvoicePage from "./pages/InvoicePage";
 import Events from "./pages/Events";
+import EventBookingPage from "./pages/EventBookingPage";
 import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <BookingForm />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/booking/event/:id" 
+              element={
+                <ProtectedRoute>
+                  <EventBookingPage />
                 </ProtectedRoute>
               } 
             />
