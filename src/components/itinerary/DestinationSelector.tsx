@@ -26,15 +26,19 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
   const [open, setOpen] = useState(false);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDestinations = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const data = await getDestinations();
-        setDestinations(data || []);
-      } catch (error) {
-        console.error('Error fetching destinations:', error);
+        // Ensure destinations is always an array, even if API returns null or undefined
+        setDestinations(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching destinations:', err);
+        setError('Failed to load destinations');
         setDestinations([]);
       } finally {
         setIsLoading(false);
@@ -58,37 +62,43 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
+      <PopoverContent className="w-[300px] p-0" align="start">
         <Command>
           <CommandInput placeholder="Search destinations..." />
-          <CommandEmpty>No destination found.</CommandEmpty>
-          <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {Array.isArray(destinations) && destinations.length > 0 ? (
-              destinations.map((destination) => (
-                <CommandItem
-                  key={destination.id}
-                  value={destination.name}
-                  onSelect={() => {
-                    onChange(destination.id === value?.id ? null : destination);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value?.id === destination.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {destination.name}
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {destination.location}
-                  </span>
-                </CommandItem>
-              ))
-            ) : (
-              <CommandItem disabled>No destinations available</CommandItem>
-            )}
-          </CommandGroup>
+          {error ? (
+            <CommandEmpty>{error}</CommandEmpty>
+          ) : (
+            <>
+              <CommandEmpty>No destination found.</CommandEmpty>
+              <CommandGroup className="max-h-[300px] overflow-y-auto">
+                {destinations.length > 0 ? (
+                  destinations.map((destination) => (
+                    <CommandItem
+                      key={destination.id}
+                      value={destination.name}
+                      onSelect={() => {
+                        onChange(destination.id === value?.id ? null : destination);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value?.id === destination.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {destination.name}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {destination.location}
+                      </span>
+                    </CommandItem>
+                  ))
+                ) : (
+                  <CommandItem disabled>No destinations available</CommandItem>
+                )}
+              </CommandGroup>
+            </>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
