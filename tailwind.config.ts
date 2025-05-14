@@ -20,48 +20,74 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: '#E2E8F0',
-				input: '#6366F1',
-				ring: '#8B5CF6',
-				background: '#F1F0FB',
-				foreground: '#1E293B',
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#6366F1',
-					foreground: '#FFFFFF'
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: '#8B5CF6', 
-					foreground: '#FFFFFF'
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				destructive: {
-					DEFAULT: '#FF4A6D',
-					foreground: '#FFFFFF'
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))'
 				},
 				muted: {
-					DEFAULT: '#F1F5F9', 
-					foreground: '#64748B'
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))'
 				},
 				accent: {
-					DEFAULT: '#8B5CF6', 
-					foreground: '#FFFFFF'
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
-					DEFAULT: '#FFFFFF',
-					foreground: '#1E293B'
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))'
 				},
 				card: {
-					DEFAULT: '#FFFFFF',
-					foreground: '#1E293B'
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))'
 				},
 				sidebar: {
-					DEFAULT: '#6366F1',
-					foreground: '#FFFFFF',
-					primary: '#8B5CF6',
-					'primary-foreground': '#FFFFFF',
-					accent: '#F1F0FB',
-					'accent-foreground': '#6366F1',
-					border: '#818CF8',
-					ring: '#8B5CF6'
+					DEFAULT: 'hsl(var(--sidebar-background))',
+					foreground: 'hsl(var(--sidebar-foreground))',
+					primary: 'hsl(var(--sidebar-primary))',
+					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+					accent: 'hsl(var(--sidebar-accent))',
+					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+					border: 'hsl(var(--sidebar-border))',
+					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// New nature-inspired color palette for Zimbabwe
+				safari: {
+					DEFAULT: '#8B5A2B', // Earthy brown
+					light: '#D2B48C',   // Tan/khaki
+					dark: '#654321',    // Dark brown
+				},
+				savanna: {
+					DEFAULT: '#E1C16E', // Golden grass
+					light: '#F5DEB3',   // Wheat
+					dark: '#B8860B',    // Dark goldenrod
+				},
+				forest: {
+					DEFAULT: '#2E8B57', // Sea green
+					light: '#98FB98',   // Pale green
+					dark: '#006400',    // Dark green
+				},
+				water: {
+					DEFAULT: '#4682B4', // Steel blue (Victoria Falls)
+					light: '#ADD8E6',   // Light blue
+					dark: '#00008B',    // Dark blue
+				},
+				sunset: {
+					DEFAULT: '#FF7F50', // Coral
+					light: '#FFDAB9',   // Peach
+					dark: '#CD5C5C',    // Indian red
 				}
 			},
 			borderRadius: {
@@ -132,14 +158,10 @@ export default {
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
 			},
 			boxShadow: {
-				'card-hover': '0 15px 30px -10px rgba(99, 102, 241, 0.15), 0 8px 10px -5px rgba(99, 102, 241, 0.08)',
-				'elevation-1': '0 1px 3px rgba(99, 102, 241, 0.12), 0 1px 2px rgba(99, 102, 241, 0.24)',
-				'elevation-2': '0 3px 6px rgba(99, 102, 241, 0.16), 0 3px 6px rgba(99, 102, 241, 0.23)',
-				'elevation-3': '0 10px 20px rgba(99, 102, 241, 0.19), 0 6px 6px rgba(99, 102, 241, 0.23)',
-			},
-			fontFamily: {
-				'display': ['Montserrat', 'sans-serif'],
-				'body': ['Open Sans', 'sans-serif'],
+				'card-hover': '0 15px 30px -10px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04)',
+				'elevation-1': '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+				'elevation-2': '0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)',
+				'elevation-3': '0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)',
 			}
 		}
 	},

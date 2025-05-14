@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import DestinationCard from "@/components/DestinationCard";
@@ -10,7 +11,6 @@ import { getDestinations, searchDestinations } from "@/models/Destination";
 import { getEvents, searchEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import DestinationCategories from "@/components/DestinationCategories";
-import Navigation from "@/components/Navigation";
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -67,14 +67,10 @@ const Browse = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <div className="bg-[url('/nyanga.jpg')] bg-cover bg-center h-64 relative">
-        <div className="absolute inset-0 bg-[#004AAD] opacity-75"></div>
-        <Navigation />
-        <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Explore Zimbabwe</h1>
-          <div className="w-full max-w-xl">
-            <SearchBar onSearch={handleSearch} />
-          </div>
+      <div className="bg-white py-6 px-4 border-b">
+        <div className="container mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Explore Zimbabwe</h1>
+          <SearchBar onSearch={handleSearch} />
         </div>
       </div>
       
@@ -85,16 +81,16 @@ const Browse = () => {
       <div className="container mx-auto px-4 py-8 flex-grow">
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <div className="mb-6">
-            <TabsList className="w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-6 px-0 border-b border-[#004AAD]/20">
+            <TabsList className="w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-6 px-0 border-b">
               <TabsTrigger 
                 value="destinations"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#004AAD] data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-[#004AAD]"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
               >
                 Places to stay
               </TabsTrigger>
               <TabsTrigger 
                 value="events"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-[#004AAD] data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0 text-[#004AAD]"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
               >
                 Experiences
               </TabsTrigger>
@@ -105,20 +101,20 @@ const Browse = () => {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                  <div key={i} className="border border-[#004AAD]/10 rounded-lg overflow-hidden">
-                    <Skeleton className="h-48 w-full bg-[#E6F0FF]" />
+                  <div key={i} className="border rounded-lg overflow-hidden">
+                    <Skeleton className="h-48 w-full" />
                     <div className="p-4 space-y-2">
-                      <Skeleton className="h-6 w-3/4 bg-[#E6F0FF]" />
-                      <Skeleton className="h-4 w-1/2 bg-[#E6F0FF]" />
-                      <Skeleton className="h-4 w-full bg-[#E6F0FF]" />
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-full" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : destinations.length === 0 ? (
               <div className="text-center py-12">
-                <h3 className="text-xl font-medium text-[#004AAD]">No destinations found</h3>
-                <p className="text-[#004AAD]/70">Try adjusting your search query</p>
+                <h3 className="text-xl font-medium">No destinations found</h3>
+                <p className="text-muted-foreground">Try adjusting your search query</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -133,20 +129,20 @@ const Browse = () => {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                  <div key={i} className="border border-[#004AAD]/10 rounded-lg overflow-hidden">
-                    <Skeleton className="h-48 w-full bg-[#E6F0FF]" />
+                  <div key={i} className="border rounded-lg overflow-hidden">
+                    <Skeleton className="h-48 w-full" />
                     <div className="p-4 space-y-2">
-                      <Skeleton className="h-6 w-3/4 bg-[#E6F0FF]" />
-                      <Skeleton className="h-4 w-1/2 bg-[#E6F0FF]" />
-                      <Skeleton className="h-4 w-full bg-[#E6F0FF]" />
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-full" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : events.length === 0 ? (
               <div className="text-center py-12">
-                <h3 className="text-xl font-medium text-[#004AAD]">No events found</h3>
-                <p className="text-[#004AAD]/70">Try adjusting your search query</p>
+                <h3 className="text-xl font-medium">No events found</h3>
+                <p className="text-muted-foreground">Try adjusting your search query</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

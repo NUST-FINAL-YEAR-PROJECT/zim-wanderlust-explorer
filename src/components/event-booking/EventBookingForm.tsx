@@ -146,12 +146,12 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto border-[#E2E8F0] shadow-md">
-      <CardHeader className="bg-[#F1F0FB]/50">
-        <CardTitle className="text-2xl text-[#6366F1] font-display">Book Event</CardTitle>
-        <CardDescription className="text-[#6366F1]/70 font-body">Complete the form below to book {eventDetails?.title || 'this event'}</CardDescription>
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl">Book Event</CardTitle>
+        <CardDescription>Complete the form below to book {eventDetails?.title || 'this event'}</CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <EventSummary eventDetails={eventDetails} />
 
@@ -178,18 +178,17 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
           />
         </form>
       </CardContent>
-      <CardFooter className="flex justify-end gap-4 bg-[#F1F0FB]/50">
+      <CardFooter className="flex justify-end gap-4">
         <Button 
           variant="outline" 
           onClick={() => navigate('/events')}
-          className="border-[#6366F1] text-[#6366F1] transition-all duration-300"
         >
           Cancel
         </Button>
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="bg-[#6366F1] hover:bg-[#4F46E5] text-white transition-all duration-300"
+          className="bg-amber-600 hover:bg-amber-700 text-white"
         >
           {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
         </Button>
