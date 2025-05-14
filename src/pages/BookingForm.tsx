@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -5,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { getDestination } from '@/models/Destination';
-import { createBooking, updateBooking } from '@/models/Booking';
+import { createBooking, updateBooking, sendBookingConfirmationEmail } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -153,6 +154,19 @@ const BookingForm = () => {
       await updateBooking(booking.id, {
         payment_id: payment.id
       });
+      
+      // Send booking confirmation email
+      sendBookingConfirmationEmail(booking.id)
+        .then(success => {
+          if (success) {
+            console.log('Booking confirmation email sent successfully');
+          } else {
+            console.warn('Failed to send booking confirmation email');
+          }
+        })
+        .catch(err => {
+          console.error('Error sending booking confirmation email:', err);
+        });
       
       toast.success("Booking created successfully!");
       // Navigate to payment page

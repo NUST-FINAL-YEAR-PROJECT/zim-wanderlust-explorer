@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Aligning this with the database schema
@@ -154,4 +155,121 @@ export async function checkForDuplicateBooking(userId: string, destinationId: st
   }
   
   return data && data.length > 0;
+}
+
+// New functions for sending email notifications
+export async function sendBookingConfirmationEmail(bookingId: string) {
+  const booking = await getBooking(bookingId);
+  
+  if (!booking) {
+    console.error('Booking not found, cannot send confirmation email');
+    return false;
+  }
+  
+  try {
+    const response = await supabase.functions.invoke('send-email', {
+      body: {
+        templateType: 'bookingConfirmation',
+        bookingData: booking
+      }
+    });
+    
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    
+    console.log('Booking confirmation email sent:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Failed to send booking confirmation email:', error);
+    return false;
+  }
+}
+
+export async function sendPaymentConfirmationEmail(bookingId: string) {
+  const booking = await getBooking(bookingId);
+  
+  if (!booking) {
+    console.error('Booking not found, cannot send payment confirmation email');
+    return false;
+  }
+  
+  try {
+    const response = await supabase.functions.invoke('send-email', {
+      body: {
+        templateType: 'paymentConfirmation',
+        bookingData: booking
+      }
+    });
+    
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    
+    console.log('Payment confirmation email sent:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Failed to send payment confirmation email:', error);
+    return false;
+  }
+}
+
+export async function sendBookingCancellationEmail(bookingId: string) {
+  const booking = await getBooking(bookingId);
+  
+  if (!booking) {
+    console.error('Booking not found, cannot send cancellation email');
+    return false;
+  }
+  
+  try {
+    const response = await supabase.functions.invoke('send-email', {
+      body: {
+        templateType: 'bookingCancellation',
+        bookingData: booking
+      }
+    });
+    
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    
+    console.log('Booking cancellation email sent:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Failed to send booking cancellation email:', error);
+    return false;
+  }
+}
+
+export async function sendCustomEmail(bookingId: string, subject: string, htmlContent: string, textContent?: string) {
+  const booking = await getBooking(bookingId);
+  
+  if (!booking) {
+    console.error('Booking not found, cannot send custom email');
+    return false;
+  }
+  
+  try {
+    const response = await supabase.functions.invoke('send-email', {
+      body: {
+        bookingData: booking,
+        customEmail: {
+          subject,
+          html: htmlContent,
+          text: textContent || htmlContent.replace(/<[^>]*>?/gm, '')
+        }
+      }
+    });
+    
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    
+    console.log('Custom email sent:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Failed to send custom email:', error);
+    return false;
+  }
 }

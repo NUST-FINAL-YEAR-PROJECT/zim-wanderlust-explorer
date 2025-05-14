@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { createBooking, updateBooking, BookingStatus, PaymentStatus } from '@/models/Booking';
+import { createBooking, updateBooking, BookingStatus, PaymentStatus, sendBookingConfirmationEmail } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/sonner';
@@ -119,6 +119,19 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
       await updateBooking(booking.id, {
         payment_id: payment.id
       });
+
+      // Send booking confirmation email
+      sendBookingConfirmationEmail(booking.id)
+        .then(success => {
+          if (success) {
+            console.log('Booking confirmation email sent successfully');
+          } else {
+            console.warn('Failed to send booking confirmation email');
+          }
+        })
+        .catch(err => {
+          console.error('Error sending booking confirmation email:', err);
+        });
 
       toast.success('Booking created successfully!');
       
