@@ -6,7 +6,7 @@ import {
   Mountain, 
   Tent, 
   Building, 
-  Beach, 
+  Palmtree, 
   TreePine, 
   Camera, 
   Compass 
@@ -19,7 +19,7 @@ const categories = [
   { id: "wildlife", name: "Wildlife", icon: Map },
   { id: "mountains", name: "Mountains", icon: Mountain },
   { id: "camping", name: "Camping", icon: Tent },
-  { id: "lakes", name: "Lakes", icon: Beach },
+  { id: "lakes", name: "Lakes", icon: Palmtree },
   { id: "photography", name: "Photography", icon: Camera },
   { id: "adventure", name: "Adventure", icon: Compass },
 ];
