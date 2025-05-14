@@ -26,6 +26,29 @@ export interface Destination {
   updated_at: string;
 }
 
+// Define a type for creating or updating destinations that ensures required fields
+export type DestinationInput = {
+  name: string;
+  location: string;
+  price: number;
+  description?: string | null;
+  image_url?: string | null;
+  activities?: string[] | null;
+  best_time_to_visit?: string | null;
+  duration_recommended?: string | null;
+  difficulty_level?: string | null;
+  amenities?: string[] | null;
+  what_to_bring?: string[] | null;
+  highlights?: string[] | null;
+  weather_info?: string | null;
+  getting_there?: string | null;
+  categories?: string[] | null;
+  additional_images?: string[] | null;
+  additional_costs?: Record<string, any> | any[] | null;
+  is_featured?: boolean | null;
+  payment_url?: string | null;
+};
+
 export async function getDestinations() {
   const { data, error } = await supabase
     .from('destinations')
@@ -82,7 +105,7 @@ export async function searchDestinations(query: string) {
   return data as Destination[];
 }
 
-export async function addDestination(destination: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>>) {
+export async function addDestination(destination: DestinationInput) {
   // Ensure all array fields are properly set to empty arrays if they're null or undefined
   const sanitizedDestination = {
     ...destination,
@@ -96,7 +119,7 @@ export async function addDestination(destination: Partial<Omit<Destination, 'id'
 
   const { data, error } = await supabase
     .from('destinations')
-    .insert([sanitizedDestination])
+    .insert(sanitizedDestination)
     .select()
     .single();
   
@@ -108,7 +131,7 @@ export async function addDestination(destination: Partial<Omit<Destination, 'id'
   return data as Destination;
 }
 
-export async function updateDestination(id: string, updates: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>>) {
+export async function updateDestination(id: string, updates: Partial<DestinationInput>) {
   // Ensure we don't send null values for array fields
   const sanitizedUpdates = { ...updates };
   

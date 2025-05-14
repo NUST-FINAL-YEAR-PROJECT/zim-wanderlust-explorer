@@ -20,6 +20,23 @@ export interface Event {
   updated_at: string;
 }
 
+// Define a type for creating or updating events that ensures required fields
+export type EventInput = {
+  title: string;
+  description?: string | null;
+  location?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  price?: number | null;
+  ticket_types?: any[] | Record<string, any> | null;
+  image_url?: string | null;
+  event_type?: string | null;
+  program_type?: string | null;
+  program_name?: string | null;
+  program_url?: string | null;
+  payment_url?: string | null;
+};
+
 export async function getEvents() {
   const { data, error } = await supabase
     .from('events')
@@ -77,10 +94,10 @@ export async function searchEvents(query: string) {
   return data as Event[];
 }
 
-export async function addEvent(event: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at'>>) {
+export async function addEvent(event: EventInput) {
   const { data, error } = await supabase
     .from('events')
-    .insert([event])
+    .insert(event)
     .select()
     .single();
   
@@ -92,7 +109,7 @@ export async function addEvent(event: Partial<Omit<Event, 'id' | 'created_at' | 
   return data as Event;
 }
 
-export async function updateEvent(id: string, updates: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at'>>) {
+export async function updateEvent(id: string, updates: Partial<EventInput>) {
   const { data, error } = await supabase
     .from('events')
     .update(updates)
