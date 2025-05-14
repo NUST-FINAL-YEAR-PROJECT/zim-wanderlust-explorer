@@ -1,6 +1,5 @@
-
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect, useState, useRef } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   BarChart,
   Bar,
@@ -18,12 +17,22 @@ import {
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChartContainer, ChartLegend } from '@/components/ui/chart';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Download, ChartBar, ChartPie, ChartLine } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const AdminAnalytics: React.FC = () => {
   const { profile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const chartRefs = {
+    userGrowth: useRef<HTMLDivElement>(null),
+    bookingTrends: useRef<HTMLDivElement>(null),
+    destinationPopularity: useRef<HTMLDivElement>(null),
+  };
   const [analyticsData, setAnalyticsData] = useState({
     totalUsers: 0,
     totalBookings: 0,
@@ -215,6 +224,67 @@ const AdminAnalytics: React.FC = () => {
     return analyticsData.totalRevenue > 0 ? "+15.3%" : "0%";
   };
 
+  // New download chart function
+  const downloadChart = async (chartRef: React.RefObject<HTMLDivElement>, chartName: string) => {
+    if (!chartRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      
+      // For direct download as PNG
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `${chartName}-${new Date().toISOString().split('T')[0]}.png`;
+      link.click();
+      
+    } catch (error) {
+      console.error('Error downloading chart:', error);
+    }
+  };
+  
+  // Download all charts as PDF
+  const downloadAllCharts = async () => {
+    try {
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      let pdfHeight = 0;
+      
+      for (const [name, ref] of Object.entries(chartRefs)) {
+        if (!ref.current) continue;
+        
+        const canvas = await html2canvas(ref.current, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 260;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // First page doesn't need addPage
+        if (pdfHeight > 0) {
+          pdf.addPage();
+        }
+        
+        // Add title
+        pdf.setFontSize(18);
+        pdf.text(name.replace(/([A-Z])/g, ' $1').trim(), 14, 15);
+        
+        // Add chart
+        pdf.addImage(imgData, 'PNG', 14, 25, imgWidth, imgHeight);
+        pdfHeight += imgHeight + 30;
+      }
+      
+      pdf.save(`Analytics-Report-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error('Error downloading all charts as PDF:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -247,124 +317,327 @@ const AdminAnalytics: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Summary Cards Row */}
-      <Card className="bg-white hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{analyticsData.totalUsers}</div>
-          <p className="text-xs text-muted-foreground">
-            {getUserGrowthRate()}% from last month
-          </p>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-white hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{analyticsData.totalBookings}</div>
-          <p className="text-xs text-muted-foreground">
-            {getBookingGrowthRate()}% from last month
-          </p>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-white hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">${analyticsData.totalRevenue.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">{getRevenueGrowthRate()} from last month</p>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Export All Charts Button */}
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2"
+          onClick={downloadAllCharts}
+        >
+          <Download size={16} />
+          Export All Charts
+        </Button>
+      </div>
 
-      {/* Charts Row */}
-      <Card className="lg:col-span-2 bg-white hover:shadow-md transition-shadow">
-        <CardHeader>
-          <CardTitle>User Growth</CardTitle>
-          <CardDescription>Monthly new user registrations</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px]">
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={analyticsData.userStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="users" 
-                  name="Users" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6 grid grid-cols-3 w-full max-w-md mx-auto">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <ChartBar size={16} />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <ChartLine size={16} />
+            Users
+          </TabsTrigger>
+          <TabsTrigger value="bookings" className="flex items-center gap-2">
+            <ChartPie size={16} />
+            Bookings
+          </TabsTrigger>
+        </TabsList>
 
-      <Card className="bg-white hover:shadow-md transition-shadow">
-        <CardHeader>
-          <CardTitle>Popular Destinations</CardTitle>
-          <CardDescription>Booking distribution</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px]">
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={analyticsData.destinationPopularity}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+        {/* Overview Tab */}
+        <TabsContent value="overview">
+          {/* Summary Cards Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.totalUsers}</div>
+                <p className="text-xs text-muted-foreground">
+                  {getUserGrowthRate()}% from last month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.totalBookings}</div>
+                <p className="text-xs text-muted-foreground">
+                  {getBookingGrowthRate()}% from last month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">${analyticsData.totalRevenue.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">{getRevenueGrowthRate()} from last month</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>User Growth</CardTitle>
+                    <CardDescription>Monthly new user registrations</CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => downloadChart(chartRefs.userGrowth, 'UserGrowth')}
+                  >
+                    <Download size={14} />
+                    <span className="hidden sm:inline">Export</span>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="h-[250px]" ref={chartRefs.userGrowth}>
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analyticsData.userStats} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="users" 
+                        name="Users" 
+                        stroke="#8884d8" 
+                        activeDot={{ r: 8 }} 
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Popular Destinations</CardTitle>
+                    <CardDescription>Booking distribution</CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => downloadChart(chartRefs.destinationPopularity, 'PopularDestinations')}
+                  >
+                    <Download size={14} />
+                    <span className="hidden sm:inline">Export</span>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="h-[250px]" ref={chartRefs.destinationPopularity}>
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.destinationPopularity}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, value, percent }) => `${name.substring(0, 10)}${name.length > 10 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {analyticsData.destinationPopularity.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value, name, props) => [`${value} bookings`, props.payload.name]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Booking Trends Chart - Full Width */}
+          <Card className="bg-white hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Booking Trends</CardTitle>
+                  <CardDescription>Monthly booking statistics</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-1"
+                  onClick={() => downloadChart(chartRefs.bookingTrends, 'BookingTrends')}
                 >
-                  {analyticsData.destinationPopularity.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                  <Download size={14} />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="h-[300px]" ref={chartRefs.bookingTrends}>
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analyticsData.bookingData} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Bar 
+                      dataKey="bookings" 
+                      name="Bookings" 
+                      fill="#82ca9d"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      <Card className="lg:col-span-3 bg-white hover:shadow-md transition-shadow">
-        <CardHeader>
-          <CardTitle>Booking Trends</CardTitle>
-          <CardDescription>Monthly booking statistics</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px]">
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analyticsData.bookingData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar 
-                  dataKey="bookings" 
-                  name="Bookings" 
-                  fill="#82ca9d" 
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+        {/* Users Tab */}
+        <TabsContent value="users">
+          <Card className="bg-white hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>User Registration Trends</CardTitle>
+                  <CardDescription>Detailed view of user growth over time</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-1"
+                  onClick={() => downloadChart(chartRefs.userGrowth, 'UserGrowth')}
+                >
+                  <Download size={14} />
+                  Export
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="h-[400px]">
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={analyticsData.userStats} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="users" 
+                      name="New Users" 
+                      stroke="#8884d8" 
+                      activeDot={{ r: 8 }} 
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Bookings Tab */}
+        <TabsContent value="bookings">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Booking Trends</CardTitle>
+                    <CardDescription>Monthly booking volume</CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => downloadChart(chartRefs.bookingTrends, 'BookingTrends')}
+                  >
+                    <Download size={14} />
+                    Export
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analyticsData.bookingData} margin={{ top: 5, right: 20, bottom: 20, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="bookings" name="Bookings" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Popular Destinations</CardTitle>
+                    <CardDescription>Most booked destinations</CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => downloadChart(chartRefs.destinationPopularity, 'PopularDestinations')}
+                  >
+                    <Download size={14} />
+                    Export
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.destinationPopularity}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, value, percent }) => `${name.substring(0, 10)}${name.length > 10 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {analyticsData.destinationPopularity.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value, name, props) => [`${value} bookings`, props.payload.name]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

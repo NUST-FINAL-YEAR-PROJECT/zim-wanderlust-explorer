@@ -30,12 +30,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Booking, BookingStatus, PaymentStatus, getBookings, updateBooking } from '@/models/Booking';
 import { formatDistanceToNow } from 'date-fns';
+import { ArrowDown, ArrowUp, Download } from 'lucide-react';
 
 const BookingsManagement: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [openProofDialog, setOpenProofDialog] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'}>({
+    key: 'booking_date',
+    direction: 'desc'
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -64,6 +70,11 @@ const BookingsManagement: React.FC = () => {
     setOpenEditDialog(true);
   };
 
+  const handleViewPaymentProof = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setOpenProofDialog(true);
+  };
+
   const handleUpdateBookingStatus = async () => {
     if (!selectedBooking) return;
     
@@ -90,6 +101,30 @@ const BookingsManagement: React.FC = () => {
     }
   };
 
+  const handleSort = (key: string) => {
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    setSortConfig({ key, direction });
+  };
+
+  const sortedBookings = [...bookings].sort((a, b) => {
+    if (sortConfig.key === 'booking_date') {
+      return sortConfig.direction === 'asc' 
+        ? new Date(a.booking_date).getTime() - new Date(b.booking_date).getTime()
+        : new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime();
+    }
+    if (sortConfig.key === 'total_price') {
+      return sortConfig.direction === 'asc' 
+        ? a.total_price - b.total_price
+        : b.total_price - a.total_price;
+    }
+    if (sortConfig.key === 'number_of_people') {
+      return sortConfig.direction === 'asc' 
+        ? a.number_of_people - b.number_of_people
+        : b.number_of_people - a.number_of_people;
+    }
+    return 0;
+  });
+
   const getStatusBadgeColor = (status: BookingStatus | null) => {
     switch (status) {
       case 'confirmed': return 'bg-green-100 text-green-800';
@@ -107,6 +142,13 @@ const BookingsManagement: React.FC = () => {
       case 'processing': return 'bg-blue-100 text-blue-800';
       default: return 'bg-yellow-100 text-yellow-800';
     }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortConfig.key !== column) {
+      return null;
+    }
+    return sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
 
   return (
@@ -127,16 +169,32 @@ const BookingsManagement: React.FC = () => {
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Contact</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>People</TableHead>
-                  <TableHead>Total</TableHead>
+                  <TableHead 
+                    className="cursor-pointer flex items-center gap-1" 
+                    onClick={() => handleSort('booking_date')}
+                  >
+                    Date <SortIcon column="booking_date" />
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer flex items-center gap-1"
+                    onClick={() => handleSort('number_of_people')}
+                  >
+                    People <SortIcon column="number_of_people" />
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer flex items-center gap-1"
+                    onClick={() => handleSort('total_price')}
+                  >
+                    Total <SortIcon column="total_price" />
+                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Payment</TableHead>
+                  <TableHead>Proof</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map((booking) => (
+                {sortedBookings.map((booking) => (
                   <TableRow key={booking.id}>
                     <TableCell className="font-mono text-xs">{booking.id.slice(0, 8)}...</TableCell>
                     <TableCell>
@@ -162,6 +220,20 @@ const BookingsManagement: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      {booking.payment_proof_url ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center gap-1"
+                          onClick={() => handleViewPaymentProof(booking)}
+                        >
+                          View
+                        </Button>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No proof</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -177,6 +249,7 @@ const BookingsManagement: React.FC = () => {
           )}
         </div>
         
+        {/* Edit Booking Dialog */}
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
           <DialogContent>
             <DialogHeader>
@@ -253,6 +326,53 @@ const BookingsManagement: React.FC = () => {
               </Button>
               <Button onClick={handleUpdateBookingStatus}>
                 Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Proof Dialog */}
+        <Dialog open={openProofDialog} onOpenChange={setOpenProofDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Payment Proof</DialogTitle>
+              <DialogDescription>
+                Payment proof uploaded by {selectedBooking?.contact_name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedBooking && selectedBooking.payment_proof_url && (
+              <div className="flex flex-col items-center">
+                <div className="max-h-96 overflow-auto my-4">
+                  <img 
+                    src={selectedBooking.payment_proof_url} 
+                    alt="Payment Proof" 
+                    className="max-w-full rounded-md shadow-md"
+                  />
+                </div>
+                <div className="text-sm text-gray-500 mb-4">
+                  {selectedBooking.payment_proof_uploaded_at ? (
+                    <p>Uploaded {formatDistanceToNow(new Date(selectedBooking.payment_proof_uploaded_at), { addSuffix: true })}</p>
+                  ) : (
+                    <p>Upload date not available</p>
+                  )}
+                </div>
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    window.open(selectedBooking.payment_proof_url, '_blank');
+                  }}
+                >
+                  <Download size={16} />
+                  Download Proof
+                </Button>
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpenProofDialog(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>
