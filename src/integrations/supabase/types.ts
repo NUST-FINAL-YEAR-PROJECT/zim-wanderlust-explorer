@@ -414,6 +414,93 @@ export type Database = {
         }
         Relationships: []
       }
+      itineraries: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          share_code: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          share_code?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          share_code?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      itinerary_destinations: {
+        Row: {
+          created_at: string
+          destination_id: string
+          end_date: string
+          id: string
+          itinerary_id: string
+          name: string
+          notes: string | null
+          order: number
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination_id: string
+          end_date: string
+          id?: string
+          itinerary_id: string
+          name: string
+          notes?: string | null
+          order: number
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string
+          end_date?: string
+          id?: string
+          itinerary_id?: string
+          name?: string
+          notes?: string | null
+          order?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itinerary_destinations_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itinerary_destinations_itinerary_id_fkey"
+            columns: ["itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null

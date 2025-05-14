@@ -58,6 +58,7 @@ export async function getUserItineraries(userId: string): Promise<Itinerary[]> {
     .from('itineraries')
     .select(`
       id,
+      user_id,
       title,
       description,
       created_at,
@@ -84,7 +85,7 @@ export async function getUserItineraries(userId: string): Promise<Itinerary[]> {
 
   return data.map(item => ({
     id: item.id,
-    userId: userId,
+    userId: item.user_id,
     title: item.title,
     description: item.description,
     destinations: (item.itinerary_destinations || []).map((dest: any) => ({
