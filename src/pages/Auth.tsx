@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { signIn, signUp, signInWithGoogle } from '@/models/Auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { MapPin, Google } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -160,7 +160,18 @@ const Auth: React.FC = () => {
                       onClick={handleGoogleSignIn}
                       disabled={loading}
                     >
-                      <Google className="mr-2 h-4 w-4" />
+                      <svg 
+                        className="mr-2 h-4 w-4" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                      >
+                        <path 
+                          fill="currentColor" 
+                          d="M12 22q-2.05 0-3.875-.788t-3.188-2.15-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175 3.188-2.137T12 2q2.075 0 3.9.788t3.175 2.137 2.138 3.175T22 12q0 2.05-.788 3.9t-2.137 3.175-3.175 2.138T12 22Zm0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20Zm-1-3h2v-4h4v-2h-4V7h-2v4H7v2h4v4Z"
+                        />
+                      </svg>
                       Google
                     </Button>
                   </CardFooter>
@@ -212,7 +223,18 @@ const Auth: React.FC = () => {
                       onClick={handleGoogleSignIn}
                       disabled={loading}
                     >
-                      <Google className="mr-2 h-4 w-4" />
+                      <svg 
+                        className="mr-2 h-4 w-4" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                      >
+                        <path 
+                          fill="currentColor" 
+                          d="M12 22q-2.05 0-3.875-.788t-3.188-2.15-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175 3.188-2.137T12 2q2.075 0 3.9.788t3.175 2.137 2.138 3.175T22 12q0 2.05-.788 3.9t-2.137 3.175-3.175 2.138T12 22Zm0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20Zm-1-3h2v-4h4v-2h-4V7h-2v4H7v2h4v4Z"
+                        />
+                      </svg>
                       Google
                     </Button>
                   </CardFooter>
