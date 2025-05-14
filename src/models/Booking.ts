@@ -47,6 +47,21 @@ export async function getUserBookings(userId: string) {
   return data as (Booking & { destinations: any; events: any })[];
 }
 
+// Add new function to get all bookings (for admin)
+export async function getBookings() {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*, destinations(*), events(*)')
+    .order('booking_date', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching all bookings:', error);
+    return [];
+  }
+  
+  return data as (Booking & { destinations: any; events: any })[];
+}
+
 export async function getBooking(id: string) {
   const { data, error } = await supabase
     .from('bookings')
