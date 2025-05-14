@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDestination } from '@/models/Destination';
@@ -73,7 +74,11 @@ const DestinationDetails = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <WishlistButton destinationId={destination.id} variant="outline" />
+            <WishlistButton 
+              destinationId={destination.id} 
+              variant="default" 
+              className="relative z-10"
+            />
             <span className="text-2xl font-bold text-primary">${destination.price}</span>
             <Button 
               onClick={() => navigate(`/booking/${destination.id}`)}
@@ -85,12 +90,21 @@ const DestinationDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-lg shadow overflow-hidden relative">
               <img 
                 src={destination.image_url || '/placeholder.svg'} 
                 alt={destination.name}
                 className="w-full h-[400px] object-cover"
               />
+              
+              {/* Add an absolute positioned wishlist button in the top-right corner of the image */}
+              <div className="absolute top-4 right-4">
+                <WishlistButton
+                  destinationId={destination.id}
+                  variant="default"
+                  className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white"
+                />
+              </div>
               
               <div className="p-6">
                 {!isRatingLoading && (

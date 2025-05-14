@@ -39,7 +39,7 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
           <WishlistButton 
             destinationId={destination.id}
             variant="default"
-            className="bg-white text-primary hover:bg-white/90"
+            className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white"
           />
         </div>
       </div>

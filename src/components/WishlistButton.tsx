@@ -12,7 +12,7 @@ interface WishlistButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
-  onRemove?: () => void; // Add this prop
+  onRemove?: () => void;
 }
 
 export function WishlistButton({ 
@@ -60,7 +60,7 @@ export function WishlistButton({
         if (success) {
           setIsWishlisted(false);
           if (onRemove) {
-            onRemove(); // Call the onRemove callback if provided
+            onRemove();
           }
         }
       } else {
@@ -82,10 +82,10 @@ export function WishlistButton({
       size={size}
       disabled={isLoading}
       onClick={handleToggleWishlist}
-      className={`${className} ${isWishlisted ? 'text-primary hover:text-primary' : ''}`}
+      className={`${className} ${isWishlisted ? 'text-primary hover:text-primary' : ''} bg-white hover:bg-white/90 shadow-sm`}
       title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
     >
-      <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-primary' : ''}`} />
+      <Heart className={`h-6 w-6 ${isWishlisted ? 'fill-primary stroke-primary' : 'stroke-primary'}`} />
     </Button>
   );
 }
