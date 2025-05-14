@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Destination, getDestinations } from '@/models/Destination';
+import { Destination, getDestinations, addDestination, updateDestination, deleteDestination } from '@/models/Destination';
 import { 
   Table, 
   TableBody, 
@@ -12,11 +12,12 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Edit, Trash2, Plus, Save } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,11 +29,35 @@ const formSchema = z.object({
   location: z.string().min(2, {
     message: "Location must be at least 2 characters.",
   }),
-  description: z.string().optional(),
-  price: z.string().refine((val) => !isNaN(Number(val)), {
-    message: "Price must be a number."
-  })
+  description: z.string().optional().nullable(),
+  price: z.coerce.number().min(0, {
+    message: "Price must be a positive number.",
+  }),
+  image_url: z.string().url().optional().nullable(),
+  activities: z.string().optional().nullable().transform(val => val ? val.split(',').map(item => item.trim()) : null),
+  best_time_to_visit: z.string().optional().nullable(),
+  duration_recommended: z.string().optional().nullable(),
+  difficulty_level: z.string().optional().nullable(),
+  amenities: z.string().optional().nullable().transform(val => val ? val.split(',').map(item => item.trim()) : null),
+  what_to_bring: z.string().optional().nullable().transform(val => val ? val.split(',').map(item => item.trim()) : null),
+  highlights: z.string().optional().nullable().transform(val => val ? val.split(',').map(item => item.trim()) : null),
+  weather_info: z.string().optional().nullable(),
+  getting_there: z.string().optional().nullable(),
+  categories: z.string().optional().nullable().transform(val => val ? val.split(',').map(item => item.trim()) : null),
+  additional_images: z.string().optional().nullable().transform(val => val ? val.split(',').map(item => item.trim()) : null),
+  additional_costs: z.string().optional().nullable().transform(val => {
+    if (!val) return null;
+    try {
+      return JSON.parse(val);
+    } catch (e) {
+      return null;
+    }
+  }),
+  is_featured: z.boolean().default(false),
+  payment_url: z.string().url().optional().nullable(),
 });
+
+type DestinationFormValues = z.infer<typeof formSchema>;
 
 const DestinationsManagement: React.FC = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -40,25 +65,56 @@ const DestinationsManagement: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<DestinationFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       location: "",
       description: "",
-      price: ""
+      price: 0,
+      image_url: "",
+      activities: "",
+      best_time_to_visit: "",
+      duration_recommended: "",
+      difficulty_level: "",
+      amenities: "",
+      what_to_bring: "",
+      highlights: "",
+      weather_info: "",
+      getting_there: "",
+      categories: "",
+      additional_images: "",
+      additional_costs: "",
+      is_featured: false,
+      payment_url: "",
     },
   });
 
-  const editForm = useForm<z.infer<typeof formSchema>>({
+  const editForm = useForm<DestinationFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       location: "",
       description: "",
-      price: ""
+      price: 0,
+      image_url: "",
+      activities: "",
+      best_time_to_visit: "",
+      duration_recommended: "",
+      difficulty_level: "",
+      amenities: "",
+      what_to_bring: "",
+      highlights: "",
+      weather_info: "",
+      getting_there: "",
+      categories: "",
+      additional_images: "",
+      additional_costs: "",
+      is_featured: false,
+      payment_url: "",
     },
   });
 
@@ -72,7 +128,22 @@ const DestinationsManagement: React.FC = () => {
         name: selectedDestination.name,
         location: selectedDestination.location,
         description: selectedDestination.description || "",
-        price: selectedDestination.price.toString()
+        price: selectedDestination.price,
+        image_url: selectedDestination.image_url || "",
+        activities: selectedDestination.activities ? selectedDestination.activities.join(', ') : "",
+        best_time_to_visit: selectedDestination.best_time_to_visit || "",
+        duration_recommended: selectedDestination.duration_recommended || "",
+        difficulty_level: selectedDestination.difficulty_level || "",
+        amenities: selectedDestination.amenities ? selectedDestination.amenities.join(', ') : "",
+        what_to_bring: selectedDestination.what_to_bring ? selectedDestination.what_to_bring.join(', ') : "",
+        highlights: selectedDestination.highlights ? selectedDestination.highlights.join(', ') : "",
+        weather_info: selectedDestination.weather_info || "",
+        getting_there: selectedDestination.getting_there || "",
+        categories: selectedDestination.categories ? selectedDestination.categories.join(', ') : "",
+        additional_images: selectedDestination.additional_images ? selectedDestination.additional_images.join(', ') : "",
+        additional_costs: selectedDestination.additional_costs ? JSON.stringify(selectedDestination.additional_costs) : "",
+        is_featured: selectedDestination.is_featured || false,
+        payment_url: selectedDestination.payment_url || "",
       });
     }
   }, [selectedDestination, isEditDialogOpen, editForm]);
@@ -93,14 +164,23 @@ const DestinationsManagement: React.FC = () => {
     }
   };
 
-  const handleAddDestination = (data: z.infer<typeof formSchema>) => {
-    // This is a placeholder for the actual add function
-    toast({
-      title: 'Info',
-      description: 'Add destination functionality is not implemented yet',
-    });
-    setIsAddDialogOpen(false);
-    form.reset();
+  const handleAddDestination = async (data: DestinationFormValues) => {
+    try {
+      await addDestination(data);
+      toast({
+        title: 'Success',
+        description: 'Destination added successfully',
+      });
+      setIsAddDialogOpen(false);
+      form.reset();
+      fetchDestinations();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add destination',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleEditDestination = (destination: Destination) => {
@@ -108,21 +188,106 @@ const DestinationsManagement: React.FC = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleSaveDestination = (data: z.infer<typeof formSchema>) => {
-    // This is a placeholder for the actual update function
-    toast({
-      title: 'Info',
-      description: 'Update destination functionality is not implemented yet',
-    });
-    setIsEditDialogOpen(false);
+  const handleSaveDestination = async (data: DestinationFormValues) => {
+    if (!selectedDestination) return;
+    
+    try {
+      await updateDestination(selectedDestination.id, data);
+      toast({
+        title: 'Success',
+        description: 'Destination updated successfully',
+      });
+      setIsEditDialogOpen(false);
+      fetchDestinations();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update destination',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleDeleteDestination = (destinationId: string) => {
-    // This is a placeholder for the actual delete function
-    toast({
-      title: 'Info',
-      description: 'Delete destination functionality is not implemented yet',
-    });
+  const handleDeleteDestination = async (destinationId: string) => {
+    setIsDeleting(true);
+    try {
+      await deleteDestination(destinationId);
+      toast({
+        title: 'Success',
+        description: 'Destination deleted successfully',
+      });
+      fetchDestinations();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete destination',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const formFields = [
+    { name: 'name', label: 'Name', type: 'text', required: true },
+    { name: 'location', label: 'Location', type: 'text', required: true },
+    { name: 'description', label: 'Description', type: 'textarea' },
+    { name: 'price', label: 'Price', type: 'number', required: true },
+    { name: 'image_url', label: 'Image URL', type: 'text' },
+    { name: 'activities', label: 'Activities (comma separated)', type: 'text' },
+    { name: 'best_time_to_visit', label: 'Best Time to Visit', type: 'text' },
+    { name: 'duration_recommended', label: 'Recommended Duration', type: 'text' },
+    { name: 'difficulty_level', label: 'Difficulty Level', type: 'text' },
+    { name: 'amenities', label: 'Amenities (comma separated)', type: 'text' },
+    { name: 'what_to_bring', label: 'What to Bring (comma separated)', type: 'text' },
+    { name: 'highlights', label: 'Highlights (comma separated)', type: 'text' },
+    { name: 'weather_info', label: 'Weather Information', type: 'text' },
+    { name: 'getting_there', label: 'Getting There', type: 'text' },
+    { name: 'categories', label: 'Categories (comma separated)', type: 'text' },
+    { name: 'additional_images', label: 'Additional Images (comma separated URLs)', type: 'text' },
+    { name: 'additional_costs', label: 'Additional Costs (JSON format)', type: 'textarea' },
+    { name: 'is_featured', label: 'Featured Destination', type: 'switch' },
+    { name: 'payment_url', label: 'Payment URL', type: 'text' },
+  ];
+
+  const renderFormField = (field: any, formInstance: any) => {
+    return (
+      <FormField
+        key={field.name}
+        control={formInstance.control}
+        name={field.name}
+        render={({ field: fieldProps }) => (
+          <FormItem>
+            <FormLabel>{field.label}{field.required && ' *'}</FormLabel>
+            <FormControl>
+              {field.type === 'textarea' ? (
+                <Textarea 
+                  placeholder={`Enter ${field.label.toLowerCase()}`}
+                  {...fieldProps}
+                  className={field.name === 'description' ? "min-h-[100px]" : ""}
+                />
+              ) : field.type === 'switch' ? (
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    checked={fieldProps.value}
+                    onCheckedChange={fieldProps.onChange}
+                  />
+                  <span>{fieldProps.value ? 'Yes' : 'No'}</span>
+                </div>
+              ) : (
+                <Input 
+                  placeholder={`Enter ${field.label.toLowerCase()}`} 
+                  type={field.type}
+                  step={field.type === 'number' ? "0.01" : undefined}
+                  {...fieldProps} 
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
   };
 
   return (
@@ -198,6 +363,7 @@ const DestinationsManagement: React.FC = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => handleDeleteDestination(destination.id)}
+                          disabled={isDeleting}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -213,7 +379,7 @@ const DestinationsManagement: React.FC = () => {
 
       {/* Add Destination Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Destination</DialogTitle>
             <DialogDescription>
@@ -222,69 +388,18 @@ const DestinationsManagement: React.FC = () => {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleAddDestination)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter destination name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter description" 
-                        {...field} 
-                        className="min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter price" 
-                        type="number"
-                        step="0.01" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formFields.map(field => (
+                  <div key={field.name} className={field.name === 'description' ? "col-span-1 md:col-span-2" : ""}>
+                    {renderFormField(field, form)}
+                  </div>
+                ))}
+              </div>
               <DialogFooter>
-                <Button type="submit">Save</Button>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save
+                </Button>
               </DialogFooter>
             </form>
           </Form>
@@ -293,7 +408,7 @@ const DestinationsManagement: React.FC = () => {
 
       {/* Edit Destination Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Destination</DialogTitle>
             <DialogDescription>
@@ -302,69 +417,18 @@ const DestinationsManagement: React.FC = () => {
           </DialogHeader>
           <Form {...editForm}>
             <form onSubmit={editForm.handleSubmit(handleSaveDestination)} className="space-y-4">
-              <FormField
-                control={editForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter destination name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter description" 
-                        {...field} 
-                        className="min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter price" 
-                        type="number" 
-                        step="0.01"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formFields.map(field => (
+                  <div key={field.name} className={field.name === 'description' ? "col-span-1 md:col-span-2" : ""}>
+                    {renderFormField(field, editForm)}
+                  </div>
+                ))}
+              </div>
               <DialogFooter>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
               </DialogFooter>
             </form>
           </Form>

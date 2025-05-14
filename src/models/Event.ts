@@ -76,3 +76,48 @@ export async function searchEvents(query: string) {
   
   return data as Event[];
 }
+
+export async function addEvent(event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) {
+  const { data, error } = await supabase
+    .from('events')
+    .insert([event])
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error adding event:', error);
+    throw error;
+  }
+  
+  return data as Event;
+}
+
+export async function updateEvent(id: string, updates: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at'>>) {
+  const { data, error } = await supabase
+    .from('events')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(`Error updating event with id ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Event;
+}
+
+export async function deleteEvent(id: string) {
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error deleting event with id ${id}:`, error);
+    throw error;
+  }
+  
+  return true;
+}

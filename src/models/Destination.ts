@@ -81,3 +81,48 @@ export async function searchDestinations(query: string) {
   
   return data as Destination[];
 }
+
+export async function addDestination(destination: Omit<Destination, 'id' | 'created_at' | 'updated_at'>) {
+  const { data, error } = await supabase
+    .from('destinations')
+    .insert([destination])
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error adding destination:', error);
+    throw error;
+  }
+  
+  return data as Destination;
+}
+
+export async function updateDestination(id: string, updates: Partial<Omit<Destination, 'id' | 'created_at' | 'updated_at'>>) {
+  const { data, error } = await supabase
+    .from('destinations')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(`Error updating destination with id ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Destination;
+}
+
+export async function deleteDestination(id: string) {
+  const { error } = await supabase
+    .from('destinations')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error(`Error deleting destination with id ${id}:`, error);
+    throw error;
+  }
+  
+  return true;
+}

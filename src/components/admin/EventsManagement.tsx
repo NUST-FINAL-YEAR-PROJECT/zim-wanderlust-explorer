@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Event, getEvents } from '@/models/Event';
+import { Event, getEvents, addEvent, updateEvent, deleteEvent } from '@/models/Event';
 import { 
   Table, 
   TableBody, 
@@ -12,11 +12,11 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Edit, Trash2, Plus, Save } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,16 +26,28 @@ const formSchema = z.object({
   title: z.string().min(2, {
     message: "Title must be at least 2 characters.",
   }),
-  location: z.string().min(2, {
-    message: "Location must be at least 2 characters.",
+  location: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  price: z.coerce.number().min(0).optional().nullable(),
+  start_date: z.string().optional().nullable(),
+  end_date: z.string().optional().nullable(),
+  image_url: z.string().url().optional().nullable(),
+  event_type: z.string().optional().nullable(),
+  program_type: z.string().optional().nullable(),
+  program_name: z.string().optional().nullable(),
+  program_url: z.string().url().optional().nullable(),
+  payment_url: z.string().url().optional().nullable(),
+  ticket_types: z.string().optional().nullable().transform(val => {
+    if (!val) return null;
+    try {
+      return JSON.parse(val);
+    } catch (e) {
+      return null;
+    }
   }),
-  description: z.string().optional(),
-  price: z.string().refine((val) => !isNaN(Number(val)), {
-    message: "Price must be a number."
-  }),
-  startDate: z.string(),
-  endDate: z.string()
 });
+
+type EventFormValues = z.infer<typeof formSchema>;
 
 const EventsManagement: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -43,29 +55,44 @@ const EventsManagement: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       location: "",
       description: "",
-      price: "",
-      startDate: new Date().toISOString().slice(0, 10),
-      endDate: new Date().toISOString().slice(0, 10)
+      price: 0,
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: new Date().toISOString().split('T')[0],
+      image_url: "",
+      event_type: "",
+      program_type: "",
+      program_name: "",
+      program_url: "",
+      payment_url: "",
+      ticket_types: "",
     },
   });
 
-  const editForm = useForm<z.infer<typeof formSchema>>({
+  const editForm = useForm<EventFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       location: "",
       description: "",
-      price: "",
-      startDate: new Date().toISOString().slice(0, 10),
-      endDate: new Date().toISOString().slice(0, 10)
+      price: 0,
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: new Date().toISOString().split('T')[0],
+      image_url: "",
+      event_type: "",
+      program_type: "",
+      program_name: "",
+      program_url: "",
+      payment_url: "",
+      ticket_types: "",
     },
   });
 
@@ -79,9 +106,16 @@ const EventsManagement: React.FC = () => {
         title: selectedEvent.title,
         location: selectedEvent.location || "",
         description: selectedEvent.description || "",
-        price: selectedEvent.price?.toString() || "",
-        startDate: selectedEvent.start_date ? new Date(selectedEvent.start_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
-        endDate: selectedEvent.end_date ? new Date(selectedEvent.end_date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
+        price: selectedEvent.price || 0,
+        start_date: selectedEvent.start_date ? selectedEvent.start_date.split('T')[0] : new Date().toISOString().split('T')[0],
+        end_date: selectedEvent.end_date ? selectedEvent.end_date.split('T')[0] : new Date().toISOString().split('T')[0],
+        image_url: selectedEvent.image_url || "",
+        event_type: selectedEvent.event_type || "",
+        program_type: selectedEvent.program_type || "",
+        program_name: selectedEvent.program_name || "",
+        program_url: selectedEvent.program_url || "",
+        payment_url: selectedEvent.payment_url || "",
+        ticket_types: selectedEvent.ticket_types ? JSON.stringify(selectedEvent.ticket_types) : "",
       });
     }
   }, [selectedEvent, isEditDialogOpen, editForm]);
@@ -102,14 +136,23 @@ const EventsManagement: React.FC = () => {
     }
   };
 
-  const handleAddEvent = (data: z.infer<typeof formSchema>) => {
-    // This is a placeholder for the actual add function
-    toast({
-      title: 'Info',
-      description: 'Add event functionality is not implemented yet',
-    });
-    setIsAddDialogOpen(false);
-    form.reset();
+  const handleAddEvent = async (data: EventFormValues) => {
+    try {
+      await addEvent(data);
+      toast({
+        title: 'Success',
+        description: 'Event added successfully',
+      });
+      setIsAddDialogOpen(false);
+      form.reset();
+      fetchEvents();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add event',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleEditEvent = (event: Event) => {
@@ -117,21 +160,44 @@ const EventsManagement: React.FC = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleSaveEvent = (data: z.infer<typeof formSchema>) => {
-    // This is a placeholder for the actual update function
-    toast({
-      title: 'Info',
-      description: 'Update event functionality is not implemented yet',
-    });
-    setIsEditDialogOpen(false);
+  const handleSaveEvent = async (data: EventFormValues) => {
+    if (!selectedEvent) return;
+    
+    try {
+      await updateEvent(selectedEvent.id, data);
+      toast({
+        title: 'Success',
+        description: 'Event updated successfully',
+      });
+      setIsEditDialogOpen(false);
+      fetchEvents();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update event',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    // This is a placeholder for the actual delete function
-    toast({
-      title: 'Info',
-      description: 'Delete event functionality is not implemented yet',
-    });
+  const handleDeleteEvent = async (eventId: string) => {
+    setIsDeleting(true);
+    try {
+      await deleteEvent(eventId);
+      toast({
+        title: 'Success',
+        description: 'Event deleted successfully',
+      });
+      fetchEvents();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete event',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const formatDate = (dateString: string | null) => {
@@ -141,6 +207,54 @@ const EventsManagement: React.FC = () => {
     } catch (error) {
       return 'Invalid date';
     }
+  };
+
+  const formFields = [
+    { name: 'title', label: 'Title', type: 'text', required: true },
+    { name: 'location', label: 'Location', type: 'text' },
+    { name: 'description', label: 'Description', type: 'textarea' },
+    { name: 'price', label: 'Price', type: 'number' },
+    { name: 'start_date', label: 'Start Date', type: 'date' },
+    { name: 'end_date', label: 'End Date', type: 'date' },
+    { name: 'image_url', label: 'Image URL', type: 'text' },
+    { name: 'event_type', label: 'Event Type', type: 'text' },
+    { name: 'program_type', label: 'Program Type', type: 'text' },
+    { name: 'program_name', label: 'Program Name', type: 'text' },
+    { name: 'program_url', label: 'Program URL', type: 'text' },
+    { name: 'payment_url', label: 'Payment URL', type: 'text' },
+    { name: 'ticket_types', label: 'Ticket Types (JSON format)', type: 'textarea' },
+  ];
+
+  const renderFormField = (field: any, formInstance: any) => {
+    return (
+      <FormField
+        key={field.name}
+        control={formInstance.control}
+        name={field.name}
+        render={({ field: fieldProps }) => (
+          <FormItem>
+            <FormLabel>{field.label}{field.required && ' *'}</FormLabel>
+            <FormControl>
+              {field.type === 'textarea' ? (
+                <Textarea 
+                  placeholder={`Enter ${field.label.toLowerCase()}`}
+                  {...fieldProps}
+                  className={field.name === 'description' ? "min-h-[100px]" : ""}
+                />
+              ) : (
+                <Input 
+                  placeholder={`Enter ${field.label.toLowerCase()}`} 
+                  type={field.type}
+                  step={field.type === 'number' ? "0.01" : undefined}
+                  {...fieldProps} 
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
   };
 
   return (
@@ -209,6 +323,7 @@ const EventsManagement: React.FC = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => handleDeleteEvent(event.id)}
+                          disabled={isDeleting}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -224,7 +339,7 @@ const EventsManagement: React.FC = () => {
 
       {/* Add Event Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
             <DialogDescription>
@@ -233,97 +348,18 @@ const EventsManagement: React.FC = () => {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleAddEvent)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter event title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter description" 
-                        {...field} 
-                        className="min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="endDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formFields.map(field => (
+                  <div key={field.name} className={field.name === 'description' || field.name === 'ticket_types' ? "col-span-1 md:col-span-2" : ""}>
+                    {renderFormField(field, form)}
+                  </div>
+                ))}
               </div>
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter price" 
-                        type="number" 
-                        step="0.01"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <DialogFooter>
-                <Button type="submit">Save</Button>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save
+                </Button>
               </DialogFooter>
             </form>
           </Form>
@@ -332,7 +368,7 @@ const EventsManagement: React.FC = () => {
 
       {/* Edit Event Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Event</DialogTitle>
             <DialogDescription>
@@ -341,97 +377,18 @@ const EventsManagement: React.FC = () => {
           </DialogHeader>
           <Form {...editForm}>
             <form onSubmit={editForm.handleSubmit(handleSaveEvent)} className="space-y-4">
-              <FormField
-                control={editForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter event title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter description" 
-                        {...field} 
-                        className="min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={editForm.control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="endDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formFields.map(field => (
+                  <div key={field.name} className={field.name === 'description' || field.name === 'ticket_types' ? "col-span-1 md:col-span-2" : ""}>
+                    {renderFormField(field, editForm)}
+                  </div>
+                ))}
               </div>
-              <FormField
-                control={editForm.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter price" 
-                        type="number" 
-                        step="0.01"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <DialogFooter>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
               </DialogFooter>
             </form>
           </Form>
