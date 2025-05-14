@@ -63,31 +63,30 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// New nature-inspired color palette for Zimbabwe
 				safari: {
-					DEFAULT: '#8B5A2B', // Earthy brown
-					light: '#D2B48C',   // Tan/khaki
-					dark: '#654321',    // Dark brown
+					DEFAULT: '#8B5A2B', 
+					light: '#D2B48C',   
+					dark: '#654321',    
 				},
 				savanna: {
-					DEFAULT: '#E1C16E', // Golden grass
-					light: '#F5DEB3',   // Wheat
-					dark: '#B8860B',    // Dark goldenrod
+					DEFAULT: '#E1C16E', 
+					light: '#F5DEB3',   
+					dark: '#B8860B',    
 				},
 				forest: {
-					DEFAULT: '#2E8B57', // Sea green
-					light: '#98FB98',   // Pale green
-					dark: '#006400',    // Dark green
+					DEFAULT: '#2E8B57', 
+					light: '#98FB98',   
+					dark: '#006400',    
 				},
 				water: {
-					DEFAULT: '#4682B4', // Steel blue (Victoria Falls)
-					light: '#ADD8E6',   // Light blue
-					dark: '#00008B',    // Dark blue
+					DEFAULT: '#4682B4', 
+					light: '#ADD8E6',   
+					dark: '#00008B',    
 				},
 				sunset: {
-					DEFAULT: '#FF7F50', // Coral
-					light: '#FFDAB9',   // Peach
-					dark: '#CD5C5C',    // Indian red
+					DEFAULT: '#FF7F50', 
+					light: '#FFDAB9',   
+					dark: '#CD5C5C',    
 				}
 			},
 			borderRadius: {
@@ -162,6 +161,14 @@ export default {
 				'elevation-1': '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
 				'elevation-2': '0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)',
 				'elevation-3': '0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)',
+			},
+			fontFamily: {
+				sans: ["'Open Sans'", "sans-serif"],
+				display: ["'Montserrat'", "sans-serif"],
+			},
+			transitionDuration: {
+				'400': '400ms',
+				'600': '600ms',
 			}
 		}
 	},

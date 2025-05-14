@@ -128,22 +128,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full bg-gray-50">
-        <Sidebar variant={isMobile ? "floating" : "sidebar"}>
+      <div className="flex min-h-screen w-full bg-background">
+        <Sidebar variant={isMobile ? "floating" : "sidebar"} className="border-r">
           <SidebarHeader>
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="rounded-full gradient-purple p-1.5 text-white">
+              <div className="rounded-full bg-gradient-to-r from-primary to-accent p-1.5 text-white">
                 <MapPin size={20} />
               </div>
               <div className="flex flex-col">
-                <h3 className="font-bold text-lg tracking-tight">Zimbabwe Tourism</h3>
+                <h3 className="font-display font-bold text-lg tracking-tight">Zimbabwe Tourism</h3>
                 <p className="text-xs text-muted-foreground">Discover the beauty</p>
               </div>
             </div>
           </SidebarHeader>
           <SidebarContent className="pb-6">
             <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-display">Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => (
@@ -157,10 +157,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                               tooltip={item.title}
                             >
                               <Link to={item.path} className={cn(
-                                "transition-colors",
+                                "transition-all duration-300",
                                 location.pathname === item.path 
-                                  ? "text-sidebar-primary font-medium" 
-                                  : "text-sidebar-foreground hover:text-sidebar-primary"
+                                  ? "text-primary font-medium" 
+                                  : "text-sidebar-foreground hover:text-primary"
                               )}>
                                 <item.icon className="dashboard-icon" />
                                 <span>{item.title}</span>
@@ -179,12 +179,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </SidebarGroup>
             
             <SidebarGroup>
-              <SidebarGroupLabel>Support</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-display">Support</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <a href="#" className="text-sidebar-foreground hover:text-sidebar-primary">
+                      <a href="#" className="text-sidebar-foreground hover:text-primary transition-colors duration-300">
                         <HelpCircle className="dashboard-icon" />
                         <span>Help & Support</span>
                       </a>
@@ -199,7 +199,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <p className="text-sm font-medium">{displayName}</p>
@@ -209,7 +209,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
             <Button 
               variant="outline" 
-              className="w-full flex items-center gap-2 text-gray-600" 
+              className="w-full flex items-center gap-2 text-gray-600 hover:text-primary hover:border-primary transition-colors duration-300" 
               onClick={handleSignOut}
             >
               <LogOut size={16} />
@@ -219,12 +219,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Sidebar>
         
         <div className="flex-1 overflow-auto">
-          <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-md py-3 px-6 shadow-sm">
+          <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md py-3 px-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="h-8 w-8" />
                 <div>
-                  <h1 className="text-xl font-semibold">
+                  <h1 className="text-xl font-display font-semibold">
                     {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
                   </h1>
                   <p className="text-sm text-muted-foreground hidden sm:block">
@@ -234,7 +234,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" asChild>
+                <Button variant="ghost" size="icon" asChild className="hover:text-primary transition-colors duration-300">
                   <Link to="/settings">
                     <User className="h-5 w-5" />
                   </Link>

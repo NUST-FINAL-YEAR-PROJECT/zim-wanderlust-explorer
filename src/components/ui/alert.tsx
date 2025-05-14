@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -11,6 +12,8 @@ const alertVariants = cva(
         default: "bg-background text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        primary: "border-primary/50 bg-primary/10 text-primary [&>svg]:text-primary",
+        accent: "border-accent/50 bg-accent/10 text-accent [&>svg]:text-accent",
       },
     },
     defaultVariants: {
@@ -38,7 +41,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    className={cn("mb-1 font-display font-medium leading-none tracking-tight", className)}
     {...props}
   />
 ))
