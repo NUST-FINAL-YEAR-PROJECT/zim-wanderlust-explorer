@@ -1,9 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+// Aligning this with the database schema
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
-// Align this with what's in the database
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+// Updating this type to match what's in the database - changed 'paid' to 'completed'
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
 
 export interface Booking {
   id: string;
@@ -62,6 +63,7 @@ export async function getBooking(id: string) {
 }
 
 // Fixed by correctly typing the booking parameter with required fields
+// and removing the [key: string]: any to avoid type issues
 export async function createBooking(booking: {
   booking_date: string;
   number_of_people: number;
@@ -75,8 +77,7 @@ export async function createBooking(booking: {
   preferred_date?: string | null;
   booking_details?: Record<string, any> | null;
   status?: BookingStatus | null;
-  payment_status?: PaymentStatus | null;
-  [key: string]: any;
+  payment_status?: "pending" | "processing" | "completed" | "failed" | "refunded" | null;
 }) {
   const { data, error } = await supabase
     .from('bookings')
@@ -105,7 +106,7 @@ export async function updateBooking(id: string, updates: {
   preferred_date?: string | null;
   booking_details?: Record<string, any> | null;
   status?: BookingStatus | null;
-  payment_status?: PaymentStatus | null;
+  payment_status?: "pending" | "processing" | "completed" | "failed" | "refunded" | null;
   payment_id?: string | null;
   payment_proof_url?: string | null;
   payment_proof_uploaded_at?: string | null;
