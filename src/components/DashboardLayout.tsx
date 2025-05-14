@@ -128,22 +128,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full bg-gray-50">
-        <Sidebar variant={isMobile ? "floating" : "sidebar"}>
+      <div className="flex min-h-screen w-full bg-white">
+        <Sidebar className="border-r border-[#004AAD]/20">
           <SidebarHeader>
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="rounded-full gradient-purple p-1.5 text-white">
+              <div className="rounded-full bg-[#004AAD] p-1.5 text-white">
                 <MapPin size={20} />
               </div>
               <div className="flex flex-col">
-                <h3 className="font-bold text-lg tracking-tight">Zimbabwe Tourism</h3>
-                <p className="text-xs text-muted-foreground">Discover the beauty</p>
+                <h3 className="font-bold text-lg tracking-tight text-[#004AAD]">Zimbabwe Tourism</h3>
+                <p className="text-xs text-[#004AAD]/70">Discover the beauty</p>
               </div>
             </div>
           </SidebarHeader>
           <SidebarContent className="pb-6">
             <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-[#004AAD]/70">Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => (
@@ -159,15 +159,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                               <Link to={item.path} className={cn(
                                 "transition-colors",
                                 location.pathname === item.path 
-                                  ? "text-sidebar-primary font-medium" 
-                                  : "text-sidebar-foreground hover:text-sidebar-primary"
+                                  ? "text-[#004AAD] font-medium" 
+                                  : "text-[#004AAD]/70 hover:text-[#004AAD]"
                               )}>
                                 <item.icon className="dashboard-icon" />
                                 <span>{item.title}</span>
                               </Link>
                             </SidebarMenuButton>
                           </TooltipTrigger>
-                          <TooltipContent side="right">
+                          <TooltipContent side="right" className="bg-[#004AAD] text-white">
                             {item.description}
                           </TooltipContent>
                         </Tooltip>
@@ -179,12 +179,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </SidebarGroup>
             
             <SidebarGroup>
-              <SidebarGroupLabel>Support</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-[#004AAD]/70">Support</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <a href="#" className="text-sidebar-foreground hover:text-sidebar-primary">
+                      <a href="#" className="text-[#004AAD]/70 hover:text-[#004AAD]">
                         <HelpCircle className="dashboard-icon" />
                         <span>Help & Support</span>
                       </a>
@@ -194,22 +194,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter className="border-t pt-2">
+          <SidebarFooter className="border-t border-[#004AAD]/20 pt-2">
             <div className="mb-3 px-3 py-2">
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-[#E6F0FF] text-[#004AAD]">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <p className="text-sm font-medium">{displayName}</p>
-                  <p className="text-xs text-muted-foreground">{profile?.role || 'User'}</p>
+                  <p className="text-sm font-medium text-[#004AAD]">{displayName}</p>
+                  <p className="text-xs text-[#004AAD]/70">{profile?.role || 'User'}</p>
                 </div>
               </div>
             </div>
             <Button 
               variant="outline" 
-              className="w-full flex items-center gap-2 text-gray-600" 
+              className="w-full flex items-center gap-2 text-[#004AAD] border-[#004AAD]/40 hover:bg-[#E6F0FF]" 
               onClick={handleSignOut}
             >
               <LogOut size={16} />
@@ -219,22 +219,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Sidebar>
         
         <div className="flex-1 overflow-auto">
-          <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-md py-3 px-6 shadow-sm">
+          <header className="sticky top-0 z-10 border-b border-[#004AAD]/20 bg-white/80 backdrop-blur-md py-3 px-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="h-8 w-8" />
+                <SidebarTrigger className="h-8 w-8 text-[#004AAD]" />
                 <div>
-                  <h1 className="text-xl font-semibold">
+                  <h1 className="text-xl font-semibold text-[#004AAD]">
                     {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
                   </h1>
-                  <p className="text-sm text-muted-foreground hidden sm:block">
+                  <p className="text-sm text-[#004AAD]/70 hidden sm:block">
                     {navigationItems.find(item => item.path === location.pathname)?.description || 'Welcome to Zimbabwe Tourism'}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" asChild>
+                <Button variant="ghost" size="icon" asChild className="text-[#004AAD] hover:bg-[#E6F0FF]">
                   <Link to="/settings">
                     <User className="h-5 w-5" />
                   </Link>
