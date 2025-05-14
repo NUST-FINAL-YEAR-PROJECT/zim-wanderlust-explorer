@@ -45,10 +45,20 @@ export async function getPaymentByBookingId(bookingId: string) {
   return data as Payment;
 }
 
-export async function createPayment(payment: Partial<Payment>) {
+// Fixed by explicitly typing the required fields
+export async function createPayment(payment: {
+  booking_id: string;
+  amount: number;
+  status: string;
+  payment_method?: string | null;
+  payment_gateway?: string | null;
+  payment_gateway_reference?: string | null;
+  payment_intent_id?: string | null;
+  payment_details?: Record<string, any> | null;
+}) {
   const { data, error } = await supabase
     .from('payments')
-    .insert([payment])
+    .insert(payment)
     .select()
     .single();
   

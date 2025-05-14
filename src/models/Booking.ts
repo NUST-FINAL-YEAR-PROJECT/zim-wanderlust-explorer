@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+// Align this with what's in the database
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 
 export interface Booking {
@@ -60,10 +61,26 @@ export async function getBooking(id: string) {
   return data as Booking;
 }
 
-export async function createBooking(booking: Partial<Booking>) {
+// Fixed by correctly typing the booking parameter with required fields
+export async function createBooking(booking: {
+  booking_date: string;
+  number_of_people: number;
+  total_price: number;
+  contact_name: string;
+  contact_email: string;
+  contact_phone: string;
+  user_id?: string | null;
+  destination_id?: string | null;
+  event_id?: string | null;
+  preferred_date?: string | null;
+  booking_details?: Record<string, any> | null;
+  status?: BookingStatus | null;
+  payment_status?: PaymentStatus | null;
+  [key: string]: any;
+}) {
   const { data, error } = await supabase
     .from('bookings')
-    .insert([booking])
+    .insert(booking)
     .select()
     .single();
   
@@ -75,7 +92,29 @@ export async function createBooking(booking: Partial<Booking>) {
   return data as Booking;
 }
 
-export async function updateBooking(id: string, updates: Partial<Booking>) {
+export async function updateBooking(id: string, updates: {
+  booking_date?: string;
+  number_of_people?: number;
+  total_price?: number;
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  user_id?: string | null;
+  destination_id?: string | null;
+  event_id?: string | null;
+  preferred_date?: string | null;
+  booking_details?: Record<string, any> | null;
+  status?: BookingStatus | null;
+  payment_status?: PaymentStatus | null;
+  payment_id?: string | null;
+  payment_proof_url?: string | null;
+  payment_proof_uploaded_at?: string | null;
+  confirmation_date?: string | null;
+  cancellation_date?: string | null;
+  cancellation_reason?: string | null;
+  completion_date?: string | null;
+  selected_ticket_type?: Record<string, any> | null;
+}) {
   const { data, error } = await supabase
     .from('bookings')
     .update(updates)

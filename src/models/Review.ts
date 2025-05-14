@@ -40,10 +40,17 @@ export async function getUserReviews(userId: string) {
   return data as Review[];
 }
 
-export async function createReview(review: Partial<Review>) {
+// Fixed by explicitly typing the required fields
+export async function createReview(review: {
+  user_id: string;
+  destination_id: string;
+  rating: number;
+  comment?: string | null;
+  images?: string[] | null;
+}) {
   const { data, error } = await supabase
     .from('reviews')
-    .insert([review])
+    .insert(review)
     .select()
     .single();
   

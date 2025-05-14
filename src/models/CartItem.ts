@@ -30,10 +30,17 @@ export async function getUserCart(userId: string) {
   return data;
 }
 
-export async function addToCart(cartItem: Partial<CartItem>) {
+// Fixed by explicitly typing the required fields
+export async function addToCart(cartItem: {
+  user_id: string;
+  quantity?: number;
+  destination_id?: string | null;
+  event_id?: string | null;
+  preferred_date?: string | null;
+}) {
   const { data, error } = await supabase
     .from('cart_items')
-    .insert([cartItem])
+    .insert(cartItem)
     .select()
     .single();
   
