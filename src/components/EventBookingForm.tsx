@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createBooking, updateBooking } from '@/models/Booking';
+import { createBooking, updateBooking, BookingStatus } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { Calendar, MapPin, Clock, Users } from 'lucide-react';
 import { format, addDays } from 'date-fns';
@@ -88,7 +88,7 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
         contact_name: contactName,
         contact_email: contactEmail,
         contact_phone: contactPhone,
-        status: 'pending',
+        status: 'pending' as BookingStatus,
         payment_status: 'pending',
         selected_ticket_type: {
           type: selectedTicketType,
