@@ -13,6 +13,9 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Bookings from "./pages/Bookings";
+import Destinations from "./pages/Destinations";
+import Events from "./pages/Events";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +57,7 @@ const App = () => (
               path="/destinations" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Destinations />
                 </ProtectedRoute>
               } 
             />
@@ -62,7 +65,7 @@ const App = () => (
               path="/events" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Events />
                 </ProtectedRoute>
               } 
             />
@@ -71,6 +74,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               } 
             />
