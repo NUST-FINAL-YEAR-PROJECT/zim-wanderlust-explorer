@@ -37,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -55,25 +56,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Got existing session:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         fetchUserProfile(session.user.id);
+      } else {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
-    const fetchedProfile = await getCurrentProfile();
-    setProfile(fetchedProfile);
-    if (fetchedProfile) {
-      setUserRole(fetchedProfile.role as UserRole);
+    console.log("Fetching profile for user:", userId);
+    try {
+      const fetchedProfile = await getCurrentProfile();
+      console.log("Fetched profile:", fetchedProfile);
+      setProfile(fetchedProfile);
+      if (fetchedProfile) {
+        setUserRole(fetchedProfile.role as UserRole);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Calculate isAdmin based on userRole
+  const isAdmin = userRole === 'ADMIN';
+  
+  console.log("Auth context state:", { userRole, isAdmin });
 
   const value = {
     user,
@@ -81,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     userRole,
     isLoading,
-    isAdmin: userRole === 'ADMIN',
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

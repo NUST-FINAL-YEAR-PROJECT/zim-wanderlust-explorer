@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ const Auth: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
 
   // Get the intended destination from location state, or default routes
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
@@ -26,11 +25,12 @@ const Auth: React.FC = () => {
   const redirectPath = from || defaultRedirect;
 
   useEffect(() => {
-    // Redirect to appropriate dashboard if user is already logged in
-    if (user) {
+    // Only redirect when we have determined the user state and they're logged in
+    if (!isLoading && user) {
+      console.log("User is logged in, redirecting to:", isAdmin ? '/admin' : '/dashboard');
       navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, navigate, isLoading]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +87,11 @@ const Auth: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Show loading state if auth state is still being determined
+  if (isLoading && user) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">

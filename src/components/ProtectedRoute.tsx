@@ -37,9 +37,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   
   // Check for admin access if required and redirect to dashboard if not admin
   if (requireAdmin && !isAdmin) {
+    console.log("User is not admin, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
   }
   
+  console.log("Rendering protected content, requireAdmin:", requireAdmin, "isAdmin:", isAdmin);
   return <>{children}</>;
 };
 
