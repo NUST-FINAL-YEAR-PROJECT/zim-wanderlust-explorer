@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '@/models/Booking';
@@ -6,8 +5,8 @@ import { getPayment, updatePayment } from '@/models/Payment';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Check, FileDown, Copy, ExternalLink } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AlertCircle, Check, FileDown, Copy, ExternalLink, Upload } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +41,37 @@ const PaymentPage = () => {
       console.log('Payment details:', payment);
     }
   }, [booking, payment]);
+
+  // Initialize payment_proofs bucket if needed
+  useEffect(() => {
+    const initializeStorageBucket = async () => {
+      try {
+        // Check if the bucket exists
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        const bucketExists = buckets?.some(bucket => bucket.name === 'payment_proofs');
+        
+        if (!bucketExists) {
+          // Create the bucket if it doesn't exist
+          const { data, error } = await supabase.storage.createBucket('payment_proofs', {
+            public: true,
+            fileSizeLimit: 5242880, // 5MB
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf']
+          });
+          
+          if (error) {
+            console.error('Error creating payment_proofs bucket:', error);
+          } else {
+            console.log('Created payment_proofs bucket:', data);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing storage bucket:', error);
+      }
+    };
+    
+    initializeStorageBucket();
+  }, []);
 
   // Get the payment URL from the booking record
   const getPaymentUrl = () => {
@@ -111,21 +141,11 @@ const PaymentPage = () => {
     }
 
     setIsUploading(true);
+    toast.info("Uploading payment proof...");
+    
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${booking.id}-proof.${fileExt}`;
-      const filePath = `payment_proofs/${fileName}`;
-
-      // Create the storage bucket if it doesn't exist
-      const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('payment_proofs');
-      
-      if (bucketError && bucketError.message.includes('not found')) {
-        await supabase.storage.createBucket('payment_proofs', {
-          public: false,
-          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'],
-          fileSizeLimit: 5242880, // 5MB
-        });
-      }
       
       // Upload file
       const { data, error } = await supabase.storage
@@ -139,7 +159,7 @@ const PaymentPage = () => {
         throw error;
       }
 
-      // Create a public URL for the uploaded file - FIX: Use the proper method to get the URL
+      // Get the public URL of the uploaded file
       const { data: publicUrlData } = supabase.storage
         .from('payment_proofs')
         .getPublicUrl(fileName);
@@ -152,14 +172,16 @@ const PaymentPage = () => {
         payment_proof_uploaded_at: new Date().toISOString(),
       });
 
-      await updatePayment(payment?.id as string, {
-        status: 'processing',
-        payment_details: {
-          ...payment?.payment_details,
-          proof_uploaded: true,
-          proof_uploaded_at: new Date().toISOString()
-        }
-      });
+      if (payment?.id) {
+        await updatePayment(payment.id, {
+          status: 'processing',
+          payment_details: {
+            ...payment?.payment_details,
+            proof_uploaded: true,
+            proof_uploaded_at: new Date().toISOString()
+          }
+        });
+      }
 
       toast.success("Payment proof uploaded successfully!");
       
@@ -260,7 +282,6 @@ const PaymentPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* ... keep existing code (booking summary details) */}
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Destination:</span>
@@ -354,23 +375,26 @@ const PaymentPage = () => {
                         <Copy className="mr-2 h-4 w-4" /> Copy Payment Link
                       </Button>
                       
-                      <label className="flex-1">
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          disabled={isUploading}
-                          onClick={() => document.getElementById('proof-upload')?.click()}
-                        >
-                          {isUploading ? "Uploading..." : "Upload Payment Proof"}
-                        </Button>
-                        <input 
-                          type="file" 
-                          id="proof-upload" 
-                          accept="image/*,application/pdf" 
-                          className="hidden" 
-                          onChange={handleUploadProof}
-                        />
-                      </label>
+                      <div className="flex-1">
+                        <label className="w-full">
+                          <Button 
+                            variant="outline" 
+                            className="w-full flex items-center justify-center"
+                            disabled={isUploading}
+                            onClick={() => document.getElementById('proof-upload')?.click()}
+                          >
+                            <Upload className="mr-2 h-4 w-4" />
+                            {isUploading ? "Uploading..." : "Upload Payment Proof"}
+                          </Button>
+                          <input 
+                            type="file" 
+                            id="proof-upload" 
+                            accept="image/*,application/pdf" 
+                            className="hidden" 
+                            onChange={handleUploadProof}
+                          />
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -382,6 +406,21 @@ const PaymentPage = () => {
                   <p className="text-sm">
                     Your payment is currently being verified. We'll update your booking status once the payment has been confirmed.
                   </p>
+                  {booking?.payment_proof_url && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium mb-2">Uploaded Proof:</p>
+                      <div className="bg-white p-2 rounded border flex justify-center">
+                        <img 
+                          src={booking.payment_proof_url} 
+                          alt="Payment proof" 
+                          className="max-h-40 rounded object-contain" 
+                        />
+                      </div>
+                      <p className="text-xs text-center text-muted-foreground mt-1">
+                        Uploaded {booking.payment_proof_uploaded_at ? new Date(booking.payment_proof_uploaded_at).toLocaleString() : ''}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               
