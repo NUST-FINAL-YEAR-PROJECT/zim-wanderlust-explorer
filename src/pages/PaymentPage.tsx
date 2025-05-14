@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '@/models/Booking';
@@ -32,15 +33,48 @@ const PaymentPage = () => {
 
   const isLoading = bookingLoading || paymentLoading;
 
-  const copyPaymentLink = () => {
+  // Get the payment URL from the booking record
+  const getPaymentUrl = () => {
+    // First try to get the payment URL from the booking details
+    if (booking?.booking_details?.payment_url) {
+      return booking.booking_details.payment_url;
+    }
+    
+    // Then try to get the payment reference from the payment record
     if (payment?.payment_gateway_reference) {
-      navigator.clipboard.writeText(payment.payment_gateway_reference);
+      return payment.payment_gateway_reference;
+    }
+    
+    // If there's a destination ID, we can use it to construct a URL to get the payment URL
+    if (booking?.destination_id) {
+      return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/destinations?id=eq.${booking.destination_id}&select=payment_url`;
+    }
+    
+    // If there's an event ID, we can use it to construct a URL to get the payment URL
+    if (booking?.event_id) {
+      return `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/events?id=eq.${booking.event_id}&select=payment_url`;
+    }
+    
+    // If we couldn't find a payment URL, return null
+    return null;
+  };
+
+  const copyPaymentLink = () => {
+    const paymentUrl = getPaymentUrl();
+    if (paymentUrl) {
+      navigator.clipboard.writeText(paymentUrl);
       toast.success("Payment link copied to clipboard!");
-    } else if (booking?.destination_id) {
-      const destinationPaymentUrl = `https://gduzxexxpbibimtiycur.supabase.co/rest/v1/destinations?id=eq.${booking.destination_id}&select=payment_url`;
-      toast.info("Getting payment URL...");
-      // This is just an example to show the pattern - we'd normally have the URL in the booking data
-      toast.success("Payment link copied to clipboard!");
+    } else {
+      toast.error("Payment link not found. Please contact support.");
+    }
+  };
+
+  const goToPayment = () => {
+    const paymentUrl = getPaymentUrl();
+    if (paymentUrl) {
+      window.open(paymentUrl, '_blank');
+    } else {
+      toast.error("Payment link not found. Please contact support.");
     }
   };
 
@@ -236,7 +270,8 @@ const PaymentPage = () => {
                   <div className="flex flex-col space-y-3">
                     <Button 
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => window.open(booking?.booking_details?.payment_url || payment?.payment_gateway_reference || '#', '_blank')}
+                      onClick={goToPayment}
+                      disabled={!getPaymentUrl()}
                     >
                       <ExternalLink className="mr-2 h-4 w-4" /> Go to Payment
                     </Button>
@@ -254,6 +289,7 @@ const PaymentPage = () => {
                         variant="outline" 
                         className="flex-1"
                         onClick={copyPaymentLink}
+                        disabled={!getPaymentUrl()}
                       >
                         <Copy className="mr-2 h-4 w-4" /> Copy Payment Link
                       </Button>
