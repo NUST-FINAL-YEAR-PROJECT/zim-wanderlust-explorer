@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Aligning this with the database schema
@@ -31,6 +30,27 @@ export interface Booking {
   selected_ticket_type: Record<string, any> | null;
   created_at: string;
   updated_at: string;
+  // Add joined relations
+  destinations?: {
+    id: string;
+    name: string;
+    location: string;
+    price: number;
+    image_url: string | null;
+    description: string | null;
+    [key: string]: any;
+  } | null;
+  events?: {
+    id: string;
+    title: string;
+    location: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    price: number | null;
+    image_url: string | null;
+    description: string | null;
+    [key: string]: any;
+  } | null;
 }
 
 export async function getUserBookings(userId: string) {
@@ -59,7 +79,7 @@ export async function getBookings() {
     return [];
   }
   
-  return data as (Booking & { destinations: any; events: any })[];
+  return data as Booking[];
 }
 
 export async function getBooking(id: string) {

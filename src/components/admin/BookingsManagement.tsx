@@ -30,7 +30,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Booking, BookingStatus, PaymentStatus, getBookings, updateBooking } from '@/models/Booking';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowDown, ArrowUp, Download } from 'lucide-react';
+import { ArrowDown, ArrowUp, Download, Calendar, MapPin } from 'lucide-react';
 
 const BookingsManagement: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -151,6 +151,57 @@ const BookingsManagement: React.FC = () => {
     return sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
 
+  // Helper function to determine booking type
+  const getBookingType = (booking: Booking) => {
+    if (booking.destination_id) return 'Destination';
+    if (booking.event_id) return 'Event';
+    return 'Unknown';
+  };
+
+  // Helper function to get booking name
+  const getBookingName = (booking: Booking) => {
+    // For destinations
+    if (booking.destination_id && booking.destinations) {
+      return booking.destinations.name;
+    }
+    
+    // For events
+    if (booking.event_id && booking.events) {
+      return booking.events.title;
+    }
+    
+    // Fallback to booking details if available
+    if (booking.booking_details) {
+      return booking.booking_details.destination_name || 
+             booking.booking_details.event_name || 
+             'Unnamed Booking';
+    }
+    
+    return 'Unnamed Booking';
+  };
+
+  // Helper function to get booking location
+  const getBookingLocation = (booking: Booking) => {
+    // For destinations
+    if (booking.destination_id && booking.destinations) {
+      return booking.destinations.location;
+    }
+    
+    // For events
+    if (booking.event_id && booking.events) {
+      return booking.events.location;
+    }
+    
+    // Fallback to booking details if available
+    if (booking.booking_details) {
+      return booking.booking_details.destination_location || 
+             booking.booking_details.event_location || 
+             'Unknown Location';
+    }
+    
+    return 'Unknown Location';
+  };
+
   return (
     <Card className="shadow-md">
       <CardHeader>
@@ -168,7 +219,9 @@ const BookingsManagement: React.FC = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Contact</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Name / Location</TableHead>
                   <TableHead 
                     className="cursor-pointer flex items-center gap-1" 
                     onClick={() => handleSort('booking_date')}
@@ -199,10 +252,32 @@ const BookingsManagement: React.FC = () => {
                     <TableCell className="font-mono text-xs">{booking.id.slice(0, 8)}...</TableCell>
                     <TableCell>
                       <div className="font-medium">{booking.contact_name}</div>
-                      <div className="text-xs text-gray-500">{booking.contact_email}</div>
+                      <div className="text-xs text-gray-500">
+                        {booking.contact_email}<br />
+                        {booking.contact_phone}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={
+                        booking.destination_id ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
+                      }>
+                        {getBookingType(booking)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{getBookingName(booking)}</div>
+                      <div className="flex items-center text-xs text-gray-500 mt-1">
+                        <MapPin size={12} className="mr-1" /> {getBookingLocation(booking)}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div>{new Date(booking.booking_date).toLocaleDateString()}</div>
+                      {booking.preferred_date && (
+                        <div className="flex items-center text-xs text-gray-500 mt-1">
+                          <Calendar size={12} className="mr-1" /> 
+                          {new Date(booking.preferred_date).toLocaleDateString()}
+                        </div>
+                      )}
                       <div className="text-xs text-gray-500">
                         {formatDistanceToNow(new Date(booking.booking_date), { addSuffix: true })}
                       </div>
@@ -270,9 +345,62 @@ const BookingsManagement: React.FC = () => {
                   
                   <div className="font-medium">Phone:</div>
                   <div className="col-span-3">{selectedBooking.contact_phone}</div>
+
+                  <div className="font-medium">Type:</div>
+                  <div className="col-span-3">
+                    <Badge variant="outline" className={
+                      selectedBooking.destination_id ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
+                    }>
+                      {getBookingType(selectedBooking)}
+                    </Badge>
+                  </div>
+
+                  <div className="font-medium">Booking:</div>
+                  <div className="col-span-3">{getBookingName(selectedBooking)}</div>
+
+                  <div className="font-medium">Location:</div>
+                  <div className="col-span-3">{getBookingLocation(selectedBooking)}</div>
+
+                  <div className="font-medium">Date:</div>
+                  <div className="col-span-3">
+                    {new Date(selectedBooking.booking_date).toLocaleDateString()}
+                    {selectedBooking.preferred_date && (
+                      <div className="text-sm text-gray-500 mt-1">
+                        Preferred: {new Date(selectedBooking.preferred_date).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="font-medium">People:</div>
+                  <div className="col-span-3">{selectedBooking.number_of_people}</div>
                   
                   <div className="font-medium">Total:</div>
                   <div className="col-span-3">${selectedBooking.total_price.toFixed(2)}</div>
+
+                  {selectedBooking.selected_ticket_type && (
+                    <>
+                      <div className="font-medium">Ticket Type:</div>
+                      <div className="col-span-3">
+                        {selectedBooking.selected_ticket_type.name || 'Standard'}
+                        {selectedBooking.selected_ticket_type.price && (
+                          <span className="text-sm text-gray-500 ml-2">
+                            (${selectedBooking.selected_ticket_type.price} each)
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {selectedBooking.booking_details && Object.keys(selectedBooking.booking_details).length > 0 && (
+                    <>
+                      <div className="font-medium">Additional Details:</div>
+                      <div className="col-span-3">
+                        <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded">
+                          {JSON.stringify(selectedBooking.booking_details, null, 2)}
+                        </pre>
+                      </div>
+                    </>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
