@@ -33,7 +33,8 @@ import {
   NavigationMenuContent, 
   NavigationMenuItem, 
   NavigationMenuList, 
-  NavigationMenuTrigger 
+  NavigationMenuTrigger,
+  NavigationMenuLink
 } from '@/components/ui/navigation-menu';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

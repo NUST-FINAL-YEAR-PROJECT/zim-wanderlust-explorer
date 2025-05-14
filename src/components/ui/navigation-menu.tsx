@@ -78,7 +78,6 @@ const NavigationMenuContent = React.forwardRef<
 ))
 NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName
 
-// Add proper definition for NavigationMenuLink
 const NavigationMenuLink = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Link>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Link>
