@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Event, getEvents, addEvent, updateEvent, deleteEvent } from '@/models/Event';
+import { Event, getEvents, addEvent, updateEvent, deleteEvent, EventInput } from '@/models/Event';
 import { 
   Table, 
   TableBody, 
