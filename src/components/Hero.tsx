@@ -1,7 +1,15 @@
 
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import SearchBar from "./SearchBar";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleSearch = (query: string) => {
+    navigate(`/browse?search=${encodeURIComponent(query)}`);
+  };
+
   return (
     <div className="relative h-[600px] overflow-hidden">
       <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center bg-no-repeat">
@@ -15,11 +23,21 @@ const Hero = () => {
           <p className="text-xl md:text-2xl text-white/90 mb-8">
             Explore breathtaking landscapes, vibrant culture, and unforgettable experiences
           </p>
+          <div className="w-full max-w-2xl mx-auto mb-6">
+            <SearchBar onSearch={handleSearch} />
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
+            <Button 
+              className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg"
+              onClick={() => navigate("/browse?tab=destinations")}
+            >
               Explore Destinations
             </Button>
-            <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white/20 px-8 py-6 text-lg">
+            <Button 
+              variant="outline" 
+              className="bg-transparent border-white text-white hover:bg-white/20 px-8 py-6 text-lg"
+              onClick={() => navigate("/browse?tab=events")}
+            >
               Upcoming Events
             </Button>
           </div>

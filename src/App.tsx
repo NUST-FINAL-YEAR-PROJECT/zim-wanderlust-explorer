@@ -8,6 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 import Index from "./pages/Index";
+import Browse from "./pages/Browse";
+import PublicDestinationDetails from "./pages/PublicDestinationDetails";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -37,8 +39,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/destination/:id/details" element={<PublicDestinationDetails />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/itinerary/shared/:shareCode" element={<ItinerarySharedPage />} />
+            
+            {/* Protected Routes */}
             <Route 
               path="/dashboard" 
               element={
@@ -168,8 +176,8 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route path="/itinerary/shared/:shareCode" element={<ItinerarySharedPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

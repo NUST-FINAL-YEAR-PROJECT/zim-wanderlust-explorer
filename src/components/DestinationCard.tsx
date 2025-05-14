@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getDestinationRating } from '@/models/Review';
 import { RatingDisplay } from './RatingDisplay';
 import { WishlistButton } from './WishlistButton';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DestinationCardProps {
   destination: Destination;
@@ -18,13 +19,23 @@ interface DestinationCardProps {
 const DestinationCard = ({ destination, className = '' }: DestinationCardProps) => {
   const navigate = useNavigate();
 
-  const { data: rating = { average: 0, count: 0 } } = useQuery({
+  const { data: rating = { average: 0, count: 0 }, isError } = useQuery({
     queryKey: ['destinationRating', destination.id],
-    queryFn: () => getDestinationRating(destination.id)
+    queryFn: () => getDestinationRating(destination.id),
+    retry: false, // Don't retry if there's an error
+    enabled: !!destination.id // Only run if destination.id exists
   });
 
+  // Check if user is authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  const isAuthenticated = !!session?.user;
+
   const handleViewDetails = () => {
-    navigate(`/destination/${destination.id}`);
+    if (isAuthenticated) {
+      navigate(`/destination/${destination.id}`);
+    } else {
+      navigate(`/browse?destination=${destination.id}`);
+    }
   };
 
   return (
@@ -35,13 +46,15 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
           alt={destination.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute top-2 right-2">
-          <WishlistButton 
-            destinationId={destination.id}
-            variant="default"
-            className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white"
-          />
-        </div>
+        {isAuthenticated && (
+          <div className="absolute top-2 right-2">
+            <WishlistButton 
+              destinationId={destination.id}
+              variant="default"
+              className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white"
+            />
+          </div>
+        )}
       </div>
       
       <CardContent className="p-4 flex-grow">
@@ -57,7 +70,7 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
           <span className="text-sm">{destination.location}</span>
         </div>
         
-        {rating && (
+        {!isError && rating && (
           <div className="mb-3">
             <RatingDisplay
               rating={rating.average}
