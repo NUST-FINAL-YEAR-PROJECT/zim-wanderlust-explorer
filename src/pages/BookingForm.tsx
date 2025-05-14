@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { getDestination } from '@/models/Destination';
-import { createBooking } from '@/models/Booking';
+import { createBooking, updateBooking } from '@/models/Booking'; // Added the import here
 import { createPayment } from '@/models/Payment';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';

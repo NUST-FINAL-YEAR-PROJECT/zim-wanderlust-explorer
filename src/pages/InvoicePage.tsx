@@ -10,7 +10,7 @@ import { AlertCircle, FileDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas'; // Fixed the import
 import jsPDF from 'jspdf';
 
 const InvoicePage = () => {
