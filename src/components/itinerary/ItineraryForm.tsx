@@ -1,7 +1,6 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { PlusCircle, Trash } from "lucide-react";
@@ -39,6 +38,7 @@ const formSchema = z.object({
 export function ItineraryForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [destinations, setDestinations] = useState<{
     destination: Destination | null;
@@ -54,6 +54,25 @@ export function ItineraryForm() {
       description: "",
     },
   });
+
+  // Handle pre-selected destination if passed from another page
+  useEffect(() => {
+    const selectedDestination = location.state?.selectedDestination;
+    if (selectedDestination) {
+      // Add the pre-selected destination
+      setDestinations([
+        {
+          destination: selectedDestination,
+          startDate: undefined,
+          endDate: undefined,
+          notes: "",
+        },
+      ]);
+      
+      // Pre-populate the title
+      form.setValue('title', `Trip to ${selectedDestination.name}`);
+    }
+  }, [location.state, form]);
 
   const addDestination = () => {
     setDestinations([
