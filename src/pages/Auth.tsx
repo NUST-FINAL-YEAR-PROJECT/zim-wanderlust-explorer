@@ -22,16 +22,15 @@ const Auth: React.FC = () => {
 
   // Get the intended destination from location state, or default routes
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
-  const defaultRedirect = isAdmin ? '/admin' : '/dashboard';
-  const redirectPath = from || defaultRedirect;
-
+  
   useEffect(() => {
     // Only redirect when we have determined the user state and they're logged in
     if (!isLoading && user) {
-      console.log("User is logged in, redirecting to:", isAdmin ? '/admin' : '/dashboard');
-      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
+      const redirectPath = from || (isAdmin ? '/admin' : '/dashboard');
+      console.log("User is logged in, redirecting to:", redirectPath, "isAdmin:", isAdmin);
+      navigate(redirectPath, { replace: true });
     }
-  }, [user, isAdmin, navigate, isLoading]);
+  }, [user, isAdmin, navigate, isLoading, from]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +112,10 @@ const Auth: React.FC = () => {
 
   // Show loading state if auth state is still being determined
   if (isLoading && user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mr-2"></div>
+      <span>Authenticating...</span>
+    </div>;
   }
 
   return (

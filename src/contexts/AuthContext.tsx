@@ -50,13 +50,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setProfile(null);
           setUserRole(null);
+          setIsLoading(false);
         }
       }
     );
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Got existing session:", session?.user?.id);
+      console.log("Got existing session:", session?.user?.id || "No session found");
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -75,9 +76,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const fetchedProfile = await getCurrentProfile();
       console.log("Fetched profile:", fetchedProfile);
-      setProfile(fetchedProfile);
+      
       if (fetchedProfile) {
+        setProfile(fetchedProfile);
         setUserRole(fetchedProfile.role as UserRole);
+        console.log("User role set to:", fetchedProfile.role);
+      } else {
+        console.log("No profile found for user");
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -89,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Calculate isAdmin based on userRole
   const isAdmin = userRole === 'ADMIN';
   
-  console.log("Auth context state:", { userRole, isAdmin });
+  console.log("Auth context state:", { userRole, isAdmin, isLoading });
 
   const value = {
     user,
