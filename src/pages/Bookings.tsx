@@ -63,8 +63,17 @@ const Bookings: React.FC = () => {
 
   // Filter bookings based on search and status
   const filteredBookings = bookings.filter(booking => {
+    const bookingName = booking.destination_id 
+      ? booking.destinations?.name || booking.booking_details?.destination_name 
+      : booking.events?.title || booking.booking_details?.event_name;
+
+    const bookingLocation = booking.destination_id
+      ? booking.destinations?.location || booking.booking_details?.destination_location
+      : booking.events?.location || booking.booking_details?.event_location;
+
     const matchesSearch = !searchQuery || 
-      (booking.booking_details?.destination_name && booking.booking_details.destination_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (bookingName && bookingName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (bookingLocation && bookingLocation.toLowerCase().includes(searchQuery.toLowerCase())) ||
       booking.id.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
@@ -131,12 +140,20 @@ const Bookings: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 className="text-3xl font-bold">My Bookings</h1>
-          <Button 
-            onClick={() => navigate('/destinations')}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
-          >
-            Browse Destinations
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/destinations')}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              Browse Destinations
+            </Button>
+            <Button 
+              onClick={() => navigate('/events')}
+              variant="outline"
+            >
+              Browse Events
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow p-4">
@@ -146,7 +163,7 @@ const Bookings: React.FC = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
-                  placeholder="Search by destination or booking ID..."
+                  placeholder="Search by name, location or booking ID..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -205,9 +222,14 @@ const Bookings: React.FC = () => {
               <p className="text-muted-foreground mt-2 mb-6">
                 You haven't made any bookings yet or no bookings match your filters.
               </p>
-              <Button onClick={() => navigate('/destinations')}>
-                Browse Destinations
-              </Button>
+              <div className="flex gap-4 justify-center">
+                <Button onClick={() => navigate('/destinations')}>
+                  Browse Destinations
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/events')}>
+                  Browse Events
+                </Button>
+              </div>
             </div>
           ) : (
             <>
@@ -315,13 +337,31 @@ const BookingTable = ({
     );
   }
 
+  // Helper function to get booking name from various sources
+  const getBookingName = (booking: any) => {
+    if (booking.destination_id) {
+      return booking.destinations?.name || booking.booking_details?.destination_name || 'Unnamed Destination';
+    } else if (booking.event_id) {
+      return booking.events?.title || booking.booking_details?.event_name || 'Unnamed Event';
+    }
+    return booking.booking_details?.destination_name || booking.booking_details?.event_name || 'Unnamed Booking';
+  };
+
+  // Helper function to get booking type
+  const getBookingType = (booking: any) => {
+    if (booking.destination_id) return 'Destination';
+    if (booking.event_id) return 'Event';
+    return 'Booking';
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Destination</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Payment</TableHead>
@@ -333,10 +373,15 @@ const BookingTable = ({
             {bookings.map((booking: any) => (
               <TableRow key={booking.id}>
                 <TableCell>
-                  <div className="font-medium">{booking.booking_details?.destination_name || 'Unnamed Destination'}</div>
+                  <div className="font-medium">{getBookingName(booking)}</div>
                   <div className="text-sm text-muted-foreground">
                     {booking.number_of_people} {booking.number_of_people === 1 ? 'person' : 'people'}
                   </div>
+                </TableCell>
+                <TableCell>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100">
+                    {getBookingType(booking)}
+                  </span>
                 </TableCell>
                 <TableCell>
                   {new Date(booking.preferred_date || '').toLocaleDateString()}

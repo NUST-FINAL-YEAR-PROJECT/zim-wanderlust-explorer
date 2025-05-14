@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Aligning this with the database schema
@@ -36,7 +35,7 @@ export interface Booking {
 export async function getUserBookings(userId: string) {
   const { data, error } = await supabase
     .from('bookings')
-    .select('*')
+    .select('*, destinations(*), events(*)')
     .eq('user_id', userId);
   
   if (error) {
@@ -44,7 +43,7 @@ export async function getUserBookings(userId: string) {
     return [];
   }
   
-  return data as Booking[];
+  return data as (Booking & { destinations: any; events: any })[];
 }
 
 export async function getBooking(id: string) {
