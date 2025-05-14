@@ -62,6 +62,32 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// New nature-inspired color palette for Zimbabwe
+				safari: {
+					DEFAULT: '#8B5A2B', // Earthy brown
+					light: '#D2B48C',   // Tan/khaki
+					dark: '#654321',    // Dark brown
+				},
+				savanna: {
+					DEFAULT: '#E1C16E', // Golden grass
+					light: '#F5DEB3',   // Wheat
+					dark: '#B8860B',    // Dark goldenrod
+				},
+				forest: {
+					DEFAULT: '#2E8B57', // Sea green
+					light: '#98FB98',   // Pale green
+					dark: '#006400',    // Dark green
+				},
+				water: {
+					DEFAULT: '#4682B4', // Steel blue (Victoria Falls)
+					light: '#ADD8E6',   // Light blue
+					dark: '#00008B',    // Dark blue
+				},
+				sunset: {
+					DEFAULT: '#FF7F50', // Coral
+					light: '#FFDAB9',   // Peach
+					dark: '#CD5C5C',    // Indian red
 				}
 			},
 			borderRadius: {
@@ -89,17 +115,37 @@ export default {
 				'fade-in': {
 					'0%': {
 						opacity: '0',
+						transform: 'translateY(10px)'
 					},
 					'100%': {
 						opacity: '1',
+						transform: 'translateY(0)'
 					}
 				},
 				'fade-out': {
 					'0%': {
 						opacity: '1',
+						transform: 'translateY(0)'
 					},
 					'100%': {
 						opacity: '0',
+						transform: 'translateY(10px)'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
+				},
+				'pulse-soft': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.7'
 					}
 				}
 			},
@@ -107,7 +153,15 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
-				'fade-out': 'fade-out 0.3s ease-out'
+				'fade-out': 'fade-out 0.3s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
+			},
+			boxShadow: {
+				'card-hover': '0 15px 30px -10px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04)',
+				'elevation-1': '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+				'elevation-2': '0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)',
+				'elevation-3': '0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)',
 			}
 		}
 	},
