@@ -1,0 +1,365 @@
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { PlusCircle, Trash } from "lucide-react";
+import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { createItinerary, addDestinationToItinerary } from "@/models/Itinerary";
+import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { DestinationSelector } from "./DestinationSelector";
+import { Destination } from "@/models/Destination";
+
+const formSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().optional(),
+});
+
+export function ItineraryForm() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [destinations, setDestinations] = useState<{
+    destination: Destination | null;
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+    notes: string;
+  }[]>([]);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
+
+  const addDestination = () => {
+    setDestinations([
+      ...destinations,
+      { destination: null, startDate: undefined, endDate: undefined, notes: "" },
+    ]);
+  };
+
+  const removeDestination = (index: number) => {
+    setDestinations((current) => current.filter((_, i) => i !== index));
+  };
+
+  const updateDestination = (index: number, destination: Destination | null) => {
+    setDestinations((current) => {
+      const updated = [...current];
+      updated[index] = { ...updated[index], destination };
+      return updated;
+    });
+  };
+
+  const updateStartDate = (index: number, date: Date | undefined) => {
+    setDestinations((current) => {
+      const updated = [...current];
+      updated[index] = { ...updated[index], startDate: date };
+      return updated;
+    });
+  };
+
+  const updateEndDate = (index: number, date: Date | undefined) => {
+    setDestinations((current) => {
+      const updated = [...current];
+      updated[index] = { ...updated[index], endDate: date };
+      return updated;
+    });
+  };
+
+  const updateNotes = (index: number, notes: string) => {
+    setDestinations((current) => {
+      const updated = [...current];
+      updated[index] = { ...updated[index], notes };
+      return updated;
+    });
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create an itinerary.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (destinations.length === 0 || destinations.some((d) => !d.destination)) {
+      toast({
+        title: "Error",
+        description: "Please add at least one destination to your itinerary.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if all destinations have valid dates
+    const invalidDates = destinations.some(
+      (d) => !d.startDate || !d.endDate || d.startDate > d.endDate
+    );
+
+    if (invalidDates) {
+      toast({
+        title: "Error",
+        description:
+          "Please ensure all destinations have valid start and end dates.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const newItinerary = await createItinerary(
+        user.id,
+        values.title,
+        values.description
+      );
+
+      if (!newItinerary) {
+        throw new Error("Failed to create itinerary");
+      }
+
+      // Add all destinations to the itinerary
+      for (const dest of destinations) {
+        if (dest.destination && dest.startDate && dest.endDate) {
+          await addDestinationToItinerary(
+            newItinerary.id,
+            dest.destination.id,
+            dest.destination.name,
+            dest.startDate.toISOString(),
+            dest.endDate.toISOString(),
+            dest.notes
+          );
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Your itinerary has been created successfully!",
+      });
+
+      navigate(`/itinerary/${newItinerary.id}`);
+    } catch (error) {
+      console.error("Error creating itinerary:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create itinerary. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Itinerary Title</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Summer Adventure 2023"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Brief description of your travel plans..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Destinations</h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addDestination}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Destination
+              </Button>
+            </div>
+
+            {destinations.length === 0 && (
+              <div className="text-center p-8 border border-dashed rounded-lg">
+                <p className="text-muted-foreground">
+                  No destinations added yet. Click "Add Destination" to start
+                  planning your trip.
+                </p>
+              </div>
+            )}
+
+            {destinations.map((dest, index) => (
+              <Card key={index}>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <FormLabel>Destination</FormLabel>
+                        <DestinationSelector
+                          value={dest.destination}
+                          onChange={(destination) =>
+                            updateDestination(index, destination)
+                          }
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <FormLabel>Start Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !dest.startDate &&
+                                      "text-muted-foreground"
+                                  )}
+                                >
+                                  {dest.startDate ? (
+                                    format(dest.startDate, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={dest.startDate}
+                                onSelect={(date) =>
+                                  updateStartDate(index, date)
+                                }
+                                initialFocus
+                                className="p-3 pointer-events-auto"
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        <div>
+                          <FormLabel>End Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !dest.endDate && "text-muted-foreground"
+                                  )}
+                                >
+                                  {dest.endDate ? (
+                                    format(dest.endDate, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={dest.endDate}
+                                onSelect={(date) => updateEndDate(index, date)}
+                                initialFocus
+                                className="p-3 pointer-events-auto"
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <FormLabel>Notes (Optional)</FormLabel>
+                        <Textarea
+                          placeholder="Accommodation details, activities, etc."
+                          value={dest.notes}
+                          onChange={(e) => updateNotes(index, e.target.value)}
+                          className="h-[140px]"
+                        />
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeDestination(index)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Itinerary"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+}

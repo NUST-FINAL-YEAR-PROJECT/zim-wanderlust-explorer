@@ -22,6 +22,10 @@ import Events from "./pages/Events";
 import EventBookingPage from "./pages/EventBookingPage";
 import Settings from "./pages/Settings";
 import WishlistPage from "./pages/WishlistPage";
+import ItinerariesPage from "./pages/ItinerariesPage";
+import ItineraryCreatePage from "./pages/ItineraryCreatePage";
+import ItineraryDetailsPage from "./pages/ItineraryDetailsPage";
+import ItinerarySharedPage from "./pages/ItinerarySharedPage";
 
 const queryClient = new QueryClient();
 
@@ -139,6 +143,32 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            {/* Itinerary Routes */}
+            <Route 
+              path="/itineraries" 
+              element={
+                <ProtectedRoute>
+                  <ItinerariesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/itineraries/create" 
+              element={
+                <ProtectedRoute>
+                  <ItineraryCreatePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/itinerary/:id" 
+              element={
+                <ProtectedRoute>
+                  <ItineraryDetailsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/itinerary/shared/:shareCode" element={<ItinerarySharedPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
