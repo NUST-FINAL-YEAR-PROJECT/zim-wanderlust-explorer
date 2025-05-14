@@ -13,6 +13,7 @@ import DestinationCategories from "@/components/DestinationCategories";
 import { Globe } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
+import StatsCounter from "@/components/StatsCounter";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -50,12 +51,12 @@ const Index = () => {
     {
       title: "Diverse Landscapes",
       description: "From cascading waterfalls to expansive savannahs and majestic mountains",
-      image: "/great-zimbabwe.jpg"
+      image: "/nyanga.jpg"
     },
     {
       title: "Rich Cultural Heritage",
       description: "Experience traditions and history dating back thousands of years",
-      image: "/traditional.jpg"
+      image: "/great-zimbabwe.jpg"
     },
     {
       title: "Incredible Wildlife",
@@ -79,6 +80,9 @@ const Index = () => {
         </div>
         <DestinationCategories />
       </div>
+      
+      {/* Stats Counter Section */}
+      <StatsCounter />
       
       {/* Features Section */}
       <section className="py-16 bg-white">
@@ -222,8 +226,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
-      {/* Testimonials or Gallery Section could be added here */}
       
       <Footer />
       

@@ -83,7 +83,7 @@ const HeroCarousel = () => {
         <Button 
           variant="outline" 
           onClick={() => navigate("/auth")}
-          className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:text-white transition-all duration-300 flex items-center gap-2"
+          className="bg-indigo-600/80 hover:bg-indigo-700 border-indigo-500 text-white hover:text-white transition-all duration-300 flex items-center gap-2"
         >
           <LogIn className="h-4 w-4" />
           Sign In
@@ -94,7 +94,7 @@ const HeroCarousel = () => {
       <Button 
         variant="outline" 
         size="icon" 
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 border-white/20 backdrop-blur-md text-white"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-indigo-600/70 hover:bg-indigo-700 border-indigo-500 text-white"
         onClick={prevSlide}
       >
         <ChevronLeft size={24} />
@@ -103,7 +103,7 @@ const HeroCarousel = () => {
       <Button 
         variant="outline" 
         size="icon" 
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 border-white/20 backdrop-blur-md text-white"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-indigo-600/70 hover:bg-indigo-700 border-indigo-500 text-white"
         onClick={nextSlide}
       >
         <ChevronRight size={24} />
@@ -112,7 +112,7 @@ const HeroCarousel = () => {
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-5xl animate-fade-in">
-          <div className="mb-2 text-indigo-300 font-medium tracking-widest">EXPLORE ZIMBABWE</div>
+          <div className="mb-2 text-indigo-300 font-medium tracking-widest uppercase">Explore Zimbabwe</div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 drop-shadow-lg">
             {heroImages[currentSlide].title}
           </h1>
@@ -120,7 +120,7 @@ const HeroCarousel = () => {
             {heroImages[currentSlide].description}
           </p>
           
-          <div className="w-full max-w-3xl mx-auto mb-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+          <div className="w-full max-w-3xl mx-auto mb-10">
             <SearchBar onSearch={handleSearch} />
           </div>
           
@@ -150,7 +150,7 @@ const HeroCarousel = () => {
             className={cn(
               "w-3 h-3 rounded-full transition-all",
               index === currentSlide 
-                ? "bg-white scale-125 w-10 h-3" 
+                ? "bg-indigo-500 scale-125 w-10 h-3" 
                 : "bg-white/50 hover:bg-white/70"
             )}
             onClick={() => setCurrentSlide(index)}

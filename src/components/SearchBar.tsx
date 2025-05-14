@@ -38,7 +38,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     <div className="w-full max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1 bg-white rounded-lg overflow-hidden shadow-md">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-indigo-500" size={20} />
           <Input
             type="text"
             placeholder="Where would you like to explore?"
@@ -52,9 +52,9 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
           <PopoverTrigger asChild>
             <Button 
               variant="outline" 
-              className="bg-white border-indigo-100 hover:border-indigo-300 rounded-lg p-4 h-auto"
+              className="bg-white border-indigo-100 hover:border-indigo-300 rounded-lg p-4 h-auto text-indigo-500 hover:text-indigo-700"
             >
-              <Filter className="h-5 w-5 text-indigo-700" />
+              <Filter className="h-5 w-5" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-6 rounded-xl shadow-lg border-indigo-100">
