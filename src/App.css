@@ -13,10 +13,10 @@
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em rgba(0, 74, 173, 0.6));
+  filter: drop-shadow(0 0 2em rgba(139, 94, 52, 0.6));
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em rgba(0, 74, 173, 0.6));
+  filter: drop-shadow(0 0 2em rgba(139, 94, 52, 0.6));
 }
 
 @keyframes logo-spin {
@@ -39,12 +39,12 @@
 }
 
 .read-the-docs {
-  color: #004AAD;
+  color: #8B5E34;
 }
 
-/* Blue-themed Button Styles */
-.btn-blue {
-  background-color: #004AAD;
+/* Warm-themed Button Styles */
+.btn-warm {
+  background-color: #8B5E34;
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -53,54 +53,54 @@
   transition: background-color 0.2s;
 }
 
-.btn-blue:hover {
-  background-color: #003c8a;
+.btn-warm:hover {
+  background-color: #6A4828;
 }
 
-.btn-blue-outline {
+.btn-warm-outline {
   background-color: transparent;
-  color: #004AAD;
-  border: 1px solid #004AAD;
+  color: #8B5E34;
+  border: 1px solid #8B5E34;
   border-radius: 0.375rem;
   padding: 0.5rem 1rem;
   font-weight: 500;
   transition: all 0.2s;
 }
 
-.btn-blue-outline:hover {
-  background-color: #E6F0FF;
+.btn-warm-outline:hover {
+  background-color: #F4EBE2;
 }
 
-/* Blue-themed Border Styles */
-.border-blue {
-  border-color: #004AAD;
+/* Warm-themed Border Styles */
+.border-warm {
+  border-color: #D0A676;
 }
 
-/* Blue-themed Text Styles */
-.text-blue {
-  color: #004AAD;
+/* Warm-themed Text Styles */
+.text-warm {
+  color: #8B5E34;
 }
 
-.text-blue-light {
-  color: #E6F0FF;
+.text-warm-light {
+  color: #F4EBE2;
 }
 
-/* Blue-themed Background Styles */
-.bg-blue {
-  background-color: #004AAD;
+/* Warm-themed Background Styles */
+.bg-warm {
+  background-color: #8B5E34;
 }
 
-.bg-blue-light {
-  background-color: #E6F0FF;
+.bg-warm-light {
+  background-color: #F4EBE2;
 }
 
-/* Blue-themed Hover Effects */
-.hover-bg-blue:hover {
-  background-color: #004AAD;
+/* Warm-themed Hover Effects */
+.hover-bg-warm:hover {
+  background-color: #8B5E34;
   color: white;
 }
 
-.hover-bg-blue-light:hover {
-  background-color: #E6F0FF;
-  color: #004AAD;
+.hover-bg-warm-light:hover {
+  background-color: #F4EBE2;
+  color: #8B5E34;
 }

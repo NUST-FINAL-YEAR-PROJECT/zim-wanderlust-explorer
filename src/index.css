@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,88 +6,88 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 217 100% 34%;
+    --foreground: 23 32% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 217 100% 34%;
+    --card-foreground: 23 32% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 100% 34%;
+    --popover-foreground: 23 32% 12%;
 
-    /* Blue theme primary colors */
-    --primary: 217 100% 34%;
+    /* Warm earthy primary colors */
+    --primary: 28 45% 37%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 213 100% 95%;
-    --secondary-foreground: 217 100% 34%;
+    --secondary: 27 51% 92%;
+    --secondary-foreground: 28 45% 37%;
 
-    --muted: 213 100% 95%;
-    --muted-foreground: 217 70% 40%;
+    --muted: 27 51% 92%;
+    --muted-foreground: 28 40% 40%;
 
-    /* Light blue accent colors */
-    --accent: 213 100% 95%;
-    --accent-foreground: 217 100% 34%;
+    /* Light golden accent colors */
+    --accent: 35 53% 62%;
+    --accent-foreground: 23 32% 12%;
 
-    --destructive: 217 100% 34%;
+    --destructive: 3 42% 54%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 100% 34%;
-    --input: 217 100% 34%;
-    --ring: 217 100% 34%;
+    --border: 35 53% 62%;
+    --input: 28 45% 37%;
+    --ring: 35 53% 62%;
 
     --radius: 0.75rem;
 
-    /* Blue sidebar colors */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 217 100% 34%;
-    --sidebar-primary: 217 100% 34%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 213 100% 95%;
-    --sidebar-accent-foreground: 217 100% 34%;
-    --sidebar-border: 217 100% 34%;
-    --sidebar-ring: 217 100% 34%;
+    /* Dark brown sidebar colors */
+    --sidebar-background: 23 32% 12%;
+    --sidebar-foreground: 27 51% 92%;
+    --sidebar-primary: 35 53% 62%;
+    --sidebar-primary-foreground: 23 32% 12%;
+    --sidebar-accent: 27 51% 92%;
+    --sidebar-accent-foreground: 23 32% 12%;
+    --sidebar-border: 35 53% 62%;
+    --sidebar-ring: 35 53% 62%;
   }
 
   .dark {
-    --background: 217 100% 15%;
+    --background: 23 32% 12%;
     --foreground: 0 0% 100%;
 
-    --card: 217 100% 15%;
+    --card: 23 32% 15%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 217 100% 15%;
+    --popover: 23 32% 15%;
     --popover-foreground: 0 0% 100%;
 
-    /* Dark blue primary colors */
-    --primary: 217 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    /* Dark earthy primary colors */
+    --primary: 35 53% 62%;
+    --primary-foreground: 23 32% 12%;
 
-    --secondary: 217 100% 25%;
+    --secondary: 28 25% 25%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 217 100% 25%;
-    --muted-foreground: 213 100% 80%;
+    --muted: 28 25% 25%;
+    --muted-foreground: 27 40% 80%;
 
-    /* Dark blue accent colors */
-    --accent: 217 100% 25%;
+    /* Golden accent colors */
+    --accent: 28 25% 25%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 217 80% 60%;
+    --destructive: 3 60% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 100% 30%;
-    --input: 217 100% 30%;
-    --ring: 217 100% 50%;
+    --border: 28 30% 30%;
+    --input: 28 30% 30%;
+    --ring: 35 53% 62%;
 
-    /* Dark blue sidebar colors */
-    --sidebar-background: 217 100% 20%;
+    /* Darker sidebar colors */
+    --sidebar-background: 23 32% 10%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 217 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 100% 25%;
+    --sidebar-primary: 35 53% 62%;
+    --sidebar-primary-foreground: 23 32% 12%;
+    --sidebar-accent: 28 25% 25%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 217 100% 30%;
-    --sidebar-ring: 217 100% 50%;
+    --sidebar-border: 28 30% 30%;
+    --sidebar-ring: 35 53% 62%;
   }
 }
 
@@ -132,22 +133,22 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   
-  /* Blue color gradient classes replacing previous ones */
-  .gradient-blue-light {
-    @apply bg-gradient-to-r from-[#004AAD] to-[#0074D9];
+  /* Earthy color gradient classes replacing previous ones */
+  .gradient-warm-light {
+    @apply bg-gradient-to-r from-[#8B5E34] to-[#D0A676];
   }
   
-  .gradient-blue-dark {
-    @apply bg-gradient-to-r from-[#001F5C] to-[#004AAD];
+  .gradient-warm-dark {
+    @apply bg-gradient-to-r from-[#2C1810] to-[#8B5E34];
   }
   
-  /* Admin Dashboard specific styles - updated for blue theme */
+  /* Admin Dashboard specific styles - updated for warm theme */
   .admin-layout {
-    @apply bg-white text-[#004AAD];
+    @apply bg-white text-[#2C1810];
   }
   
   .admin-card {
-    @apply rounded-lg border border-[#004AAD]/20 bg-white text-[#004AAD] shadow-md hover:shadow-lg transition-all duration-200;
+    @apply rounded-lg border border-[#D0A676]/20 bg-white text-[#2C1810] shadow-md hover:shadow-lg transition-all duration-200;
   }
   
   .admin-stats-card {
@@ -155,27 +156,27 @@
   }
   
   .admin-btn-primary {
-    @apply bg-[#004AAD] hover:bg-[#0035A0] text-white py-2 px-4 rounded-md transition-colors;
+    @apply bg-[#8B5E34] hover:bg-[#6A4828] text-white py-2 px-4 rounded-md transition-colors;
   }
   
   .admin-btn-secondary {
-    @apply bg-[#E6F0FF] hover:bg-[#B3D1FF] text-[#004AAD] py-2 px-4 rounded-md transition-colors;
+    @apply bg-[#F4EBE2] hover:bg-[#E9D8C6] text-[#8B5E34] py-2 px-4 rounded-md transition-colors;
   }
   
   .admin-header {
-    @apply bg-white border-b border-[#004AAD]/20 backdrop-blur-md;
+    @apply bg-white border-b border-[#D0A676]/20 backdrop-blur-md;
   }
   
   .admin-tabs {
-    @apply bg-[#E6F0FF] text-[#004AAD];
+    @apply bg-[#F4EBE2] text-[#8B5E34];
   }
   
   .admin-tab-active {
-    @apply bg-[#004AAD] text-white;
+    @apply bg-[#8B5E34] text-white;
   }
   
   .admin-gradient {
-    @apply bg-gradient-to-r from-[#004AAD] to-[#0074D9];
+    @apply bg-gradient-to-r from-[#8B5E34] to-[#D0A676];
   }
   
   .admin-table {
@@ -183,15 +184,15 @@
   }
   
   .admin-table th {
-    @apply bg-[#E6F0FF] text-[#004AAD] p-3 text-left;
+    @apply bg-[#F4EBE2] text-[#8B5E34] p-3 text-left;
   }
   
   .admin-table td {
-    @apply border-t border-[#004AAD]/20 p-3;
+    @apply border-t border-[#D0A676]/20 p-3;
   }
   
   .admin-table tr:hover {
-    @apply bg-[#B3D1FF]/40;
+    @apply bg-[#F4EBE2]/60;
   }
   
   /* Added dark mode transition */
@@ -199,17 +200,17 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   
-  /* Blue-themed custom classes for tourism site */
+  /* Warm-themed custom classes for tourism site */
   .luxury-card {
-    @apply rounded-xl border border-[#004AAD]/10 bg-white shadow-elevation-1 hover:shadow-card-hover transition-all duration-300 overflow-hidden;
+    @apply rounded-xl border border-[#D0A676]/10 bg-white shadow-elevation-1 hover:shadow-card-hover transition-all duration-300 overflow-hidden;
   }
   
-  .blue-gradient {
-    @apply bg-gradient-to-br from-[#E6F0FF] via-[#004AAD] to-[#001F5C] text-white;
+  .warm-gradient {
+    @apply bg-gradient-to-br from-[#F4EBE2] via-[#D0A676] to-[#8B5E34] text-white;
   }
   
-  .blue-light-gradient {
-    @apply bg-gradient-to-br from-white via-[#E6F0FF] to-[#B3D1FF] text-[#004AAD];
+  .warm-light-gradient {
+    @apply bg-gradient-to-br from-white via-[#F4EBE2] to-[#E9D8C6] text-[#8B5E34];
   }
     
   .image-hover-zoom {
@@ -225,11 +226,11 @@
   }
   
   .section-title {
-    @apply text-3xl font-bold mb-2 text-center text-[#004AAD];
+    @apply text-3xl font-bold mb-2 text-center text-[#8B5E34];
   }
   
   .section-subtitle {
-    @apply text-center text-[#004AAD]/70 mb-8 max-w-2xl mx-auto;
+    @apply text-center text-[#8B5E34]/70 mb-8 max-w-2xl mx-auto;
   }
   
   /* Hide scrollbar for Chrome, Safari and Opera */

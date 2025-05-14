@@ -20,48 +20,48 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: '#004AAD',
-				input: '#004AAD',
-				ring: '#004AAD',
+				border: '#D0A676',
+				input: '#8B5E34',
+				ring: '#D0A676',
 				background: '#FFFFFF',
-				foreground: '#004AAD',
+				foreground: '#2C1810',
 				primary: {
-					DEFAULT: '#004AAD',
+					DEFAULT: '#8B5E34',
 					foreground: '#FFFFFF'
 				},
 				secondary: {
-					DEFAULT: '#E6F0FF', // Very light blue
-					foreground: '#004AAD'
+					DEFAULT: '#F4EBE2', 
+					foreground: '#8B5E34'
 				},
 				destructive: {
-					DEFAULT: '#004AAD',
+					DEFAULT: '#C25450',
 					foreground: '#FFFFFF'
 				},
 				muted: {
-					DEFAULT: '#E6F0FF', // Very light blue
-					foreground: '#004AAD'
+					DEFAULT: '#F4EBE2', 
+					foreground: '#8B5E34'
 				},
 				accent: {
-					DEFAULT: '#E6F0FF', // Very light blue
-					foreground: '#004AAD'
+					DEFAULT: '#D0A676', 
+					foreground: '#2C1810'
 				},
 				popover: {
 					DEFAULT: '#FFFFFF',
-					foreground: '#004AAD'
+					foreground: '#2C1810'
 				},
 				card: {
 					DEFAULT: '#FFFFFF',
-					foreground: '#004AAD'
+					foreground: '#2C1810'
 				},
 				sidebar: {
-					DEFAULT: '#FFFFFF',
-					foreground: '#004AAD',
-					primary: '#004AAD',
-					'primary-foreground': '#FFFFFF',
-					accent: '#E6F0FF',
-					'accent-foreground': '#004AAD',
-					border: '#004AAD',
-					ring: '#004AAD'
+					DEFAULT: '#2C1810',
+					foreground: '#F4EBE2',
+					primary: '#D0A676',
+					'primary-foreground': '#2C1810',
+					accent: '#F4EBE2',
+					'accent-foreground': '#2C1810',
+					border: '#D0A676',
+					ring: '#D0A676'
 				}
 			},
 			borderRadius: {
@@ -132,10 +132,10 @@ export default {
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
 			},
 			boxShadow: {
-				'card-hover': '0 15px 30px -10px rgba(0, 74, 173, 0.1), 0 8px 10px -5px rgba(0, 74, 173, 0.04)',
-				'elevation-1': '0 1px 3px rgba(0, 74, 173, 0.12), 0 1px 2px rgba(0, 74, 173, 0.24)',
-				'elevation-2': '0 3px 6px rgba(0, 74, 173, 0.16), 0 3px 6px rgba(0, 74, 173, 0.23)',
-				'elevation-3': '0 10px 20px rgba(0, 74, 173, 0.19), 0 6px 6px rgba(0, 74, 173, 0.23)',
+				'card-hover': '0 15px 30px -10px rgba(208, 166, 118, 0.1), 0 8px 10px -5px rgba(208, 166, 118, 0.04)',
+				'elevation-1': '0 1px 3px rgba(139, 94, 52, 0.12), 0 1px 2px rgba(139, 94, 52, 0.24)',
+				'elevation-2': '0 3px 6px rgba(139, 94, 52, 0.16), 0 3px 6px rgba(139, 94, 52, 0.23)',
+				'elevation-3': '0 10px 20px rgba(139, 94, 52, 0.19), 0 6px 6px rgba(139, 94, 52, 0.23)',
 			}
 		}
 	},
