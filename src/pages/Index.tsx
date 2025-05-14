@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import HeroCarousel from "@/components/HeroCarousel";
+import HomepageSearchBar from "@/components/HomepageSearchBar";
 import DestinationCard from "@/components/DestinationCard";
 import EventCard from "@/components/EventCard";
 import Footer from "@/components/Footer";
@@ -12,11 +12,11 @@ import { Event } from "@/models/Event";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
-import StatsCounter from "@/components/StatsCounter";
-import TestimonialSlider from "@/components/TestimonialSlider";
 import WhyZimbabwe from "@/components/WhyZimbabwe";
 import MapExplorer from "@/components/MapExplorer";
 import AiAssistant from "@/components/AiAssistant";
+import DestinationCategories from "@/components/DestinationCategories";
+import { Globe } from "lucide-react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -51,37 +51,58 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <HeroCarousel />
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Hero Section with Airbnb-style search */}
+      <div className="relative h-[80vh] bg-cover bg-center" style={{ backgroundImage: "url('/hero.jpg')" }}>
+        <div className="absolute inset-0 bg-black opacity-30"></div>
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 max-w-3xl">
+            Discover the Heart of Zimbabwe
+          </h1>
+          <div className="w-full max-w-4xl bg-white rounded-full shadow-lg p-2 mb-8">
+            <HomepageSearchBar />
+          </div>
+        </div>
+      </div>
       
-      <StatsCounter />
+      {/* Categories Section */}
+      <div className="py-12 container mx-auto px-4">
+        <DestinationCategories />
+      </div>
       
-      <div className="container mx-auto px-4 py-16 max-w-7xl">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-2">Popular Destinations & Events</h2>
-          <p className="text-center text-muted-foreground mb-8">Explore our handpicked experiences in Zimbabwe</p>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="mb-10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-semibold">Popular in Zimbabwe</h2>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 rounded-full border-gray-300 hover:bg-gray-50"
+              onClick={handleExploreMore}
+            >
+              <span>Show all</span>
+            </Button>
+          </div>
           
-          <Tabs defaultValue="destinations" className="mb-12" onValueChange={setActiveTab}>
-            <div className="flex justify-center mb-8">
-              <TabsList className="bg-amber-50">
-                <TabsTrigger 
-                  value="destinations" 
-                  className="data-[state=active]:bg-amber-600 data-[state=active]:text-white px-6 py-3 text-lg"
-                >
-                  Top Attractions
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="events"
-                  className="data-[state=active]:bg-amber-600 data-[state=active]:text-white px-6 py-3 text-lg"
-                >
-                  Upcoming Events
-                </TabsTrigger>
-              </TabsList>
-            </div>
+          <Tabs defaultValue="destinations" className="mb-8" onValueChange={setActiveTab}>
+            <TabsList className="border-b w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-6 px-0">
+              <TabsTrigger 
+                value="destinations" 
+                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
+              >
+                Destinations
+              </TabsTrigger>
+              <TabsTrigger 
+                value="events"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
+              >
+                Experiences
+              </TabsTrigger>
+            </TabsList>
             
-            <TabsContent value="destinations" className="space-y-8 animate-fade-in">
+            <TabsContent value="destinations" className="animate-fade-in">
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => (
                     <div key={i} className="border rounded-lg overflow-hidden">
                       <Skeleton className="h-48 w-full" />
@@ -89,37 +110,26 @@ const Index = () => {
                         <Skeleton className="h-6 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />
                         <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-10 w-full mt-4" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {destinations.map((destination) => (
-                      <DestinationCard 
-                        key={destination.id} 
-                        destination={destination}
-                        className="hover:translate-y-[-5px] transition-all duration-300" 
-                      />
-                    ))}
-                  </div>
-                  <div className="flex justify-center mt-8">
-                    <Button 
-                      className="bg-amber-600 hover:bg-amber-700 text-white text-lg px-8 py-6"
-                      onClick={handleExploreMore}
-                    >
-                      View All Destinations
-                    </Button>
-                  </div>
-                </>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {destinations.map((destination) => (
+                    <DestinationCard 
+                      key={destination.id} 
+                      destination={destination}
+                      className="hover:shadow-md transition-all duration-300" 
+                    />
+                  ))}
+                </div>
               )}
             </TabsContent>
             
-            <TabsContent value="events" className="space-y-8 animate-fade-in">
+            <TabsContent value="events" className="animate-fade-in">
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => (
                     <div key={i} className="border rounded-lg overflow-hidden">
                       <Skeleton className="h-48 w-full" />
@@ -127,33 +137,53 @@ const Index = () => {
                         <Skeleton className="h-6 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />
                         <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-10 w-full mt-4" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {events.map((event) => (
-                      <EventCard 
-                        key={event.id} 
-                        event={event}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex justify-center mt-8">
-                    <Button 
-                      className="bg-amber-600 hover:bg-amber-700 text-white text-lg px-8 py-6"
-                      onClick={handleExploreMore}
-                    >
-                      View All Events
-                    </Button>
-                  </div>
-                </>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {events.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      event={event}
+                    />
+                  ))}
+                </div>
               )}
             </TabsContent>
           </Tabs>
+        </div>
+      </div>
+      
+      {/* Inspiration Section */}
+      <div className="container mx-auto px-4 py-12">
+        <h2 className="text-3xl font-semibold mb-10">Inspiration for your next adventure</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="relative rounded-2xl overflow-hidden h-72 group">
+            <img src="/victoria-falls.jpg" alt="Victoria Falls" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 text-white">
+              <h3 className="text-2xl font-bold">Natural Wonders</h3>
+              <p className="mt-2">Experience breathtaking landscapes and natural beauty</p>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden h-72 group">
+            <img src="/traditional.jpg" alt="Cultural Experiences" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 text-white">
+              <h3 className="text-2xl font-bold">Cultural Immersion</h3>
+              <p className="mt-2">Connect with local traditions and authentic experiences</p>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden h-72 group">
+            <img src="/hwange.jpg" alt="Wildlife Safari" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 text-white">
+              <h3 className="text-2xl font-bold">Wildlife Safari</h3>
+              <p className="mt-2">Encounter majestic animals in their natural habitat</p>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -161,26 +191,67 @@ const Index = () => {
       
       <MapExplorer />
       
-      <TestimonialSlider />
+      {/* Airbnb-style "Worldwide" section */}
+      <div className="bg-gray-50 py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-3 mb-8">
+            <Globe className="h-8 w-8" />
+            <h2 className="text-3xl font-semibold">Travel Zimbabwe from anywhere</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="h-52 overflow-hidden">
+                <img src="/mana-pools.jpg" alt="Virtual Tour" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">Virtual Tours</h3>
+                <p className="text-gray-600">Experience Zimbabwe's beauty through immersive 360° virtual tours.</p>
+                <Button className="mt-4 bg-black hover:bg-gray-800 text-white rounded-lg">Explore now</Button>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="h-52 overflow-hidden">
+                <img src="/carnival.jpg" alt="Online Experiences" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">Online Experiences</h3>
+                <p className="text-gray-600">Join interactive sessions with local guides and cultural experts.</p>
+                <Button className="mt-4 bg-black hover:bg-gray-800 text-white rounded-lg">Join a session</Button>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="h-52 overflow-hidden">
+                <img src="/nyanga.jpg" alt="Travel Guides" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">Travel Guides</h3>
+                <p className="text-gray-600">Access comprehensive guides curated by Zimbabwe travel experts.</p>
+                <Button className="mt-4 bg-black hover:bg-gray-800 text-white rounded-lg">Get guides</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
+      {/* CTA Section */}
       <section className="py-16 bg-cover bg-center relative" style={{ backgroundImage: "url('/hero.jpg')" }}>
         <div className="absolute inset-0 bg-black opacity-60"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center text-white">
+          <div className="max-w-2xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready for Your Zimbabwe Adventure?</h2>
             <p className="mb-8 text-lg text-white/90">
-              Create an account to book your perfect trip, save favorites, and get personalized recommendations.
+              Create an account to save your favorites and get personalized recommendations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                className="bg-green-700 hover:bg-green-800 text-white text-lg px-10 py-6"
+                className="bg-white hover:bg-gray-100 text-black text-lg px-8 py-6 rounded-xl"
                 onClick={() => navigate("/auth")}
               >
-                Start Planning Now
+                Start Planning
               </Button>
               <Button 
                 variant="outline" 
-                className="border-white text-white hover:bg-white/20 text-lg px-10 py-6"
+                className="border-white text-white hover:bg-white/20 text-lg px-8 py-6 rounded-xl"
                 onClick={() => navigate("/browse")}
               >
                 Browse Experiences

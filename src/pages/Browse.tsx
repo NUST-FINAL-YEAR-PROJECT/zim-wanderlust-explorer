@@ -10,11 +10,13 @@ import EventCard from "@/components/EventCard";
 import { getDestinations, searchDestinations } from "@/models/Destination";
 import { getEvents, searchEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
+import DestinationCategories from "@/components/DestinationCategories";
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "destinations";
   const initialSearch = searchParams.get("search") || "";
+  const category = searchParams.get("category");
   
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
@@ -64,44 +66,47 @@ const Browse = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="bg-green-900 py-6 px-4">
+    <div className="min-h-screen flex flex-col bg-white">
+      <div className="bg-white py-6 px-4 border-b">
         <div className="container mx-auto">
-          <h1 className="text-2xl font-bold text-white mb-4">Browse Zimbabwe</h1>
+          <h1 className="text-2xl font-bold mb-4">Explore Zimbabwe</h1>
           <SearchBar onSearch={handleSearch} />
         </div>
       </div>
       
+      <div className="container mx-auto px-4 py-6">
+        <DestinationCategories />
+      </div>
+      
       <div className="container mx-auto px-4 py-8 flex-grow">
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-          <div className="flex justify-center mb-6">
-            <TabsList className="bg-green-50">
+          <div className="mb-6">
+            <TabsList className="w-full justify-start space-x-10 rounded-none bg-transparent h-auto mb-6 px-0 border-b">
               <TabsTrigger 
                 value="destinations"
-                className="data-[state=active]:bg-green-700 data-[state=active]:text-white"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
               >
-                Destinations
+                Places to stay
               </TabsTrigger>
               <TabsTrigger 
                 value="events"
-                className="data-[state=active]:bg-green-700 data-[state=active]:text-white"
+                className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none bg-transparent h-10 px-0"
               >
-                Events
+                Experiences
               </TabsTrigger>
             </TabsList>
           </div>
           
           <TabsContent value="destinations" className="space-y-6">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map(i => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                   <div key={i} className="border rounded-lg overflow-hidden">
                     <Skeleton className="h-48 w-full" />
                     <div className="p-4 space-y-2">
                       <Skeleton className="h-6 w-3/4" />
                       <Skeleton className="h-4 w-1/2" />
                       <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-10 w-full mt-4" />
                     </div>
                   </div>
                 ))}
@@ -112,7 +117,7 @@ const Browse = () => {
                 <p className="text-muted-foreground">Try adjusting your search query</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {destinations.map(destination => (
                   <DestinationCard key={destination.id} destination={destination} />
                 ))}
@@ -122,15 +127,14 @@ const Browse = () => {
           
           <TabsContent value="events" className="space-y-6">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map(i => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                   <div key={i} className="border rounded-lg overflow-hidden">
                     <Skeleton className="h-48 w-full" />
                     <div className="p-4 space-y-2">
                       <Skeleton className="h-6 w-3/4" />
                       <Skeleton className="h-4 w-1/2" />
                       <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-10 w-full mt-4" />
                     </div>
                   </div>
                 ))}
@@ -141,7 +145,7 @@ const Browse = () => {
                 <p className="text-muted-foreground">Try adjusting your search query</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {events.map(event => (
                   <EventCard key={event.id} event={event} />
                 ))}
