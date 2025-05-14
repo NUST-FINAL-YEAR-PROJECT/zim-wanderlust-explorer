@@ -139,7 +139,12 @@ const PaymentPage = () => {
         throw error;
       }
 
-      const fileUrl = `${supabase.storageUrl}/object/public/payment_proofs/${fileName}`;
+      // Create a public URL for the uploaded file - FIX: Use the proper method to get the URL
+      const { data: publicUrlData } = supabase.storage
+        .from('payment_proofs')
+        .getPublicUrl(fileName);
+      
+      const fileUrl = publicUrlData.publicUrl;
       
       // Update booking and payment records
       await updateBooking(booking.id, {
