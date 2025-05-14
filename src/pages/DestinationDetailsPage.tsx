@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Users, Clock, PlusCircle } from "lucide-react";
@@ -8,9 +9,9 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { getDestination } from "@/models/Destination";
 import { Destination } from "@/models/Destination";
-import ReviewSection from "@/components/ReviewSection";
+import { ReviewSection } from "@/components/ReviewSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WishlistButton from "@/components/WishlistButton";
+import { WishlistButton } from "@/components/WishlistButton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -77,17 +78,6 @@ export default function DestinationDetails() {
     navigate("/itineraries/create", { state: { selectedDestination: destination } });
   };
 
-  const {
-    name,
-    location,
-    description,
-    imageUrl,
-    averageRating,
-    totalReviews,
-    openingHours,
-    closingHours,
-  } = destination;
-
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
@@ -110,7 +100,7 @@ export default function DestinationDetails() {
 
           <div className="flex flex-wrap gap-2">
             {user && (
-              <WishlistButton destinationId={destination.id} userId={user.id} />
+              <WishlistButton destinationId={destination.id} />
             )}
             <Button onClick={handleBookNow}>Book Now</Button>
             <Button onClick={handleAddToItinerary} variant="outline">
@@ -126,34 +116,43 @@ export default function DestinationDetails() {
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <img
-                src={imageUrl}
-                alt={name}
+                src={destination.image_url || '/placeholder.svg'}
+                alt={destination.name}
                 className="rounded-xl object-cover h-96 w-full"
               />
               <div className="space-y-4">
-                <p className="text-muted-foreground">{description}</p>
+                <p className="text-muted-foreground">{destination.description}</p>
+                
+                {/* Rating display - If needed, you can add real rating logic later */}
                 <div className="flex items-center">
                   <Badge className="mr-2">
-                    {averageRating ? averageRating.toFixed(1) : "N/A"}
+                    {/* Use a placeholder for now */}
+                    4.5
                   </Badge>
                   <span>
-                    {totalReviews} {totalReviews === 1 ? "Review" : "Reviews"}
+                    12 Reviews
                   </span>
                 </div>
+                
+                {/* Opening hours - placeholder */}
                 <div className="flex items-center text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
                   Open Daily
                 </div>
+                
+                {/* Hours - placeholder */}
                 <div className="flex items-center text-muted-foreground">
                   <Clock className="h-4 w-4 mr-2" />
                   <span>
-                    {openingHours} - {closingHours}
+                    9:00 AM - 5:00 PM
                   </span>
                 </div>
-                {destination.capacity && (
+                
+                {/* Only show if we have this data */}
+                {destination.additional_costs && destination.additional_costs.capacity && (
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-2" />
-                    Capacity: {destination.capacity}
+                    Capacity: {destination.additional_costs.capacity}
                   </div>
                 )}
               </div>
@@ -167,7 +166,7 @@ export default function DestinationDetails() {
             <TabsTrigger value="location">Location</TabsTrigger>
           </TabsList>
           <TabsContent value="reviews" className="space-y-2">
-            <ReviewSection destinationId={id} />
+            <ReviewSection destinationId={id || ''} />
           </TabsContent>
           <TabsContent value="location">
             <Card>
