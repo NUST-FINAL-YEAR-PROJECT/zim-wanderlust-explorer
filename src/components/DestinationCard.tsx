@@ -1,42 +1,84 @@
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { MapPin } from 'lucide-react';
+import { Destination } from '@/models/Destination';
+import { useQuery } from '@tanstack/react-query';
+import { getDestinationRating } from '@/models/Review';
+import { RatingDisplay } from './RatingDisplay';
+import { WishlistButton } from './WishlistButton';
 
-interface DestinationProps {
-  destination: {
-    id: number;
-    name: string;
-    location: string;
-    image: string;
-    description: string;
-    price: number;
-  };
+interface DestinationCardProps {
+  destination: Destination;
+  className?: string;
 }
 
-const DestinationCard = ({ destination }: DestinationProps) => {
+const DestinationCard = ({ destination, className = '' }: DestinationCardProps) => {
+  const navigate = useNavigate();
+
+  const { data: rating = { average: 0, count: 0 } } = useQuery({
+    queryKey: ['destinationRating', destination.id],
+    queryFn: () => getDestinationRating(destination.id)
+  });
+
+  const handleViewDetails = () => {
+    navigate(`/destination/${destination.id}`);
+  };
+
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg h-full flex flex-col">
-      <div className="relative h-56 overflow-hidden">
+    <Card className={`overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow ${className}`}>
+      <div className="relative h-48 overflow-hidden">
         <img
-          src={destination.image}
+          src={destination.image_url || '/placeholder.svg'}
           alt={destination.name}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          className="w-full h-full object-cover"
         />
-      </div>
-      <CardContent className="pt-6 flex-grow">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-bold text-xl">{destination.name}</h3>
-          <span className="font-medium text-green-700">${destination.price}</span>
+        <div className="absolute top-2 right-2">
+          <WishlistButton 
+            destinationId={destination.id}
+            variant="default"
+            className="bg-white text-primary hover:bg-white/90"
+          />
         </div>
-        <div className="flex items-center text-muted-foreground mb-4">
-          <MapPin size={16} className="mr-1" />
+      </div>
+      
+      <CardContent className="p-4 flex-grow">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-bold text-xl">{destination.name}</h3>
+          <Badge variant="outline" className="font-medium text-primary border-primary/20 bg-primary/5">
+            ${destination.price}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center text-muted-foreground mb-2">
+          <MapPin size={16} className="mr-1 flex-shrink-0" />
           <span className="text-sm">{destination.location}</span>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-3">{destination.description}</p>
+        
+        {rating && (
+          <div className="mb-3">
+            <RatingDisplay
+              rating={rating.average}
+              count={rating.count}
+              showCount={true}
+            />
+          </div>
+        )}
+        
+        <p className="text-sm text-muted-foreground line-clamp-3 flex-grow">
+          {destination.description}
+        </p>
       </CardContent>
-      <CardFooter className="pt-0">
-        <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">View Details</Button>
+      
+      <CardFooter className="p-4 pt-0">
+        <Button 
+          className="w-full"
+          onClick={handleViewDetails}
+        >
+          View Details
+        </Button>
       </CardFooter>
     </Card>
   );

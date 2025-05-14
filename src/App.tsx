@@ -21,6 +21,7 @@ import InvoicePage from "./pages/InvoicePage";
 import Events from "./pages/Events";
 import EventBookingPage from "./pages/EventBookingPage";
 import Settings from "./pages/Settings";
+import WishlistPage from "./pages/WishlistPage";
 
 const queryClient = new QueryClient();
 
@@ -134,7 +135,7 @@ const App = () => (
               path="/wishlist" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <WishlistPage />
                 </ProtectedRoute>
               } 
             />

@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDestination } from '@/models/Destination';
+import { getDestinationRating } from '@/models/Review';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +9,9 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { MapPin, Calendar, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { WishlistButton } from '@/components/WishlistButton';
+import { RatingDisplay } from '@/components/RatingDisplay';
+import { ReviewSection } from '@/components/ReviewSection';
 
 const DestinationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +20,12 @@ const DestinationDetails = () => {
   const { data: destination, isLoading } = useQuery({
     queryKey: ['destination', id],
     queryFn: () => getDestination(id as string),
+    enabled: !!id
+  });
+
+  const { data: rating = { average: 0, count: 0 }, isLoading: isRatingLoading } = useQuery({
+    queryKey: ['destinationRating', id],
+    queryFn: () => getDestinationRating(id as string),
     enabled: !!id
   });
 
@@ -63,11 +72,11 @@ const DestinationDetails = () => {
               <span>{destination.location}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-green-600">${destination.price}</span>
+          <div className="flex items-center gap-3">
+            <WishlistButton destinationId={destination.id} variant="outline" />
+            <span className="text-2xl font-bold text-primary">${destination.price}</span>
             <Button 
               onClick={() => navigate(`/booking/${destination.id}`)}
-              className="bg-amber-600 hover:bg-amber-700 text-white"
             >
               Book Now
             </Button>
@@ -83,11 +92,25 @@ const DestinationDetails = () => {
                 className="w-full h-[400px] object-cover"
               />
               
-              <Tabs defaultValue="overview" className="p-6">
+              <div className="p-6">
+                {!isRatingLoading && (
+                  <div className="mb-4">
+                    <RatingDisplay 
+                      rating={rating.average} 
+                      count={rating.count}
+                      showCount={true}
+                      size="lg"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <Tabs defaultValue="overview" className="p-6 pt-0">
                 <TabsList className="mb-4">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="amenities">Amenities</TabsTrigger>
+                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="space-y-4">
@@ -102,7 +125,7 @@ const DestinationDetails = () => {
                       <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {destination.highlights.map((highlight, index) => (
                           <li key={index} className="flex items-start">
-                            <CheckCircle size={18} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                            <CheckCircle size={18} className="text-primary mr-2 mt-1 flex-shrink-0" />
                             <span>{highlight}</span>
                           </li>
                         ))}
@@ -163,6 +186,10 @@ const DestinationDetails = () => {
                     </div>
                   )}
                 </TabsContent>
+                
+                <TabsContent value="reviews" className="space-y-4">
+                  <ReviewSection destinationId={destination.id} />
+                </TabsContent>
               </Tabs>
             </div>
           </div>
@@ -205,7 +232,7 @@ const DestinationDetails = () => {
 
                 <div className="pt-4">
                   <Button 
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                    className="w-full"
                     onClick={() => navigate(`/booking/${destination.id}`)}
                   >
                     Book This Destination
@@ -223,7 +250,7 @@ const DestinationDetails = () => {
                   <ul className="space-y-2">
                     {destination.activities.map((activity, index) => (
                       <li key={index} className="flex items-center">
-                        <CheckCircle size={16} className="text-green-500 mr-2" />
+                        <CheckCircle size={16} className="text-primary mr-2" />
                         <span>{activity}</span>
                       </li>
                     ))}
