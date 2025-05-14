@@ -5,6 +5,7 @@ import { MapPin, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from '@/integrations/supabase/client';
 import { format, parseISO, isValid } from 'date-fns';
+import { cn } from "@/lib/utils";
 
 interface EventProps {
   event: {
@@ -20,9 +21,10 @@ interface EventProps {
     description: string;
     price?: number;
   };
+  className?: string;
 }
 
-const EventCard = ({ event }: EventProps) => {
+const EventCard = ({ event, className }: EventProps) => {
   const navigate = useNavigate();
   
   // Format date for display
@@ -76,7 +78,7 @@ const EventCard = ({ event }: EventProps) => {
   const imageUrl = event.image_url || event.image || "/placeholder.svg";
   
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg h-full flex flex-col">
+    <Card className={cn("overflow-hidden transition-all duration-300 hover:shadow-lg h-full flex flex-col", className)}>
       <div className="relative h-56 overflow-hidden">
         <img
           src={imageUrl}
