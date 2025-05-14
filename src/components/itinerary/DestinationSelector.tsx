@@ -9,6 +9,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Destination, getDestinations } from "@/models/Destination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DestinationSelectorProps {
   value: Destination | null;
@@ -28,6 +30,7 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchDestinations = async () => {
@@ -35,12 +38,10 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
       setError(null);
       try {
         const data = await getDestinations();
-        // Initialize as empty array to prevent undefined errors
         setDestinations(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Error fetching destinations:', err);
         setError('Failed to load destinations');
-        // Always ensure destinations is an array
         setDestinations([]);
       } finally {
         setIsLoading(false);
@@ -49,6 +50,11 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
 
     fetchDestinations();
   }, []);
+
+  const filteredDestinations = destinations.filter(destination => 
+    destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    destination.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (error) {
     return (
@@ -70,45 +76,93 @@ export function DestinationSelector({ value, onChange }: DestinationSelectorProp
           className="w-full justify-between"
           disabled={isLoading}
         >
-          {value ? value.name : isLoading ? "Loading destinations..." : "Select destination"}
+          {value ? (
+            <div className="flex items-center">
+              {value.image_url && (
+                <div 
+                  className="h-6 w-6 rounded mr-2 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${value.image_url})` }}
+                />
+              )}
+              <span>{value.name}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">
+              {isLoading ? "Loading destinations..." : "Select destination"}
+            </span>
+          )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search destinations..." />
-          <CommandEmpty>
-            {error ? error : "No destination found."}
-          </CommandEmpty>
-          <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {destinations && destinations.length > 0 ? (
-              destinations.map((destination) => (
-                <CommandItem
-                  key={destination.id}
-                  value={destination.name}
-                  onSelect={() => {
-                    onChange(destination.id === value?.id ? null : destination);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value?.id === destination.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {destination.name}
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {destination.location}
-                  </span>
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder="Search destinations..." 
+            onValueChange={setSearchQuery}
+            value={searchQuery}
+          />
+          <CommandList>
+            <CommandEmpty>
+              {isLoading ? (
+                <div className="p-2">
+                  <Skeleton className="h-8 w-full mb-2" />
+                  <Skeleton className="h-8 w-full mb-2" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : error ? (
+                error
+              ) : (
+                "No destination found."
+              )}
+            </CommandEmpty>
+            <CommandGroup className="max-h-[300px] overflow-y-auto">
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-8 w-full mb-2 mx-2" />
+                  <Skeleton className="h-8 w-full mb-2 mx-2" />
+                  <Skeleton className="h-8 w-full mx-2" />
+                </>
+              ) : filteredDestinations.length > 0 ? (
+                filteredDestinations.map((destination) => (
+                  <CommandItem
+                    key={destination.id}
+                    value={destination.name}
+                    onSelect={() => {
+                      onChange(destination.id === value?.id ? null : destination);
+                      setOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="flex items-center"
+                  >
+                    <div className="flex items-center flex-1">
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value?.id === destination.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {destination.image_url && (
+                        <div 
+                          className="w-6 h-6 rounded mr-2 bg-cover bg-center"
+                          style={{ backgroundImage: `url(${destination.image_url})` }}
+                        />
+                      )}
+                      <div className="flex flex-col">
+                        <span>{destination.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {destination.location}
+                        </span>
+                      </div>
+                    </div>
+                  </CommandItem>
+                ))
+              ) : (
+                <CommandItem disabled>
+                  No destinations available
                 </CommandItem>
-              ))
-            ) : (
-              <CommandItem disabled>
-                {isLoading ? "Loading destinations..." : "No destinations available"}
-              </CommandItem>
-            )}
-          </CommandGroup>
+              )}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

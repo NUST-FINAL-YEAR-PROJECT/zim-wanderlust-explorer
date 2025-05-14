@@ -1,16 +1,34 @@
 
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
-import { useEffect, useState } from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ItineraryCreatePage() {
   const [error, setError] = useState<Error | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Redirect if not logged in
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to create an itinerary",
+        variant: "destructive",
+      });
+      navigate("/auth");
+    }
+  }, [user, navigate, toast]);
 
   // Add error boundary handling
   useEffect(() => {
-    // Clean up any console errors
     console.log("Itinerary Create Page mounted");
     
     // Handle global errors
@@ -41,12 +59,12 @@ export default function ItineraryCreatePage() {
             </AlertDescription>
           </Alert>
           <div className="mt-4">
-            <button 
+            <Button 
               onClick={() => setError(null)} 
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         </div>
       </DashboardLayout>
@@ -56,8 +74,21 @@ export default function ItineraryCreatePage() {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold tracking-tight mb-6">Create New Itinerary</h1>
-        <ItineraryForm onError={(err) => setError(err)} />
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)}
+            className="mr-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">Create New Itinerary</h1>
+        </div>
+        
+        <div className="bg-muted/30 p-6 rounded-lg">
+          <ItineraryForm onError={(err) => setError(err)} />
+        </div>
       </div>
     </DashboardLayout>
   );
