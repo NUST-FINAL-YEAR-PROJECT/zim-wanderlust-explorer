@@ -1,17 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,10 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Booking, BookingStatus, PaymentStatus, getBookings, updateBooking } from '@/models/Booking';
+import { Download } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowDown, ArrowUp, Download, Calendar, MapPin } from 'lucide-react';
+import BookingsTable from './BookingsTable';
 
 const BookingsManagement: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -124,39 +116,6 @@ const BookingsManagement: React.FC = () => {
     return 0;
   });
 
-  const getStatusBadgeColor = (status: BookingStatus | null) => {
-    switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
-  const getPaymentStatusBadgeColor = (status: PaymentStatus | null) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      case 'refunded': return 'bg-purple-100 text-purple-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
-  const SortIcon = ({ column }: { column: string }) => {
-    if (sortConfig.key !== column) {
-      return null;
-    }
-    return sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
-  };
-
-  // Helper function to determine booking type
-  const getBookingType = (booking: Booking) => {
-    if (booking.destination_id) return 'Destination';
-    if (booking.event_id) return 'Event';
-    return 'Unknown';
-  };
-
   // Helper function to get booking name
   const getBookingName = (booking: Booking) => {
     // For destinations
@@ -208,118 +167,14 @@ const BookingsManagement: React.FC = () => {
         <CardDescription>View and manage customer bookings</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          {isLoading ? (
-            <div className="py-8 text-center">Loading bookings...</div>
-          ) : bookings.length === 0 ? (
-            <div className="py-8 text-center">No bookings found.</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Name / Location</TableHead>
-                  <TableHead 
-                    className="cursor-pointer flex items-center gap-1" 
-                    onClick={() => handleSort('booking_date')}
-                  >
-                    Date <SortIcon column="booking_date" />
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer flex items-center gap-1"
-                    onClick={() => handleSort('number_of_people')}
-                  >
-                    People <SortIcon column="number_of_people" />
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer flex items-center gap-1"
-                    onClick={() => handleSort('total_price')}
-                  >
-                    Total <SortIcon column="total_price" />
-                  </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Proof</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedBookings.map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell>
-                      <div className="font-medium">{booking.contact_name}</div>
-                      <div className="text-xs text-gray-500">
-                        {booking.contact_email}<br />
-                        {booking.contact_phone}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={
-                        booking.destination_id ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
-                      }>
-                        {getBookingType(booking)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{getBookingName(booking)}</div>
-                      <div className="flex items-center text-xs text-gray-500 mt-1">
-                        <MapPin size={12} className="mr-1" /> {getBookingLocation(booking)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>{new Date(booking.booking_date).toLocaleDateString()}</div>
-                      {booking.preferred_date && (
-                        <div className="flex items-center text-xs text-gray-500 mt-1">
-                          <Calendar size={12} className="mr-1" /> 
-                          {new Date(booking.preferred_date).toLocaleDateString()}
-                        </div>
-                      )}
-                      <div className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(booking.booking_date), { addSuffix: true })}
-                      </div>
-                    </TableCell>
-                    <TableCell>{booking.number_of_people}</TableCell>
-                    <TableCell>${booking.total_price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusBadgeColor(booking.status)}>
-                        {booking.status || 'pending'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getPaymentStatusBadgeColor(booking.payment_status)}>
-                        {booking.payment_status || 'pending'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {booking.payment_proof_url ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex items-center gap-1"
-                          onClick={() => handleViewPaymentProof(booking)}
-                        >
-                          View
-                        </Button>
-                      ) : (
-                        <span className="text-gray-400 text-xs">No proof</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleEditBooking(booking)}
-                      >
-                        Manage
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
+        <BookingsTable 
+          bookings={sortedBookings}
+          isLoading={isLoading}
+          onViewPaymentProof={handleViewPaymentProof}
+          onEditBooking={handleEditBooking}
+          onSort={handleSort}
+          sortConfig={sortConfig}
+        />
         
         {/* Edit Booking Dialog */}
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
@@ -343,15 +198,6 @@ const BookingsManagement: React.FC = () => {
                   <div className="font-medium">Phone:</div>
                   <div className="col-span-3">{selectedBooking.contact_phone}</div>
 
-                  <div className="font-medium">Type:</div>
-                  <div className="col-span-3">
-                    <Badge variant="outline" className={
-                      selectedBooking.destination_id ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
-                    }>
-                      {getBookingType(selectedBooking)}
-                    </Badge>
-                  </div>
-
                   <div className="font-medium">Booking:</div>
                   <div className="col-span-3">{getBookingName(selectedBooking)}</div>
 
@@ -362,7 +208,7 @@ const BookingsManagement: React.FC = () => {
                   <div className="col-span-3">
                     {new Date(selectedBooking.booking_date).toLocaleDateString()}
                     {selectedBooking.preferred_date && (
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-sm text-muted-foreground mt-1">
                         Preferred: {new Date(selectedBooking.preferred_date).toLocaleDateString()}
                       </div>
                     )}
@@ -373,31 +219,6 @@ const BookingsManagement: React.FC = () => {
                   
                   <div className="font-medium">Total:</div>
                   <div className="col-span-3">${selectedBooking.total_price.toFixed(2)}</div>
-
-                  {selectedBooking.selected_ticket_type && (
-                    <>
-                      <div className="font-medium">Ticket Type:</div>
-                      <div className="col-span-3">
-                        {selectedBooking.selected_ticket_type.name || 'Standard'}
-                        {selectedBooking.selected_ticket_type.price && (
-                          <span className="text-sm text-gray-500 ml-2">
-                            (${selectedBooking.selected_ticket_type.price} each)
-                          </span>
-                        )}
-                      </div>
-                    </>
-                  )}
-
-                  {selectedBooking.booking_details && Object.keys(selectedBooking.booking_details).length > 0 && (
-                    <>
-                      <div className="font-medium">Additional Details:</div>
-                      <div className="col-span-3">
-                        <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded">
-                          {JSON.stringify(selectedBooking.booking_details, null, 2)}
-                        </pre>
-                      </div>
-                    </>
-                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -475,7 +296,7 @@ const BookingsManagement: React.FC = () => {
                     className="max-w-full rounded-md shadow-md"
                   />
                 </div>
-                <div className="text-sm text-gray-500 mb-4">
+                <div className="text-sm text-muted-foreground mb-4">
                   {selectedBooking.payment_proof_uploaded_at ? (
                     <p>Uploaded {formatDistanceToNow(new Date(selectedBooking.payment_proof_uploaded_at), { addSuffix: true })}</p>
                   ) : (
