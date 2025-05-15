@@ -80,8 +80,7 @@ const HeroCarousel = () => {
     }
   };
 
-  const handleSignIn = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleSignIn = () => {
     navigate("/auth");
   };
   

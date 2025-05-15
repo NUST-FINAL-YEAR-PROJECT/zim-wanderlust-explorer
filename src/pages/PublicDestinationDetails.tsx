@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Footer from '@/components/Footer';
 import { RatingDisplay } from '@/components/RatingDisplay';
 import { getDestinationRating } from '@/models/Review';
+import { useToast } from '@/hooks/use-toast';
 
 const PublicDestinationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +18,7 @@ const PublicDestinationDetails = () => {
   const [destination, setDestination] = useState<Destination | null>(null);
   const [loading, setLoading] = useState(true);
   const [rating, setRating] = useState({ average: 0, count: 0 });
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchDestination() {
@@ -37,16 +38,27 @@ const PublicDestinationDetails = () => {
           } catch (error) {
             console.error("Error fetching rating:", error);
           }
+        } else {
+          toast({
+            title: "Error",
+            description: "Destination not found. Please try again.",
+            variant: "destructive"
+          });
         }
       } catch (error) {
         console.error("Error fetching destination:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load destination details. Please try again.",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     }
 
     fetchDestination();
-  }, [id]);
+  }, [id, toast]);
 
   const handleBookNow = () => {
     navigate('/auth', { state: { returnTo: `/destination/${id}` } });
