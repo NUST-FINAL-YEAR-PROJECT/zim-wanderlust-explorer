@@ -1,10 +1,9 @@
-
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from '@/integrations/supabase/client';
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parseISO, isValid, isPast } from 'date-fns';
 import { cn } from "@/lib/utils";
 
 interface EventProps {
@@ -54,6 +53,33 @@ const EventCard = ({ event, className }: EventProps) => {
     return "Date not specified";
   };
   
+  // Check if event is expired
+  const isEventExpired = () => {
+    if (!event.start_date && !event.end_date) return false;
+    
+    try {
+      // If we have an end date, use that to determine expiry
+      if (event.end_date) {
+        const endDate = parseISO(event.end_date);
+        if (isValid(endDate)) {
+          return isPast(endDate);
+        }
+      }
+      
+      // Otherwise use the start date
+      if (event.start_date) {
+        const startDate = parseISO(event.start_date);
+        if (isValid(startDate)) {
+          return isPast(startDate);
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      return false;
+    }
+  };
+  
   // Check if user is authenticated
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -61,6 +87,11 @@ const EventCard = ({ event, className }: EventProps) => {
   };
   
   const handleBookNow = async () => {
+    // If event expired, don't allow booking
+    if (isEventExpired()) {
+      return;
+    }
+    
     const isAuthenticated = await checkAuth();
     
     if (isAuthenticated) {
@@ -76,6 +107,7 @@ const EventCard = ({ event, className }: EventProps) => {
   // Use title if available, otherwise name (for compatibility)
   const eventName = event.title || event.name || "Unnamed Event";
   const imageUrl = event.image_url || event.image || "/placeholder.svg";
+  const expired = isEventExpired();
   
   return (
     <Card className={cn("overflow-hidden transition-all duration-300 hover:shadow-lg h-full flex flex-col", className)}>
@@ -83,13 +115,23 @@ const EventCard = ({ event, className }: EventProps) => {
         <img
           src={imageUrl}
           alt={eventName}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          className={cn(
+            "w-full h-full object-cover transition-transform duration-500 hover:scale-105",
+            expired ? "opacity-70 grayscale" : ""
+          )}
         />
+        {expired && (
+          <div className="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 m-2 rounded-md font-medium text-sm">
+            Expired
+          </div>
+        )}
       </div>
       <CardContent className="pt-6 flex-grow">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-bold text-xl">{eventName}</h3>
-          <span className="font-medium text-green-700">${event.price}</span>
+          {event.price !== undefined && (
+            <span className="font-medium text-green-700">${event.price}</span>
+          )}
         </div>
         <div className="flex items-center text-muted-foreground mb-2">
           <Calendar size={16} className="mr-1" />
@@ -102,12 +144,21 @@ const EventCard = ({ event, className }: EventProps) => {
         <p className="text-sm text-muted-foreground line-clamp-3">{event.description}</p>
       </CardContent>
       <CardFooter className="pt-0">
-        <Button 
-          className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-          onClick={handleBookNow}
-        >
-          Book Now
-        </Button>
+        {expired ? (
+          <Button 
+            className="w-full bg-gray-400 cursor-not-allowed text-white"
+            disabled
+          >
+            Event Expired
+          </Button>
+        ) : (
+          <Button 
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+            onClick={handleBookNow}
+          >
+            Book Now
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

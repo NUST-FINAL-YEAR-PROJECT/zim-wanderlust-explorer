@@ -20,17 +20,19 @@ const Auth: React.FC = () => {
   const location = useLocation();
   const { user, isAdmin, isLoading } = useAuth();
 
-  // Get the intended destination from location state, or default routes
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
+  // Get the intended destination from query params or location state
+  const searchParams = new URLSearchParams(location.search);
+  const returnTo = searchParams.get('returnTo');
+  const fromState = (location.state as { from?: { pathname: string } })?.from?.pathname;
   
   useEffect(() => {
     // Only redirect when we have determined the user state and they're logged in
     if (!isLoading && user) {
-      const redirectPath = from || (isAdmin ? '/admin' : '/dashboard');
+      const redirectPath = returnTo || fromState || (isAdmin ? '/admin' : '/dashboard');
       console.log("User is logged in, redirecting to:", redirectPath, "isAdmin:", isAdmin);
       navigate(redirectPath, { replace: true });
     }
-  }, [user, isAdmin, navigate, isLoading, from]);
+  }, [user, isAdmin, navigate, isLoading, returnTo, fromState]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ const Auth: React.FC = () => {
         title: 'Success',
         description: 'Signed in successfully.',
       });
-      // Will be handled by the useEffect above
+      // Redirection will be handled by the useEffect above
     } catch (error: any) {
       toast({
         title: 'Error',

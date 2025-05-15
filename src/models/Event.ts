@@ -40,7 +40,8 @@ export type EventInput = {
 export async function getEvents() {
   const { data, error } = await supabase
     .from('events')
-    .select('*');
+    .select('*')
+    .order('start_date', { ascending: true });
   
   if (error) {
     console.error('Error fetching events:', error);
@@ -66,10 +67,11 @@ export async function getEvent(id: string) {
 }
 
 export async function getUpcomingEvents() {
+  const now = new Date();
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .gt('start_date', new Date().toISOString())
+    .gt('start_date', now.toISOString())
     .order('start_date', { ascending: true });
   
   if (error) {
@@ -84,10 +86,28 @@ export async function searchEvents(query: string) {
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .or(`title.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`);
+    .or(`title.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
+    .order('start_date', { ascending: true });
   
   if (error) {
     console.error('Error searching events:', error);
+    return [];
+  }
+  
+  return data as Event[];
+}
+
+// Add a new function to get only active (non-expired) events
+export async function getActiveEvents() {
+  const now = new Date();
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .or(`end_date.gt.${now.toISOString()},and(end_date.is.null,start_date.gt.${now.toISOString()})`)
+    .order('start_date', { ascending: true });
+  
+  if (error) {
+    console.error('Error fetching active events:', error);
     return [];
   }
   

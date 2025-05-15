@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,7 @@ const HeroCarousel = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
   const nextSlide = () => {
@@ -58,13 +59,21 @@ const HeroCarousel = () => {
     setSearchQuery(query);
     if (query.trim()) {
       setShowResults(true);
-      // You would fetch actual results here
+      // We'll show some quick results here - in a real app this would be fetched
+      setSearchResults([
+        { id: 1, name: "Victoria Falls", type: "destination" },
+        { id: 2, name: "Hwange National Park", type: "destination" },
+        { id: 3, name: "HIFA Festival", type: "event" }
+      ]);
     } else {
       setShowResults(false);
+      setSearchResults([]);
     }
   };
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
     if (searchQuery.trim()) {
       navigate(`/browse?search=${encodeURIComponent(searchQuery)}`);
       setShowResults(false);
@@ -87,7 +96,12 @@ const HeroCarousel = () => {
 
   // Close search results when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setShowResults(false);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -162,8 +176,8 @@ const HeroCarousel = () => {
           </p>
           
           {/* Search Bar with Results Panel */}
-          <div className="w-full max-w-3xl mx-auto mb-10 relative">
-            <div className="flex gap-2">
+          <div className="w-full max-w-3xl mx-auto mb-10 relative" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit} className="flex gap-2">
               <div className="relative flex-1 bg-white rounded-lg overflow-hidden shadow-md">
                 <input
                   type="text"
@@ -177,43 +191,45 @@ const HeroCarousel = () => {
                 </div>
               </div>
               <Button 
-                onClick={handleSearchSubmit}
+                type="submit"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white h-[52px] px-6 rounded-lg shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/40"
               >
                 Search
               </Button>
-            </div>
+            </form>
             
             {/* Search Results Panel */}
-            {showResults && (
+            {showResults && searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
                 <div className="p-4">
                   <h3 className="font-medium text-lg mb-2">Quick Results</h3>
                   <div className="space-y-2">
-                    <div 
-                      className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
-                      onClick={() => navigate('/browse?search=victoria+falls')}
-                    >
-                      <div className="w-10 h-10 rounded bg-indigo-100 mr-3 flex-shrink-0"></div>
-                      <div className="flex-grow">
-                        <p className="font-medium">Victoria Falls</p>
-                        <p className="text-sm text-gray-500">Popular destination</p>
+                    {searchResults.map((result) => (
+                      <div 
+                        key={result.id}
+                        className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
+                        onClick={() => {
+                          if (result.type === 'destination') {
+                            navigate(`/browse?search=${encodeURIComponent(result.name)}&tab=destinations`);
+                          } else {
+                            navigate(`/browse?search=${encodeURIComponent(result.name)}&tab=events`);
+                          }
+                          setShowResults(false);
+                        }}
+                      >
+                        <div className="w-10 h-10 rounded bg-indigo-100 mr-3 flex-shrink-0"></div>
+                        <div className="flex-grow">
+                          <p className="font-medium">{result.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {result.type === 'destination' ? 'Popular destination' : 'Event'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div 
-                      className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
-                      onClick={() => navigate('/browse?search=hwange')}
-                    >
-                      <div className="w-10 h-10 rounded bg-indigo-100 mr-3 flex-shrink-0"></div>
-                      <div className="flex-grow">
-                        <p className="font-medium">Hwange National Park</p>
-                        <p className="text-sm text-gray-500">Wildlife sanctuary</p>
-                      </div>
-                    </div>
+                    ))}
                     <div className="text-center">
                       <Button 
                         variant="link" 
-                        onClick={handleSearchSubmit} 
+                        onClick={() => handleSearchSubmit()} 
                         className="text-indigo-600"
                       >
                         See all results

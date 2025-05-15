@@ -11,8 +11,7 @@ const Hero = () => {
     navigate(`/browse?search=${encodeURIComponent(query)}`);
   };
 
-  const handleSignIn = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleSignIn = () => {
     navigate("/auth");
   };
 

@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Calendar, Filter, Search } from 'lucide-react';
-import { getEvents, Event } from '@/models/Event';
+import { MapPin, Calendar, Search } from 'lucide-react';
+import { getEvents, searchEvents, Event } from '@/models/Event';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, parseISO, isAfter, isBefore } from 'date-fns';
+import { format, parseISO, isAfter, isBefore, isPast } from 'date-fns';
 
 const Events = () => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const Events = () => {
   const [locationFilter, setLocationFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('all');
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['events'],
@@ -45,34 +46,73 @@ const Events = () => {
     }
   };
 
-  // Filter events based on search and filters
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = !searchQuery || 
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (event.location && event.location.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Check if an event is expired
+  const isEventExpired = (event: Event) => {
+    if (!event.end_date && !event.start_date) return false;
     
-    const matchesLocation = locationFilter === 'all' || 
-      (event.location && event.location === locationFilter);
-    
-    let matchesTime = true;
-    const now = new Date();
-    
-    if (timeFilter !== 'all' && event.start_date) {
-      const startDate = parseISO(event.start_date);
-      
-      if (timeFilter === 'upcoming') {
-        matchesTime = isAfter(startDate, now);
-      } else if (timeFilter === 'past') {
-        matchesTime = isBefore(startDate, now);
+    try {
+      // If we have an end date, use that to determine expiry
+      if (event.end_date) {
+        const endDate = parseISO(event.end_date);
+        return isPast(endDate);
       }
+      
+      // Otherwise use the start date
+      if (event.start_date) {
+        const startDate = parseISO(event.start_date);
+        return isPast(startDate);
+      }
+      
+      return false;
+    } catch (error) {
+      return false;
     }
-    
-    return matchesSearch && matchesLocation && matchesTime;
-  });
+  };
+
+  // Filter events based on search and filters
+  useEffect(() => {
+    if (!isLoading && events) {
+      const filtered = events.filter(event => {
+        const matchesSearch = !searchQuery || 
+          event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (event.location && event.location.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        const matchesLocation = locationFilter === 'all' || 
+          (event.location && event.location === locationFilter);
+        
+        let matchesTime = true;
+        const now = new Date();
+        const expired = isEventExpired(event);
+        
+        if (timeFilter !== 'all') {
+          if (timeFilter === 'upcoming') {
+            matchesTime = !expired;
+          } else if (timeFilter === 'past') {
+            matchesTime = expired;
+          }
+        }
+        
+        return matchesSearch && matchesLocation && matchesTime;
+      });
+      
+      setFilteredEvents(filtered);
+    }
+  }, [isLoading, events, searchQuery, locationFilter, timeFilter]);
+
+  // Handle search form submission
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // The search is already applied via the useEffect
+  };
 
   // Add a function to handle booking
   const handleBookEvent = (event: Event) => {
+    // Don't allow booking for expired events
+    if (isEventExpired(event)) {
+      return;
+    }
+    
     navigate(`/booking/event/${event.id}`, { 
       state: { eventDetails: event }
     });
@@ -102,7 +142,7 @@ const Events = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">Search</label>
               <div className="relative">
@@ -144,7 +184,13 @@ const Events = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+            <Button 
+              type="submit"
+              className="mt-4 md:mt-0"
+            >
+              Apply Filters
+            </Button>
+          </form>
         </div>
 
         {isLoading ? (
@@ -174,103 +220,136 @@ const Events = () => {
                 ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
                 : "space-y-4"
               }>
-                {filteredEvents.map((event) => (
-                  <Card 
-                    key={event.id}
-                    className={view === 'list' ? "overflow-hidden" : "overflow-hidden h-full flex flex-col"}
-                  >
-                    {view === 'grid' ? (
-                      <>
-                        <div className="h-48 overflow-hidden">
-                          <img
-                            src={event.image_url || '/placeholder.svg'}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <CardContent className="p-5 flex-grow flex flex-col">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-bold text-xl">{event.title}</h3>
-                            {event.price !== null && (
-                              <span className="font-medium text-green-700">${event.price}</span>
+                {filteredEvents.map((event) => {
+                  const isExpired = isEventExpired(event);
+                  
+                  return (
+                    <Card 
+                      key={event.id}
+                      className={view === 'list' ? "overflow-hidden" : "overflow-hidden h-full flex flex-col"}
+                    >
+                      {view === 'grid' ? (
+                        <>
+                          <div className="h-48 overflow-hidden relative">
+                            <img
+                              src={event.image_url || '/placeholder.svg'}
+                              alt={event.title}
+                              className={`w-full h-full object-cover ${isExpired ? 'opacity-70 grayscale' : ''}`}
+                            />
+                            {isExpired && (
+                              <div className="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 m-2 rounded-md font-medium text-sm">
+                                Expired
+                              </div>
                             )}
                           </div>
-                          {event.start_date && (
-                            <div className="flex items-center text-muted-foreground mb-2">
-                              <Calendar size={16} className="mr-1" />
-                              <span className="text-sm">
-                                {formatEventDate(event.start_date, event.end_date)}
-                              </span>
-                            </div>
-                          )}
-                          {event.location && (
-                            <div className="flex items-center text-muted-foreground mb-4">
-                              <MapPin size={16} className="mr-1" />
-                              <span className="text-sm">{event.location}</span>
-                            </div>
-                          )}
-                          <p className="text-sm text-muted-foreground line-clamp-3 flex-grow">
-                            {event.description}
-                          </p>
-                          <div className="mt-4">
-                            <Button 
-                              className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-                              onClick={() => handleBookEvent(event)}
-                            >
-                              Book Now
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </>
-                    ) : (
-                      <div className="flex">
-                        <div className="w-32 h-32 flex-shrink-0">
-                          <img
-                            src={event.image_url || '/placeholder.svg'}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <CardContent className="flex-grow p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold text-lg">{event.title}</h3>
-                              {event.start_date && (
-                                <div className="flex items-center text-muted-foreground mb-1">
-                                  <Calendar size={14} className="mr-1" />
-                                  <span className="text-sm">
-                                    {formatEventDate(event.start_date, event.end_date)}
-                                  </span>
-                                </div>
-                              )}
-                              {event.location && (
-                                <div className="flex items-center text-muted-foreground mb-2">
-                                  <MapPin size={14} className="mr-1" />
-                                  <span className="text-sm">{event.location}</span>
-                                </div>
-                              )}
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {event.description}
-                              </p>
-                            </div>
-                            <div className="text-right">
+                          <CardContent className="p-5 flex-grow flex flex-col">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-bold text-xl">{event.title}</h3>
                               {event.price !== null && (
-                                <span className="font-medium text-green-700 block mb-2">${event.price}</span>
+                                <span className="font-medium text-green-700">${event.price}</span>
                               )}
-                              <Button 
-                                size="sm" 
-                                className="bg-amber-600 hover:bg-amber-700 text-white"
-                                onClick={() => handleBookEvent(event)}
-                              >
-                                Book
-                              </Button>
                             </div>
+                            {event.start_date && (
+                              <div className="flex items-center text-muted-foreground mb-2">
+                                <Calendar size={16} className="mr-1" />
+                                <span className="text-sm">
+                                  {formatEventDate(event.start_date, event.end_date)}
+                                </span>
+                              </div>
+                            )}
+                            {event.location && (
+                              <div className="flex items-center text-muted-foreground mb-4">
+                                <MapPin size={16} className="mr-1" />
+                                <span className="text-sm">{event.location}</span>
+                              </div>
+                            )}
+                            <p className="text-sm text-muted-foreground line-clamp-3 flex-grow">
+                              {event.description}
+                            </p>
+                            <div className="mt-4">
+                              {isExpired ? (
+                                <Button 
+                                  className="w-full bg-gray-400 cursor-not-allowed text-white"
+                                  disabled
+                                >
+                                  Event Expired
+                                </Button>
+                              ) : (
+                                <Button 
+                                  className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                                  onClick={() => handleBookEvent(event)}
+                                >
+                                  Book Now
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </>
+                      ) : (
+                        <div className="flex">
+                          <div className="w-32 h-32 flex-shrink-0 relative">
+                            <img
+                              src={event.image_url || '/placeholder.svg'}
+                              alt={event.title}
+                              className={`w-full h-full object-cover ${isExpired ? 'opacity-70 grayscale' : ''}`}
+                            />
+                            {isExpired && (
+                              <div className="absolute top-0 right-0 bg-red-600 text-white px-2 py-0.5 m-1 rounded-sm text-xs font-medium">
+                                Expired
+                              </div>
+                            )}
                           </div>
-                        </CardContent>
-                      </div>
-                    )}
-                  </Card>
-                ))}
+                          <CardContent className="flex-grow p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-bold text-lg">{event.title}</h3>
+                                {event.start_date && (
+                                  <div className="flex items-center text-muted-foreground mb-1">
+                                    <Calendar size={14} className="mr-1" />
+                                    <span className="text-sm">
+                                      {formatEventDate(event.start_date, event.end_date)}
+                                    </span>
+                                  </div>
+                                )}
+                                {event.location && (
+                                  <div className="flex items-center text-muted-foreground mb-2">
+                                    <MapPin size={14} className="mr-1" />
+                                    <span className="text-sm">{event.location}</span>
+                                  </div>
+                                )}
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {event.description}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                {event.price !== null && (
+                                  <span className="font-medium text-green-700 block mb-2">${event.price}</span>
+                                )}
+                                {isExpired ? (
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-gray-400 cursor-not-allowed text-white"
+                                    disabled
+                                  >
+                                    Expired
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                                    onClick={() => handleBookEvent(event)}
+                                  >
+                                    Book
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </>
