@@ -20,9 +20,9 @@ const Hero = () => {
       {/* Sign In Button */}
       <div className="absolute top-6 right-6 z-20">
         <Button 
-          variant="outline" 
+          variant="secondary" 
           onClick={() => navigate("/auth")}
-          className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:text-white transition-all duration-300 flex items-center gap-2"
+          className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
         >
           <LogIn className="h-4 w-4" />
           Sign In

@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
 import StatsCounter from "@/components/StatsCounter";
+import { ChevronRight } from "lucide-react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -46,7 +47,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 to-indigo-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white">
       {/* Hero Carousel */}
       <HeroCarousel />
       
@@ -61,6 +62,7 @@ const Index = () => {
               onClick={handleExploreMore}
             >
               <span>Show all</span>
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
           
@@ -99,7 +101,7 @@ const Index = () => {
                     <DestinationCard 
                       key={destination.id} 
                       destination={destination}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 transform hover:scale-105" 
+                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]" 
                     />
                   ))}
                 </div>
@@ -125,7 +127,7 @@ const Index = () => {
                     <EventCard 
                       key={event.id} 
                       event={event}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 transform hover:scale-105"
+                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]"
                     />
                   ))}
                 </div>
@@ -139,7 +141,7 @@ const Index = () => {
       <StatsCounter />
       
       {/* CTA Section */}
-      <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: "linear-gradient(rgba(49, 91, 170, 0.8), rgba(39, 70, 133, 0.9)), url('/hero.jpg')" }}>
+      <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: "linear-gradient(rgba(79, 70, 229, 0.85), rgba(67, 56, 202, 0.9)), url('/hero.jpg')" }}>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Ready for Your Zimbabwe Adventure?</h2>

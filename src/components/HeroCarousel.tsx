@@ -91,7 +91,7 @@ const HeroCarousel = () => {
   return (
     <div className="relative h-[90vh] overflow-hidden">
       {/* Blue Background Base Layer */}
-      <div className="absolute inset-0 bg-sky-700"></div>
+      <div className="absolute inset-0 bg-indigo-800"></div>
       
       {/* Image Carousel with Reduced Transparency */}
       <div className="absolute inset-0">
@@ -110,7 +110,7 @@ const HeroCarousel = () => {
             ></div>
             
             {/* Blue gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-sky-900/70 via-sky-800/60 to-sky-900/70"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/70 via-indigo-800/60 to-indigo-900/70"></div>
           </div>
         ))}
       </div>
@@ -118,9 +118,9 @@ const HeroCarousel = () => {
       {/* Sign In Button */}
       <div className="absolute top-6 right-6 z-20">
         <Button 
-          variant="outline" 
+          variant="secondary" 
           onClick={() => navigate("/auth")}
-          className="bg-indigo-600/80 hover:bg-indigo-700 border-indigo-500 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
+          className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
         >
           <LogIn className="h-4 w-4" />
           Sign In
@@ -149,7 +149,7 @@ const HeroCarousel = () => {
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-5xl animate-fade-in">
-          <div className="mb-2 text-sky-100 font-medium tracking-widest uppercase">Explore Zimbabwe</div>
+          <div className="mb-2 text-indigo-100 font-medium tracking-widest uppercase">Explore Zimbabwe</div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 drop-shadow-lg">
             {heroImages[currentSlide].title}
           </h1>
@@ -187,20 +187,20 @@ const HeroCarousel = () => {
                   <h3 className="font-medium text-lg mb-2">Quick Results</h3>
                   <div className="space-y-2">
                     <div 
-                      className="p-2 hover:bg-sky-50 rounded cursor-pointer flex items-center"
+                      className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
                       onClick={() => navigate('/browse?search=victoria+falls')}
                     >
-                      <div className="w-10 h-10 rounded bg-sky-100 mr-3 flex-shrink-0"></div>
+                      <div className="w-10 h-10 rounded bg-indigo-100 mr-3 flex-shrink-0"></div>
                       <div className="flex-grow">
                         <p className="font-medium">Victoria Falls</p>
                         <p className="text-sm text-gray-500">Popular destination</p>
                       </div>
                     </div>
                     <div 
-                      className="p-2 hover:bg-sky-50 rounded cursor-pointer flex items-center"
+                      className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
                       onClick={() => navigate('/browse?search=hwange')}
                     >
-                      <div className="w-10 h-10 rounded bg-sky-100 mr-3 flex-shrink-0"></div>
+                      <div className="w-10 h-10 rounded bg-indigo-100 mr-3 flex-shrink-0"></div>
                       <div className="flex-grow">
                         <p className="font-medium">Hwange National Park</p>
                         <p className="text-sm text-gray-500">Wildlife sanctuary</p>
@@ -223,7 +223,7 @@ const HeroCarousel = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-sky-900/30 hover:shadow-sky-900/40 transition-all duration-300"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-indigo-900/30 hover:shadow-indigo-900/40 transition-all duration-300"
               onClick={() => navigate("/browse?tab=destinations")}
             >
               Explore Destinations
@@ -247,7 +247,7 @@ const HeroCarousel = () => {
             className={cn(
               "w-3 h-3 rounded-full transition-all",
               index === currentSlide 
-                ? "bg-sky-400 scale-125 w-10 h-3" 
+                ? "bg-indigo-400 scale-125 w-10 h-3" 
                 : "bg-white/50 hover:bg-white/70"
             )}
             onClick={() => setCurrentSlide(index)}
