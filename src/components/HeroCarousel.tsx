@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
 
 // Using images from the database (mapped from the available images in the project)
@@ -71,6 +70,11 @@ const HeroCarousel = () => {
       setShowResults(false);
     }
   };
+
+  const handleSignIn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/auth");
+  };
   
   // Auto slide every 7 seconds
   useEffect(() => {
@@ -119,7 +123,7 @@ const HeroCarousel = () => {
       <div className="absolute top-6 right-6 z-20">
         <Button 
           variant="secondary" 
-          onClick={() => navigate("/auth")}
+          onClick={handleSignIn}
           className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
         >
           <LogIn className="h-4 w-4" />

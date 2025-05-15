@@ -11,6 +11,11 @@ const Hero = () => {
     navigate(`/browse?search=${encodeURIComponent(query)}`);
   };
 
+  const handleSignIn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/auth");
+  };
+
   return (
     <div className="relative h-[700px] overflow-hidden">
       <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center bg-no-repeat">
@@ -21,7 +26,7 @@ const Hero = () => {
       <div className="absolute top-6 right-6 z-20">
         <Button 
           variant="secondary" 
-          onClick={() => navigate("/auth")}
+          onClick={handleSignIn}
           className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
         >
           <LogIn className="h-4 w-4" />

@@ -46,6 +46,14 @@ const Index = () => {
     navigate(`/browse?tab=${activeTab}`);
   };
 
+  const handleStartPlanning = () => {
+    navigate("/auth");
+  };
+
+  const handleBrowseExperiences = () => {
+    navigate("/browse");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white">
       {/* Hero Carousel */}
@@ -151,14 +159,14 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 className="bg-white hover:bg-gray-100 text-indigo-700 text-lg px-8 py-6 rounded-xl shadow-lg"
-                onClick={() => navigate("/auth")}
+                onClick={handleStartPlanning}
               >
                 Start Planning
               </Button>
               <Button 
                 variant="outline" 
                 className="border-white text-white hover:bg-white/20 text-lg px-8 py-6 rounded-xl"
-                onClick={() => navigate("/browse")}
+                onClick={handleBrowseExperiences}
               >
                 Browse Experiences
               </Button>

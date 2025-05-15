@@ -41,7 +41,7 @@ const Auth: React.FC = () => {
         title: 'Success',
         description: 'Signed in successfully.',
       });
-      // No need to navigate here as the useEffect will handle it
+      // Will be handled by the useEffect above
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -59,7 +59,6 @@ const Auth: React.FC = () => {
     try {
       await signIn(email, password);
       // We don't check for admin role here - the redirect will be handled by the useEffect
-      // based on the user's actual role
       toast({
         title: 'Success',
         description: 'Signed in successfully.',
@@ -110,6 +109,10 @@ const Auth: React.FC = () => {
     }
   };
 
+  const handleGoBack = () => {
+    navigate('/');
+  };
+
   // Show loading state if auth state is still being determined
   if (isLoading && user) {
     return <div className="flex items-center justify-center h-screen">
@@ -125,10 +128,10 @@ const Auth: React.FC = () => {
         <div className="absolute inset-0 bg-[url('/victoria-falls.jpg')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
         <div className="relative z-10 text-white max-w-md mx-auto">
           <div className="flex items-center gap-3 mb-6">
-            <div className="rounded-full bg-white/20 p-2">
+            <div className="rounded-full bg-white/20 p-2 cursor-pointer" onClick={handleGoBack}>
               <MapPin size={32} />
             </div>
-            <h1 className="text-4xl font-bold">Zimbabwe Tourism</h1>
+            <h1 className="text-4xl font-bold cursor-pointer" onClick={handleGoBack}>Zimbabwe Tourism</h1>
           </div>
           <p className="text-xl mb-8">Experience the breathtaking beauty of Zimbabwe's landscapes, rich culture, and unforgettable adventures.</p>
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
@@ -328,7 +331,13 @@ const Auth: React.FC = () => {
             </Tabs>
           </Card>
           
-          <div className="mt-6 text-center text-sm text-muted-foreground">
+          <div className="mt-6 text-center">
+            <Button variant="link" onClick={handleGoBack} className="text-indigo-700">
+              Return to Home
+            </Button>
+          </div>
+          
+          <div className="mt-4 text-center text-sm text-muted-foreground">
             <p>By continuing, you agree to our Terms of Service and Privacy Policy.</p>
           </div>
         </div>
