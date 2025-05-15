@@ -9,11 +9,9 @@ import Footer from "@/components/Footer";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
-import Hero from "@/components/Hero";
+import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
 import StatsCounter from "@/components/StatsCounter";
-import WhyZimbabwe from "@/components/WhyZimbabwe";
-import TestimonialSlider from "@/components/TestimonialSlider";
 import { ChevronRight } from "lucide-react";
 
 const Index = () => {
@@ -57,15 +55,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white overflow-hidden">
-      {/* Hero Section */}
-      <Hero />
-      
-      {/* Why Visit Zimbabwe Section */}
-      <WhyZimbabwe />
-      
-      {/* Stats Counter Section */}
-      <StatsCounter />
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white">
+      {/* Hero Carousel */}
+      <HeroCarousel />
       
       {/* Popular Destinations/Events Section */}
       <div className="container mx-auto px-4 py-16">
@@ -153,8 +145,8 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Testimonial Section */}
-      <TestimonialSlider />
+      {/* Stats Counter Section */}
+      <StatsCounter />
       
       {/* CTA Section */}
       <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: "linear-gradient(rgba(79, 70, 229, 0.85), rgba(67, 56, 202, 0.9)), url('/hero.jpg')" }}>
