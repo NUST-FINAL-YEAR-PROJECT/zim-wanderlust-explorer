@@ -85,3 +85,24 @@ export async function updatePayment(id: string, updates: Partial<Payment>) {
   
   return data as Payment;
 }
+
+export async function markPaymentAsProcessing(paymentId: string, proofUrl: string) {
+  return updatePayment(paymentId, {
+    status: 'processing',
+    payment_details: {
+      proof_uploaded: true,
+      proof_uploaded_at: new Date().toISOString(),
+      proof_url: proofUrl
+    }
+  });
+}
+
+export async function markPaymentAsCompleted(paymentId: string) {
+  return updatePayment(paymentId, {
+    status: 'completed',
+    updated_at: new Date().toISOString(),
+    payment_details: {
+      completed_at: new Date().toISOString()
+    }
+  });
+}

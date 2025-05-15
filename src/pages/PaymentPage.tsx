@@ -73,37 +73,6 @@ const PaymentPage = () => {
     }
   }, [booking, payment, destinationData, eventData]);
 
-  // Initialize payment_proofs bucket if needed
-  useEffect(() => {
-    const initializeStorageBucket = async () => {
-      try {
-        // Check if the bucket exists
-        const { data: buckets, error } = await supabase.storage.listBuckets();
-        
-        const bucketExists = buckets?.some(bucket => bucket.name === 'payment_proofs');
-        
-        if (!bucketExists) {
-          // Create the bucket if it doesn't exist
-          const { data, error } = await supabase.storage.createBucket('payment_proofs', {
-            public: true,
-            fileSizeLimit: 5242880, // 5MB
-            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf']
-          });
-          
-          if (error) {
-            console.error('Error creating payment_proofs bucket:', error);
-          } else {
-            console.log('Created payment_proofs bucket:', data);
-          }
-        }
-      } catch (error) {
-        console.error('Error initializing storage bucket:', error);
-      }
-    };
-    
-    initializeStorageBucket();
-  }, []);
-
   // Get the payment URL from the booking record
   const getPaymentUrl = (): string | null => {
     try {
@@ -162,6 +131,18 @@ const PaymentPage = () => {
     }
   };
 
+  // Main function to convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // New handleUploadProof implementation that uses direct base64 storage in booking record
+  // This avoids the Supabase storage issues with RLS policies
   const handleUploadProof = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !booking) {
@@ -170,44 +151,29 @@ const PaymentPage = () => {
     }
 
     setIsUploading(true);
-    toast.info("Uploading payment proof...");
+    toast.info("Processing payment proof...");
     
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${booking.id}-proof.${fileExt}`;
+      // Convert file to base64 string
+      const base64String = await fileToBase64(file);
       
-      // Upload file
-      const { data, error } = await supabase.storage
-        .from('payment_proofs')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
+      // Get current timestamp
+      const uploadedAt = new Date().toISOString();
       
-      if (error) {
-        throw error;
-      }
-
-      // Get the public URL of the uploaded file
-      const { data: publicUrlData } = supabase.storage
-        .from('payment_proofs')
-        .getPublicUrl(fileName);
-      
-      const fileUrl = publicUrlData.publicUrl;
-      
-      // Update booking and payment records
+      // Update booking with base64 image data
       await updateBooking(booking.id, {
-        payment_proof_url: fileUrl,
-        payment_proof_uploaded_at: new Date().toISOString(),
+        payment_proof_url: base64String,
+        payment_proof_uploaded_at: uploadedAt,
       });
 
+      // Update payment record
       if (payment?.id) {
         await updatePayment(payment.id, {
           status: 'processing',
           payment_details: {
             ...payment?.payment_details,
             proof_uploaded: true,
-            proof_uploaded_at: new Date().toISOString()
+            proof_uploaded_at: uploadedAt
           }
         });
       }
