@@ -6,6 +6,7 @@ import { LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -102,7 +103,7 @@ const Hero = () => {
         ) : (
           <Button 
             variant="secondary" 
-            onClick={() => handleSignIn()}
+            onClick={handleSignIn}
             className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
           >
             <LogIn className="h-4 w-4" />
@@ -113,18 +114,34 @@ const Hero = () => {
       
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-4xl animate-fade-in">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 drop-shadow-lg">
-            Discover the Beauty of Zimbabwe
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-10 font-light max-w-3xl mx-auto">
-            Explore breathtaking landscapes, vibrant culture, and unforgettable experiences
-          </p>
+          <motion.div
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 drop-shadow-lg">
+              Discover the Beauty of Zimbabwe
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-10 font-light max-w-3xl mx-auto">
+              Explore breathtaking landscapes, vibrant culture, and unforgettable experiences
+            </p>
+          </motion.div>
           
-          <div className="w-full max-w-3xl mx-auto mb-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="w-full max-w-3xl mx-auto mb-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20"
+          >
             <HomepageSearchBar />
-          </div>
+          </motion.div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
             <Button 
               variant="default"
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all duration-300"
@@ -139,7 +156,7 @@ const Hero = () => {
             >
               Upcoming Events
             </Button>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
