@@ -36,8 +36,8 @@ const Hero = () => {
     navigate(`/browse?search=${encodeURIComponent(query)}`);
   };
 
-  const handleSignIn = async () => {
-    // Using navigate instead of Link to ensure proper navigation
+  const handleSignIn = () => {
+    console.log("Sign in button clicked, navigating to /auth");
     navigate("/auth");
   };
   
@@ -102,7 +102,7 @@ const Hero = () => {
         ) : (
           <Button 
             variant="secondary" 
-            onClick={handleSignIn}
+            onClick={() => handleSignIn()}
             className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
           >
             <LogIn className="h-4 w-4" />
