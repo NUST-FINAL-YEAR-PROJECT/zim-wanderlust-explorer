@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 // Using images from the database (mapped from the available images in the project)
 const heroImages = [
@@ -44,8 +46,29 @@ const HeroCarousel = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  
+  // Check auth status
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsLoggedIn(!!data.session);
+    };
+    
+    checkAuthStatus();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsLoggedIn(!!session);
+      }
+    );
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1));
@@ -83,6 +106,34 @@ const HeroCarousel = () => {
   const handleSignIn = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/auth");
+  };
+  
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error signing out",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleDashboard = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/dashboard");
+  };
+  
+  const handleExploreDestination = (title: string) => {
+    // Navigate to the specific destination if possible
+    navigate(`/browse?search=${encodeURIComponent(title)}&tab=destinations`);
   };
   
   // Auto slide every 7 seconds
@@ -135,14 +186,33 @@ const HeroCarousel = () => {
       
       {/* Sign In Button */}
       <div className="absolute top-6 right-6 z-20">
-        <Button 
-          variant="secondary" 
-          onClick={handleSignIn}
-          className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
-        >
-          <LogIn className="h-4 w-4" />
-          Sign In
-        </Button>
+        {isLoggedIn ? (
+          <div className="flex gap-2">
+            <Button 
+              variant="secondary" 
+              onClick={handleDashboard}
+              className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 shadow-lg"
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="bg-transparent backdrop-blur-md border-white/30 text-white hover:bg-white/20 hover:text-white transition-all duration-300"
+            >
+              Sign Out
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            variant="secondary" 
+            onClick={handleSignIn}
+            className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
+          >
+            <LogIn className="h-4 w-4" />
+            Sign In
+          </Button>
+        )}
       </div>
       
       {/* Navigation Arrows */}
@@ -210,9 +280,9 @@ const HeroCarousel = () => {
                         className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
                         onClick={() => {
                           if (result.type === 'destination') {
-                            navigate(`/browse?search=${encodeURIComponent(result.name)}&tab=destinations`);
+                            navigate(`/destination/${result.id}/details`);
                           } else {
-                            navigate(`/browse?search=${encodeURIComponent(result.name)}&tab=events`);
+                            navigate(`/booking/event/${result.id}`);
                           }
                           setShowResults(false);
                         }}
@@ -254,6 +324,13 @@ const HeroCarousel = () => {
               onClick={() => navigate("/browse?tab=events")}
             >
               Upcoming Events
+            </Button>
+            <Button
+              variant="secondary"
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30 px-8 py-6 text-lg rounded-xl transition-all duration-300 backdrop-blur-sm"
+              onClick={() => handleExploreDestination(heroImages[currentSlide].title)}
+            >
+              View This Destination
             </Button>
           </div>
         </div>

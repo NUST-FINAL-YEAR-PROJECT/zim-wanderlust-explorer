@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +7,9 @@ import { Search, Filter } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
+import { searchDestinations } from "@/models/Destination";
+import { searchEvents } from "@/models/Event";
 
 const HomepageSearchBar = () => {
   const [activeTab, setActiveTab] = useState("stay");
@@ -14,13 +17,53 @@ const HomepageSearchBar = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const navigate = useNavigate();
   
   const categories = [
     "National Parks", "Historical Sites", "Adventure", "Cultural", "Wildlife", "Relaxation"
   ];
   
-  const handleSearch = () => {
+  // Load recent searches from localStorage
+  useEffect(() => {
+    const savedSearches = localStorage.getItem('recentSearches');
+    if (savedSearches) {
+      try {
+        const parsedSearches = JSON.parse(savedSearches);
+        if (Array.isArray(parsedSearches)) {
+          setRecentSearches(parsedSearches.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Error parsing recent searches:", error);
+      }
+    }
+  }, []);
+  
+  const saveRecentSearch = (query: string) => {
+    if (!query.trim()) return;
+    
+    const updatedSearches = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+    setRecentSearches(updatedSearches);
+    
+    try {
+      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+    } catch (error) {
+      console.error("Error saving recent searches:", error);
+    }
+  };
+  
+  const handleSearch = async () => {
+    if (!searchText.trim()) {
+      toast({
+        title: "Please enter a search term",
+        description: "Enter a destination or experience you're looking for",
+      });
+      return;
+    }
+    
+    // Save search term
+    saveRecentSearch(searchText);
+    
     const params = new URLSearchParams();
     params.append('search', searchText);
     params.append('tab', activeTab === "stay" ? "destinations" : "events");
@@ -32,6 +75,24 @@ const HomepageSearchBar = () => {
     
     if (selectedCategories.length > 0) {
       params.append('categories', selectedCategories.join(','));
+    }
+    
+    // Quick check if there are actual results before navigating
+    try {
+      const results = activeTab === "stay" 
+        ? await searchDestinations(searchText)
+        : await searchEvents(searchText);
+        
+      if (results.length === 0) {
+        toast({
+          title: "No results found",
+          description: `No ${activeTab === "stay" ? "destinations" : "events"} match your search.`,
+          variant: "default",
+        });
+        // Still navigate to show the empty state
+      }
+    } catch (error) {
+      console.error("Error searching:", error);
     }
     
     navigate(`/browse?${params.toString()}`);
@@ -79,7 +140,15 @@ const HomepageSearchBar = () => {
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              list="recent-searches"
             />
+            {recentSearches.length > 0 && (
+              <datalist id="recent-searches">
+                {recentSearches.map((search, index) => (
+                  <option key={index} value={search} />
+                ))}
+              </datalist>
+            )}
           </div>
         </div>
         

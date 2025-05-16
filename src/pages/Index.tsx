@@ -13,13 +13,36 @@ import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
 import StatsCounter from "@/components/StatsCounter";
 import { ChevronRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
   const [destinations, setDestinations] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  
+  // Check auth status
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsLoggedIn(!!data.session);
+    };
+    
+    checkAuthStatus();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsLoggedIn(!!session);
+      }
+    );
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
   // Fetch data
   useEffect(() => {
@@ -34,6 +57,11 @@ const Index = () => {
         setEvents(eventsData.slice(0, 4));
       } catch (error) {
         console.error("Error loading data:", error);
+        toast({
+          title: "Failed to load data",
+          description: "Please try refreshing the page",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -47,11 +75,23 @@ const Index = () => {
   };
 
   const handleStartPlanning = () => {
-    navigate("/auth");
+    if (isLoggedIn) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
+    }
   };
 
   const handleBrowseExperiences = () => {
     navigate("/browse");
+  };
+  
+  const handleCardClick = (item: any, type: string) => {
+    if (type === 'destination') {
+      navigate(`/destination/${item.id}/details`);
+    } else {
+      navigate(`/booking/event/${item.id}`);
+    }
   };
 
   return (
@@ -106,11 +146,16 @@ const Index = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {destinations.map((destination) => (
-                    <DestinationCard 
+                    <div 
                       key={destination.id} 
-                      destination={destination}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]" 
-                    />
+                      className="cursor-pointer"
+                      onClick={() => handleCardClick(destination, 'destination')}
+                    >
+                      <DestinationCard 
+                        destination={destination}
+                        className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]" 
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -132,11 +177,16 @@ const Index = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {events.map((event) => (
-                    <EventCard 
+                    <div 
                       key={event.id} 
-                      event={event}
-                      className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]"
-                    />
+                      className="cursor-pointer"
+                      onClick={() => handleCardClick(event, 'event')}
+                    >
+                      <EventCard 
+                        event={event}
+                        className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]"
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -154,14 +204,16 @@ const Index = () => {
           <div className="max-w-2xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Ready for Your Zimbabwe Adventure?</h2>
             <p className="mb-10 text-xl text-white/90">
-              Create an account to save your favorites and get personalized recommendations.
+              {isLoggedIn 
+                ? "Explore more destinations and start planning your trip today!" 
+                : "Create an account to save your favorites and get personalized recommendations."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 className="bg-white hover:bg-gray-100 text-indigo-700 text-lg px-8 py-6 rounded-xl shadow-lg"
                 onClick={handleStartPlanning}
               >
-                Start Planning
+                {isLoggedIn ? "Go to Dashboard" : "Start Planning"}
               </Button>
               <Button 
                 variant="outline" 
