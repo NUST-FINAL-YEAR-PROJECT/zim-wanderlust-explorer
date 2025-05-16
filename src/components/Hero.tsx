@@ -36,7 +36,8 @@ const Hero = () => {
     navigate(`/browse?search=${encodeURIComponent(query)}`);
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
+    // Using navigate instead of Link to ensure proper navigation
     navigate("/auth");
   };
   
