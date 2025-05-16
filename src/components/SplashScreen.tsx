@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
 
 interface SplashScreenProps {
   duration?: number;
@@ -11,27 +10,14 @@ interface SplashScreenProps {
 
 const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenProps) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Progress animation
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev + (100 / (duration / 100));
-        return newProgress >= 100 ? 100 : newProgress;
-      });
-    }, 100);
-
-    // Exit animation and callback
     const timer = setTimeout(() => {
       setIsVisible(false);
       if (onComplete) onComplete();
     }, duration);
 
-    return () => {
-      clearTimeout(timer);
-      clearInterval(progressInterval);
-    };
+    return () => clearTimeout(timer);
   }, [duration, onComplete]);
 
   return (
@@ -58,11 +44,12 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                   <p className="text-xl text-white/80 mt-4">Discover the Beauty of Zimbabwe</p>
                 </motion.div>
 
-                <motion.div 
-                  className="w-full max-w-md mx-auto mb-6"
-                >
-                  <Progress value={progress} className="h-2 bg-white/10" />
-                </motion.div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: 300 }}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                  className="h-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full mx-auto"
+                />
               </>
             )}
           </div>
