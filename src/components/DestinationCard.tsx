@@ -46,11 +46,20 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
     }
   };
 
+  // Function to get the best image to display
+  const getDisplayImage = () => {
+    if (destination.image_url) return destination.image_url;
+    if (destination.additional_images && destination.additional_images.length > 0) {
+      return destination.additional_images[0];
+    }
+    return '/placeholder.svg';
+  };
+
   return (
     <Card className={`overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow ${className}`}>
       <div className="relative h-48 overflow-hidden">
         <img
-          src={destination.image_url || '/placeholder.svg'}
+          src={getDisplayImage()}
           alt={destination.name}
           className="w-full h-full object-cover"
         />

@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WishlistButton } from '@/components/WishlistButton';
 import { RatingDisplay } from '@/components/RatingDisplay';
 import { ReviewSection } from '@/components/ReviewSection';
+import { DestinationGallery } from '@/components/DestinationGallery';
+import DestinationMap from '@/components/DestinationMap';
 
 const DestinationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -90,21 +92,8 @@ const DestinationDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow overflow-hidden relative">
-              <img 
-                src={destination.image_url || '/placeholder.svg'} 
-                alt={destination.name}
-                className="w-full h-[400px] object-cover"
-              />
-              
-              {/* Add an absolute positioned wishlist button in the top-right corner of the image */}
-              <div className="absolute top-4 right-4">
-                <WishlistButton
-                  destinationId={destination.id}
-                  variant="default"
-                  className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white"
-                />
-              </div>
+            <div className="bg-white rounded-lg shadow overflow-hidden relative mb-16">
+              <DestinationGallery destination={destination} />
               
               <div className="p-6">
                 {!isRatingLoading && (
@@ -124,6 +113,7 @@ const DestinationDetails = () => {
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="amenities">Amenities</TabsTrigger>
+                  <TabsTrigger value="map">Map</TabsTrigger>
                   <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 </TabsList>
                 
@@ -199,6 +189,10 @@ const DestinationDetails = () => {
                       </ul>
                     </div>
                   )}
+                </TabsContent>
+                
+                <TabsContent value="map" className="space-y-4">
+                  <DestinationMap destination={destination} />
                 </TabsContent>
                 
                 <TabsContent value="reviews" className="space-y-4">
