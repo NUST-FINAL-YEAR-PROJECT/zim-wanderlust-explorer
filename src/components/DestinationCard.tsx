@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin } from 'lucide-react';
+import { MapPin, Images, Image } from 'lucide-react';
 import { Destination } from '@/models/Destination';
 import { useQuery } from '@tanstack/react-query';
 import { getDestinationRating } from '@/models/Review';
@@ -46,6 +46,11 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
     }
   };
 
+  // Check if destination has multiple images
+  const hasMultipleImages = !!(destination.additional_images && destination.additional_images.length > 0);
+  // Check if destination has coordinates
+  const hasCoordinates = !!(destination.latitude && destination.longitude);
+
   return (
     <Card className={`overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow ${className}`}>
       <div className="relative h-48 overflow-hidden">
@@ -61,6 +66,24 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
               variant="default"
               className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white"
             />
+          </div>
+        )}
+        {/* Show icon if destination has multiple images */}
+        {hasMultipleImages && (
+          <div className="absolute bottom-2 right-2">
+            <Badge variant="default" className="bg-white/90 text-primary border-none shadow-sm">
+              <Images size={14} className="mr-1" />
+              {destination.additional_images!.length + 1}
+            </Badge>
+          </div>
+        )}
+        {/* Show map pin icon if destination has coordinates */}
+        {hasCoordinates && (
+          <div className="absolute bottom-2 left-2">
+            <Badge variant="outline" className="bg-white/90 text-primary border-none shadow-sm">
+              <MapPin size={14} className="mr-1" />
+              Map
+            </Badge>
           </div>
         )}
       </div>

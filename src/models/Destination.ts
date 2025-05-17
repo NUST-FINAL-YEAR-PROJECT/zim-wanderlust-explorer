@@ -24,6 +24,8 @@ export interface Destination {
   payment_url: string | null;
   created_at: string;
   updated_at: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 // Define a type for creating or updating destinations that ensures required fields
@@ -47,6 +49,8 @@ export type DestinationInput = {
   additional_costs?: Record<string, any> | any[] | null;
   is_featured?: boolean | null;
   payment_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export async function getDestinations() {
