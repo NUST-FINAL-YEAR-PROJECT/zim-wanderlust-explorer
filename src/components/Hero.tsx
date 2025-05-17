@@ -212,8 +212,6 @@ const Hero = () => {
             variant="secondary" 
             onClick={handleSignIn}
             className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
           >
             <LogIn className="h-4 w-4" />
             Sign In
@@ -259,8 +257,8 @@ const Hero = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <motion.div
-              whileHover="hover"
-              whileTap="tap"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Button 
                 variant="default"
@@ -272,8 +270,8 @@ const Hero = () => {
             </motion.div>
             
             <motion.div
-              whileHover="hover"
-              whileTap="tap"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Button 
                 variant="outline" 
