@@ -12,7 +12,8 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form } from '@/components/ui/form';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Edit, Trash2, Plus, Save, X, Map } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -169,6 +170,9 @@ const DestinationsManagement: React.FC = () => {
       // Create a destination object that matches the required structure
       const newDestination = {
         ...data,
+        name: data.name, // Make sure name is explicitly provided
+        location: data.location, // Make sure location is explicitly provided
+        price: data.price, // Make sure price is explicitly provided
         additional_costs: additionalCosts.length > 0 ? additionalCosts : null,
       };
       
@@ -202,6 +206,9 @@ const DestinationsManagement: React.FC = () => {
       // Create an updates object that matches the required structure
       const updates = {
         ...data,
+        name: data.name, // Make sure name is explicitly provided
+        location: data.location, // Make sure location is explicitly provided
+        price: data.price, // Make sure price is explicitly provided
         additional_costs: additionalCosts.length > 0 ? additionalCosts : null,
       };
       
