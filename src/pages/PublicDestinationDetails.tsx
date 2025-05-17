@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Footer from '@/components/Footer';
 import { RatingDisplay } from '@/components/RatingDisplay';
 import { getDestinationRating } from '@/models/Review';
+import DestinationMap from '@/components/DestinationMap';
+import { getGoogleMapsUrl } from '@/utils/mapUtils';
 
 const PublicDestinationDetails = () => {
   const { id } = useParams<{ id: string }>();

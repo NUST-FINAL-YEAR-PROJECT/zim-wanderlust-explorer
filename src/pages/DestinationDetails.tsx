@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDestination } from '@/models/Destination';
@@ -13,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WishlistButton } from '@/components/WishlistButton';
 import { RatingDisplay } from '@/components/RatingDisplay';
 import { ReviewSection } from '@/components/ReviewSection';
+import DestinationMap from '@/components/DestinationMap';
+import { getGoogleMapsUrl } from '@/utils/mapUtils';
 
 const DestinationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -125,6 +126,7 @@ const DestinationDetails = () => {
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="amenities">Amenities</TabsTrigger>
                   <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  <TabsTrigger value="map">Map</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="space-y-4">
@@ -203,6 +205,39 @@ const DestinationDetails = () => {
                 
                 <TabsContent value="reviews" className="space-y-4">
                   <ReviewSection destinationId={destination.id} />
+                </TabsContent>
+                
+                <TabsContent value="map" className="space-y-4">
+                  {(destination.latitude && destination.longitude) ? (
+                    <>
+                      <h2 className="text-xl font-semibold mb-2">Location</h2>
+                      <DestinationMap
+                        latitude={destination.latitude}
+                        longitude={destination.longitude}
+                        name={destination.name}
+                        className="mb-4"
+                      />
+                      {getGoogleMapsUrl(destination.latitude, destination.longitude, destination.name) && (
+                        <div className="mt-4 text-center">
+                          <a 
+                            href={getGoogleMapsUrl(destination.latitude, destination.longitude, destination.name) || '#'} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline inline-flex items-center"
+                          >
+                            <MapPin size={16} className="mr-1" />
+                            View on Google Maps
+                          </a>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-8 text-center">
+                      <MapPin size={48} className="text-muted-foreground mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Map location not available</p>
+                      <p className="text-muted-foreground">This destination doesn't have coordinates information.</p>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </div>
