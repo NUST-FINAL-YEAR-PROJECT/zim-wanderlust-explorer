@@ -299,9 +299,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_featured: boolean | null
-          latitude: number | null
           location: string
-          longitude: number | null
           name: string
           payment_url: string | null
           price: number
@@ -325,9 +323,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
-          latitude?: number | null
           location: string
-          longitude?: number | null
           name: string
           payment_url?: string | null
           price: number
@@ -351,9 +347,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
-          latitude?: number | null
           location?: string
-          longitude?: number | null
           name?: string
           payment_url?: string | null
           price?: number

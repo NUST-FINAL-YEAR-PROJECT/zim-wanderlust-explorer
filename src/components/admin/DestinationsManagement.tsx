@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Destination, getDestinations, addDestination, updateDestination, deleteDestination } from '@/models/Destination';
+import { useToast } from '@/components/ui/use-toast';
+import { Destination, getDestinations, addDestination, updateDestination, deleteDestination, DestinationInput } from '@/models/Destination';
 import { 
   Table, 
   TableBody, 
@@ -14,12 +14,21 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Edit, Trash2, Plus, Save, X, Map } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Edit, Trash2, Plus, Save, X } from 'lucide-react';
+import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Badge } from '@/components/ui/badge';
-import DestinationForm, { formSchema, DestinationFormValues } from './DestinationForm';
-import { z } from 'zod';
+
+// Define schema for array fields with better UX
+const stringArraySchema = z
+  .string()
+  .transform((val) => {
+    if (!val.trim()) return [];
+    return val.split(',').map((item) => item.trim()).filter(Boolean);
+  });
 
 // Define schema for additional costs
 const additionalCostSchema = z.object({
@@ -29,6 +38,37 @@ const additionalCostSchema = z.object({
 });
 
 type AdditionalCost = z.infer<typeof additionalCostSchema>;
+
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  location: z.string().min(2, {
+    message: "Location must be at least 2 characters.",
+  }),
+  description: z.string().optional().nullable(),
+  price: z.coerce.number().min(0, {
+    message: "Price must be a positive number.",
+  }),
+  image_url: z.string().url({
+    message: "Please enter a valid URL."
+  }).optional().nullable(),
+  activities: stringArraySchema.optional().nullable(),
+  best_time_to_visit: z.string().optional().nullable(),
+  duration_recommended: z.string().optional().nullable(),
+  difficulty_level: z.string().optional().nullable(),
+  amenities: stringArraySchema.optional().nullable(),
+  what_to_bring: stringArraySchema.optional().nullable(),
+  highlights: stringArraySchema.optional().nullable(),
+  weather_info: z.string().optional().nullable(),
+  getting_there: z.string().optional().nullable(),
+  categories: stringArraySchema.optional().nullable(),
+  additional_images: stringArraySchema.optional().nullable(),
+  is_featured: z.boolean().default(false),
+  payment_url: z.string().url().optional().nullable(),
+});
+
+type DestinationFormValues = z.infer<typeof formSchema>;
 
 const DestinationsManagement: React.FC = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -63,8 +103,6 @@ const DestinationsManagement: React.FC = () => {
       additional_images: [],
       is_featured: false,
       payment_url: "",
-      latitude: null,
-      longitude: null,
     },
   });
 
@@ -89,8 +127,6 @@ const DestinationsManagement: React.FC = () => {
       additional_images: [],
       is_featured: false,
       payment_url: "",
-      latitude: null,
-      longitude: null,
     },
   });
 
@@ -143,8 +179,6 @@ const DestinationsManagement: React.FC = () => {
         additional_images: selectedDestination.additional_images || [],
         is_featured: selectedDestination.is_featured || false,
         payment_url: selectedDestination.payment_url || "",
-        latitude: selectedDestination.latitude || null,
-        longitude: selectedDestination.longitude || null,
       });
     }
   }, [selectedDestination, isEditDialogOpen, editForm]);
@@ -168,12 +202,26 @@ const DestinationsManagement: React.FC = () => {
   const handleAddDestination = async (data: DestinationFormValues) => {
     try {
       // Create a destination object that matches the required structure
-      const newDestination = {
-        ...data,
-        name: data.name, // Make sure name is explicitly provided
-        location: data.location, // Make sure location is explicitly provided
-        price: data.price, // Make sure price is explicitly provided
+      const newDestination: Omit<Destination, 'id' | 'created_at' | 'updated_at'> = {
+        name: data.name,
+        location: data.location,
+        description: data.description,
+        price: data.price,
+        image_url: data.image_url,
+        activities: data.activities || [],
+        best_time_to_visit: data.best_time_to_visit,
+        duration_recommended: data.duration_recommended,
+        difficulty_level: data.difficulty_level,
+        amenities: data.amenities || [],
+        what_to_bring: data.what_to_bring || [],
+        highlights: data.highlights || [],
+        weather_info: data.weather_info,
+        getting_there: data.getting_there,
+        categories: data.categories || [],
+        additional_images: data.additional_images || [],
         additional_costs: additionalCosts.length > 0 ? additionalCosts : null,
+        is_featured: data.is_featured,
+        payment_url: data.payment_url
       };
       
       await addDestination(newDestination);
@@ -184,7 +232,7 @@ const DestinationsManagement: React.FC = () => {
       setIsAddDialogOpen(false);
       setAdditionalCosts([]);
       form.reset();
-      fetchDestinations();
+      fetchEvents();
     } catch (error) {
       toast({
         title: 'Error',
@@ -204,12 +252,26 @@ const DestinationsManagement: React.FC = () => {
     
     try {
       // Create an updates object that matches the required structure
-      const updates = {
-        ...data,
-        name: data.name, // Make sure name is explicitly provided
-        location: data.location, // Make sure location is explicitly provided
-        price: data.price, // Make sure price is explicitly provided
+      const updates: Partial<DestinationInput> = {
+        name: data.name,
+        location: data.location,
+        description: data.description,
+        price: data.price,
+        image_url: data.image_url,
+        activities: data.activities || [],
+        best_time_to_visit: data.best_time_to_visit,
+        duration_recommended: data.duration_recommended,
+        difficulty_level: data.difficulty_level,
+        amenities: data.amenities || [],
+        what_to_bring: data.what_to_bring || [],
+        highlights: data.highlights || [],
+        weather_info: data.weather_info,
+        getting_there: data.getting_there,
+        categories: data.categories || [],
+        additional_images: data.additional_images || [],
         additional_costs: additionalCosts.length > 0 ? additionalCosts : null,
+        is_featured: data.is_featured,
+        payment_url: data.payment_url
       };
       
       await updateDestination(selectedDestination.id, updates);
@@ -289,6 +351,103 @@ const DestinationsManagement: React.FC = () => {
     setAdditionalCosts(newCosts);
   };
 
+  const fetchEvents = () => {
+    fetchDestinations();
+  };
+  
+  const formatArrayForDisplay = (arr?: string[] | null): string => {
+    if (!arr || arr.length === 0) return 'None';
+    return arr.join(', ');
+  };
+
+  // Organize fields into categories for better form organization
+  const formFieldCategories = [
+    {
+      title: "Basic Information",
+      fields: [
+        { name: 'name', label: 'Name', type: 'text', required: true, gridSpan: false },
+        { name: 'location', label: 'Location', type: 'text', required: true, gridSpan: false },
+        { name: 'description', label: 'Description', type: 'textarea', gridSpan: true },
+        { name: 'price', label: 'Base Price', type: 'number', required: true, gridSpan: false },
+        { name: 'image_url', label: 'Main Image URL', type: 'text', gridSpan: true },
+      ]
+    },
+    {
+      title: "Details",
+      fields: [
+        { name: 'difficulty_level', label: 'Difficulty Level', type: 'text', gridSpan: false },
+        { name: 'duration_recommended', label: 'Recommended Duration', type: 'text', gridSpan: false },
+        { name: 'best_time_to_visit', label: 'Best Time to Visit', type: 'text', gridSpan: false },
+        { name: 'weather_info', label: 'Weather Information', type: 'text', gridSpan: false },
+        { name: 'getting_there', label: 'Getting There', type: 'textarea', gridSpan: true },
+      ]
+    },
+    {
+      title: "Features",
+      fields: [
+        { name: 'activities', label: 'Activities (comma separated)', type: 'text', gridSpan: true },
+        { name: 'amenities', label: 'Amenities (comma separated)', type: 'text', gridSpan: true },
+        { name: 'what_to_bring', label: 'What to Bring (comma separated)', type: 'text', gridSpan: true },
+        { name: 'highlights', label: 'Highlights (comma separated)', type: 'text', gridSpan: true },
+      ]
+    },
+    {
+      title: "Additional Information",
+      fields: [
+        { name: 'categories', label: 'Categories (comma separated)', type: 'text', gridSpan: true },
+        { name: 'additional_images', label: 'Additional Images (comma separated URLs)', type: 'text', gridSpan: true },
+        { name: 'payment_url', label: 'Payment URL', type: 'text', gridSpan: true },
+        { name: 'is_featured', label: 'Featured Destination', type: 'switch', gridSpan: false },
+      ]
+    }
+  ];
+
+  const renderFormField = (field: any, formInstance: any) => {
+    return (
+      <FormField
+        key={field.name}
+        control={formInstance.control}
+        name={field.name}
+        render={({ field: fieldProps }) => (
+          <FormItem className={field.gridSpan ? "col-span-2" : ""}>
+            <FormLabel>{field.label}{field.required && ' *'}</FormLabel>
+            <FormControl>
+              {field.type === 'textarea' ? (
+                <Textarea 
+                  placeholder={`Enter ${field.label.toLowerCase()}`}
+                  {...fieldProps}
+                  className={field.name === 'description' ? "min-h-[100px]" : ""}
+                />
+              ) : field.type === 'switch' ? (
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    checked={fieldProps.value}
+                    onCheckedChange={fieldProps.onChange}
+                    id={field.name}
+                  />
+                  <span className="text-sm text-gray-600">{fieldProps.value ? 'Yes' : 'No'}</span>
+                </div>
+              ) : (
+                <Input 
+                  placeholder={`Enter ${field.label.toLowerCase()}`} 
+                  type={field.type}
+                  step={field.type === 'number' ? "0.01" : undefined}
+                  {...fieldProps} 
+                />
+              )}
+            </FormControl>
+            {field.name.includes('separated') && (
+              <FormDescription className="text-xs">
+                Separate multiple items with commas
+              </FormDescription>
+            )}
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  };
+
   return (
     <div className="container mx-auto p-6">
       <Card className="shadow-lg">
@@ -316,7 +475,7 @@ const DestinationsManagement: React.FC = () => {
                     <TableHead>Name</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Featured</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -343,22 +502,7 @@ const DestinationsManagement: React.FC = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {destination.name}
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {destination.additional_images && destination.additional_images.length > 0 && (
-                              <Badge variant="outline" className="text-xs">
-                                {destination.additional_images.length + 1} Images
-                              </Badge>
-                            )}
-                            {destination.latitude && destination.longitude && (
-                              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                                <Map className="h-3 w-3" />
-                                Map
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
+                        <TableCell className="font-medium">{destination.name}</TableCell>
                         <TableCell>{destination.location}</TableCell>
                         <TableCell>${destination.price.toFixed(2)}</TableCell>
                         <TableCell>
@@ -368,7 +512,7 @@ const DestinationsManagement: React.FC = () => {
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-gray-600 bg-transparent">
-                              Standard
+                              No
                             </Badge>
                           )}
                         </TableCell>
@@ -416,7 +560,14 @@ const DestinationsManagement: React.FC = () => {
           <div className="mt-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleAddDestination)} className="space-y-6">
-                <DestinationForm form={form} />
+                {formFieldCategories.map((category) => (
+                  <div key={category.title} className="border p-4 rounded-md">
+                    <h3 className="text-lg font-medium mb-4">{category.title}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {category.fields.map(field => renderFormField(field, form))}
+                    </div>
+                  </div>
+                ))}
                 
                 <div className="border p-4 rounded-md">
                   <div className="flex items-center justify-between mb-4">
@@ -436,71 +587,72 @@ const DestinationsManagement: React.FC = () => {
                     </Button>
                   </div>
                   
-                  {/* Additional Costs Management */}
-                  <div className="border rounded-md p-4 mb-4 bg-white">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <FormField
-                        control={costForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Name *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. Guide fee" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  {addingCost ? (
+                    <div className="border rounded-md p-4 mb-4 bg-white">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <FormField
+                          control={costForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g. Guide fee" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={costForm.control}
+                          name="price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Price *</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={costForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Describe this additional cost" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       
-                      <FormField
-                        control={costForm.control}
-                        name="price"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Price *</FormLabel>
-                            <FormControl>
-                              <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={costForm.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Describe this additional cost" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => {
+                            setAddingCost(false);
+                            setEditingCostIndex(null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="button" 
+                          onClick={handleAddCost}
+                        >
+                          {editingCostIndex !== null ? 'Update Cost' : 'Add Cost'}
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => {
-                          setAddingCost(false);
-                          setEditingCostIndex(null);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        type="button" 
-                        onClick={handleAddCost}
-                      >
-                        {editingCostIndex !== null ? 'Update Cost' : 'Add Cost'}
-                      </Button>
-                    </div>
-                  </div>
+                  ) : null}
                   
                   {additionalCosts.length > 0 ? (
                     <div className="border rounded-md overflow-hidden">
@@ -535,7 +687,7 @@ const DestinationsManagement: React.FC = () => {
                                     className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
                                     onClick={() => handleRemoveCost(index)}
                                   >
-                                    <X className="h-4 w-4" />
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </TableCell>
@@ -576,7 +728,14 @@ const DestinationsManagement: React.FC = () => {
           <div className="mt-4">
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(handleSaveDestination)} className="space-y-6">
-                <DestinationForm form={editForm} />
+                {formFieldCategories.map((category) => (
+                  <div key={category.title} className="border p-4 rounded-md">
+                    <h3 className="text-lg font-medium mb-4">{category.title}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {category.fields.map(field => renderFormField(field, editForm))}
+                    </div>
+                  </div>
+                ))}
                 
                 <div className="border p-4 rounded-md">
                   <div className="flex items-center justify-between mb-4">
@@ -596,71 +755,72 @@ const DestinationsManagement: React.FC = () => {
                     </Button>
                   </div>
                   
-                  {/* Additional Costs Management */}
-                  <div className="border rounded-md p-4 mb-4 bg-white">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <FormField
-                        control={costForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Name *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. Guide fee" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  {addingCost ? (
+                    <div className="border rounded-md p-4 mb-4 bg-white">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <FormField
+                          control={costForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g. Guide fee" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={costForm.control}
+                          name="price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Price *</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={costForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Describe this additional cost" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       
-                      <FormField
-                        control={costForm.control}
-                        name="price"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Price *</FormLabel>
-                            <FormControl>
-                              <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={costForm.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Describe this additional cost" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => {
+                            setAddingCost(false);
+                            setEditingCostIndex(null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="button" 
+                          onClick={handleAddCost}
+                        >
+                          {editingCostIndex !== null ? 'Update Cost' : 'Add Cost'}
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => {
-                          setAddingCost(false);
-                          setEditingCostIndex(null);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        type="button" 
-                        onClick={handleAddCost}
-                      >
-                        {editingCostIndex !== null ? 'Update Cost' : 'Add Cost'}
-                      </Button>
-                    </div>
-                  </div>
+                  ) : null}
                   
                   {additionalCosts.length > 0 ? (
                     <div className="border rounded-md overflow-hidden">
