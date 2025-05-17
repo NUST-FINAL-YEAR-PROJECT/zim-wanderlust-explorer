@@ -18,7 +18,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { AlertCircle, Calendar as CalendarIcon2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getDestination } from '@/models/Destination';
-import { createBooking } from '@/models/Booking';
+import { createBooking, BookingStatus, PaymentStatus } from '@/models/Booking';
 import { useAuth } from '@/contexts/AuthContext';
 import DestinationMap from '@/components/DestinationMap';
 
@@ -121,8 +121,8 @@ const BookingForm = () => {
           destination_name: destination.name,
           destination_location: destination.location
         },
-        status: 'pending',
-        payment_status: 'pending'
+        status: 'pending' as BookingStatus,
+        payment_status: 'pending' as PaymentStatus
       };
 
       const newBooking = await createBooking(bookingData);
