@@ -104,11 +104,25 @@ const BookingForm = () => {
 
     setIsProcessing(true);
     try {
+      // Create the booking with the proper format expected by createBooking
       const bookingData = {
-        ...values,
-        destinationId: destination.id,
-        userId: user.id,
-        totalPrice: destination.price * values.numberOfTravelers,
+        booking_date: new Date().toISOString(),
+        number_of_people: values.numberOfTravelers, 
+        total_price: destination.price * values.numberOfTravelers,
+        contact_name: `${values.firstName} ${values.lastName}`,
+        contact_email: values.email,
+        contact_phone: values.phoneNumber,
+        user_id: user.id,
+        destination_id: destination.id,
+        preferred_date: values.startDate.toISOString(),
+        booking_details: {
+          end_date: values.endDate.toISOString(),
+          notes: values.additionalNotes || '',
+          destination_name: destination.name,
+          destination_location: destination.location
+        },
+        status: 'pending',
+        payment_status: 'pending'
       };
 
       const newBooking = await createBooking(bookingData);
@@ -340,6 +354,7 @@ const BookingForm = () => {
                                 type="number"
                                 placeholder="1"
                                 {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                               />
                             </FormControl>
                             <FormMessage />
