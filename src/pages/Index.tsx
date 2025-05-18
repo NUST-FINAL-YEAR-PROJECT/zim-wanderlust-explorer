@@ -15,6 +15,7 @@ import StatsCounter from "@/components/StatsCounter";
 import { ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -94,13 +95,44 @@ const Index = () => {
     }
   };
 
+  // Animation variants
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.8,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({ 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5,
+        delay: 0.1 * i
+      }
+    })
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white">
       {/* Hero Carousel */}
       <HeroCarousel />
       
       {/* Popular Destinations/Events Section */}
-      <div className="container mx-auto px-4 py-16">
+      <motion.div 
+        className="container mx-auto px-4 py-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
         <div className="mb-10">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-display font-bold text-indigo-900">Popular in Zimbabwe</h2>
@@ -145,17 +177,20 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {destinations.map((destination) => (
-                    <div 
+                  {destinations.map((destination, i) => (
+                    <motion.div 
                       key={destination.id} 
                       className="cursor-pointer"
                       onClick={() => handleCardClick(destination, 'destination')}
+                      custom={i}
+                      variants={cardVariants}
+                      whileHover={{ y: -8, transition: { duration: 0.3 } }}
                     >
                       <DestinationCard 
                         destination={destination}
-                        className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]" 
+                        className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200" 
                       />
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
@@ -176,56 +211,90 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {events.map((event) => (
-                    <div 
+                  {events.map((event, i) => (
+                    <motion.div 
                       key={event.id} 
                       className="cursor-pointer"
                       onClick={() => handleCardClick(event, 'event')}
+                      custom={i}
+                      variants={cardVariants}
+                      whileHover={{ y: -8, transition: { duration: 0.3 } }}
                     >
                       <EventCard 
                         event={event}
-                        className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200 transform hover:translate-y-[-4px]"
+                        className="hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white border border-indigo-100 hover:border-indigo-200"
                       />
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </motion.div>
       
       {/* Stats Counter Section */}
       <StatsCounter />
       
       {/* CTA Section */}
-      <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: "linear-gradient(rgba(79, 70, 229, 0.85), rgba(67, 56, 202, 0.9)), url('/hero.jpg')" }}>
+      <motion.section 
+        className="py-20 bg-cover bg-center relative" 
+        style={{ backgroundImage: "linear-gradient(rgba(79, 70, 229, 0.85), rgba(67, 56, 202, 0.9)), url('/lovable-uploads/6d4e39d4-1981-4237-afb7-a1a7afe47fb3.png')" }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+      >
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center text-white">
-            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Ready for Your Zimbabwe Adventure?</h2>
-            <p className="mb-10 text-xl text-white/90">
+            <motion.h2 
+              className="text-3xl md:text-5xl font-display font-bold mb-6"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+            >
+              Ready for Your Zimbabwe Adventure?
+            </motion.h2>
+            <motion.p 
+              className="mb-10 text-xl text-white/90"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
               {isLoggedIn 
                 ? "Explore more destinations and start planning your trip today!" 
                 : "Create an account to save your favorites and get personalized recommendations."}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                className="bg-white hover:bg-gray-100 text-indigo-700 text-lg px-8 py-6 rounded-xl shadow-lg"
-                onClick={handleStartPlanning}
-              >
-                {isLoggedIn ? "Go to Dashboard" : "Start Planning"}
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-white text-white hover:bg-white/20 text-lg px-8 py-6 rounded-xl"
-                onClick={handleBrowseExperiences}
-              >
-                Browse Experiences
-              </Button>
-            </div>
+            </motion.p>
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  className="bg-white hover:bg-gray-100 text-indigo-700 text-lg px-8 py-6 rounded-xl shadow-lg"
+                  onClick={handleStartPlanning}
+                >
+                  {isLoggedIn ? "Go to Dashboard" : "Start Planning"}
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="outline" 
+                  className="border-white text-white hover:bg-white/20 text-lg px-8 py-6 rounded-xl"
+                  onClick={handleBrowseExperiences}
+                >
+                  Browse Experiences
+                </Button>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
       
       <Footer />
       

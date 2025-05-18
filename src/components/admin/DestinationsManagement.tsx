@@ -1,197 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Destination, getDestinations, addDestination, updateDestination, deleteDestination, DestinationInput } from '@/models/Destination';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Edit, Trash2, Plus, Save, X } from 'lucide-react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from '@/components/ui/use-toast';
+import { createDestination, getDestinations, updateDestination, deleteDestination, Destination } from '@/models/Destination';
 
-// Define schema for array fields with better UX
-const stringArraySchema = z
-  .string()
-  .transform((val) => {
-    if (!val.trim()) return [];
-    return val.split(',').map((item) => item.trim()).filter(Boolean);
-  });
-
-// Define schema for additional costs
-const additionalCostSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  price: z.coerce.number().min(0, "Price must be a positive number"),
-  description: z.string().optional(),
-});
-
-type AdditionalCost = z.infer<typeof additionalCostSchema>;
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  location: z.string().min(2, {
-    message: "Location must be at least 2 characters.",
-  }),
-  description: z.string().optional().nullable(),
-  price: z.coerce.number().min(0, {
-    message: "Price must be a positive number.",
-  }),
-  image_url: z.string().url({
-    message: "Please enter a valid URL."
-  }).optional().nullable(),
-  activities: stringArraySchema.optional().nullable(),
-  best_time_to_visit: z.string().optional().nullable(),
-  duration_recommended: z.string().optional().nullable(),
-  difficulty_level: z.string().optional().nullable(),
-  amenities: stringArraySchema.optional().nullable(),
-  what_to_bring: stringArraySchema.optional().nullable(),
-  highlights: stringArraySchema.optional().nullable(),
-  weather_info: z.string().optional().nullable(),
-  getting_there: z.string().optional().nullable(),
-  categories: stringArraySchema.optional().nullable(),
-  additional_images: stringArraySchema.optional().nullable(),
-  is_featured: z.boolean().default(false),
-  payment_url: z.string().url().optional().nullable(),
-});
-
-type DestinationFormValues = z.infer<typeof formSchema>;
-
-const DestinationsManagement: React.FC = () => {
+const DestinationsManagement = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [additionalCosts, setAdditionalCosts] = useState<AdditionalCost[]>([]);
-  const [addingCost, setAddingCost] = useState(false);
-  const [editingCostIndex, setEditingCostIndex] = useState<number | null>(null);
-  const { toast } = useToast();
-
-  const form = useForm<DestinationFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      location: "",
-      description: "",
-      price: 0,
-      image_url: "",
-      activities: [],
-      best_time_to_visit: "",
-      duration_recommended: "",
-      difficulty_level: "",
-      amenities: [],
-      what_to_bring: [],
-      highlights: [],
-      weather_info: "",
-      getting_there: "",
-      categories: [],
-      additional_images: [],
-      is_featured: false,
-      payment_url: "",
-    },
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    description: '',
+    price: 0,
+    image_url: '',
+    activities: [] as string[],
+    best_time_to_visit: '',
+    duration_recommended: '',
+    difficulty_level: 'moderate',
+    categories: [] as string[],
+    included_services: [] as string[],
+    excluded_services: [] as string[],
+    additional_images: [] as string[],
+    notes: '',
+    booking_info: '',
+    payment_url: '',
+    latitude: null as number | null,
+    longitude: null as number | null
   });
 
-  const editForm = useForm<DestinationFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      location: "",
-      description: "",
-      price: 0,
-      image_url: "",
-      activities: [],
-      best_time_to_visit: "",
-      duration_recommended: "",
-      difficulty_level: "",
-      amenities: [],
-      what_to_bring: [],
-      highlights: [],
-      weather_info: "",
-      getting_there: "",
-      categories: [],
-      additional_images: [],
-      is_featured: false,
-      payment_url: "",
-    },
-  });
-
-  const costForm = useForm({
-    resolver: zodResolver(additionalCostSchema),
-    defaultValues: {
-      name: "",
-      price: 0,
-      description: "",
-    }
-  });
+  // Available categories
+  const categories = [
+    'Wildlife',
+    'Nature',
+    'Adventure',
+    'Cultural',
+    'Historical',
+    'Luxury',
+    'Family-friendly',
+    'UNESCO',
+    'Safari',
+    'Water',
+    'City'
+  ];
+  
+  // Difficulty levels
+  const difficultyLevels = [
+    'easy',
+    'moderate',
+    'challenging',
+    'difficult',
+    'extreme'
+  ];
 
   useEffect(() => {
-    fetchDestinations();
+    loadDestinations();
   }, []);
 
-  useEffect(() => {
-    if (selectedDestination && isEditDialogOpen) {
-      // Handle additional costs parsing
-      let costsArray: AdditionalCost[] = [];
-      if (selectedDestination.additional_costs) {
-        if (Array.isArray(selectedDestination.additional_costs)) {
-          costsArray = selectedDestination.additional_costs;
-        } else {
-          costsArray = Object.entries(selectedDestination.additional_costs).map(([name, details]) => ({
-            name,
-            ...details,
-          }));
-        }
-      }
-      
-      setAdditionalCosts(costsArray);
-      
-      editForm.reset({
-        name: selectedDestination.name,
-        location: selectedDestination.location,
-        description: selectedDestination.description || "",
-        price: selectedDestination.price,
-        image_url: selectedDestination.image_url || "",
-        activities: selectedDestination.activities || [],
-        best_time_to_visit: selectedDestination.best_time_to_visit || "",
-        duration_recommended: selectedDestination.duration_recommended || "",
-        difficulty_level: selectedDestination.difficulty_level || "",
-        amenities: selectedDestination.amenities || [],
-        what_to_bring: selectedDestination.what_to_bring || [],
-        highlights: selectedDestination.highlights || [],
-        weather_info: selectedDestination.weather_info || "",
-        getting_there: selectedDestination.getting_there || "",
-        categories: selectedDestination.categories || [],
-        additional_images: selectedDestination.additional_images || [],
-        is_featured: selectedDestination.is_featured || false,
-        payment_url: selectedDestination.payment_url || "",
-      });
-    }
-  }, [selectedDestination, isEditDialogOpen, editForm]);
-
-  const fetchDestinations = async () => {
+  const loadDestinations = async () => {
     setLoading(true);
     try {
       const data = await getDestinations();
       setDestinations(data);
     } catch (error) {
+      console.error('Error loading destinations:', error);
       toast({
         title: 'Error',
-        description: 'Failed to fetch destinations',
+        description: 'Failed to load destinations. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -199,689 +103,465 @@ const DestinationsManagement: React.FC = () => {
     }
   };
 
-  const handleAddDestination = async (data: DestinationFormValues) => {
-    try {
-      // Create a destination object that matches the required structure
-      const newDestination: Omit<Destination, 'id' | 'created_at' | 'updated_at'> = {
-        name: data.name,
-        location: data.location,
-        description: data.description,
-        price: data.price,
-        image_url: data.image_url,
-        activities: data.activities || [],
-        best_time_to_visit: data.best_time_to_visit,
-        duration_recommended: data.duration_recommended,
-        difficulty_level: data.difficulty_level,
-        amenities: data.amenities || [],
-        what_to_bring: data.what_to_bring || [],
-        highlights: data.highlights || [],
-        weather_info: data.weather_info,
-        getting_there: data.getting_there,
-        categories: data.categories || [],
-        additional_images: data.additional_images || [],
-        additional_costs: additionalCosts.length > 0 ? additionalCosts : null,
-        is_featured: data.is_featured,
-        payment_url: data.payment_url
-      };
-      
-      await addDestination(newDestination);
-      toast({
-        title: 'Success',
-        description: 'Destination added successfully',
-      });
-      setIsAddDialogOpen(false);
-      setAdditionalCosts([]);
-      form.reset();
-      fetchEvents();
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to add destination',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleEditDestination = (destination: Destination) => {
-    setSelectedDestination(destination);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSaveDestination = async (data: DestinationFormValues) => {
-    if (!selectedDestination) return;
-    
-    try {
-      // Create an updates object that matches the required structure
-      const updates: Partial<DestinationInput> = {
-        name: data.name,
-        location: data.location,
-        description: data.description,
-        price: data.price,
-        image_url: data.image_url,
-        activities: data.activities || [],
-        best_time_to_visit: data.best_time_to_visit,
-        duration_recommended: data.duration_recommended,
-        difficulty_level: data.difficulty_level,
-        amenities: data.amenities || [],
-        what_to_bring: data.what_to_bring || [],
-        highlights: data.highlights || [],
-        weather_info: data.weather_info,
-        getting_there: data.getting_there,
-        categories: data.categories || [],
-        additional_images: data.additional_images || [],
-        additional_costs: additionalCosts.length > 0 ? additionalCosts : null,
-        is_featured: data.is_featured,
-        payment_url: data.payment_url
-      };
-      
-      await updateDestination(selectedDestination.id, updates);
-      toast({
-        title: 'Success',
-        description: 'Destination updated successfully',
-      });
-      setIsEditDialogOpen(false);
-      setAdditionalCosts([]);
-      fetchDestinations();
-    } catch (error) {
-      console.error('Error updating destination:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update destination',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleDeleteDestination = async (destinationId: string) => {
-    setIsDeleting(true);
-    try {
-      await deleteDestination(destinationId);
-      toast({
-        title: 'Success',
-        description: 'Destination deleted successfully',
-      });
-      fetchDestinations();
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete destination',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleAddCost = () => {
-    costForm.handleSubmit((data) => {
-      if (editingCostIndex !== null) {
-        // Update existing cost
-        const updatedCosts = [...additionalCosts];
-        updatedCosts[editingCostIndex] = data;
-        setAdditionalCosts(updatedCosts);
-        setEditingCostIndex(null);
-      } else {
-        // Add new cost
-        setAdditionalCosts([...additionalCosts, data]);
-      }
-      
-      costForm.reset({
-        name: "",
-        price: 0,
-        description: "",
-      });
-      
-      setAddingCost(false);
-    })();
-  };
-
-  const handleEditCost = (cost: AdditionalCost, index: number) => {
-    setEditingCostIndex(index);
-    setAddingCost(true);
-    
-    costForm.reset({
-      name: cost.name,
-      price: cost.price,
-      description: cost.description || "",
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      location: '',
+      description: '',
+      price: 0,
+      image_url: '',
+      activities: [],
+      best_time_to_visit: '',
+      duration_recommended: '',
+      difficulty_level: 'moderate',
+      categories: [],
+      included_services: [],
+      excluded_services: [],
+      additional_images: [],
+      notes: '',
+      booking_info: '',
+      payment_url: '',
+      latitude: null,
+      longitude: null
     });
+    setEditId(null);
   };
 
-  const handleRemoveCost = (index: number) => {
-    const newCosts = additionalCosts.filter((_, i) => i !== index);
-    setAdditionalCosts(newCosts);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'price') {
+      setFormData({ ...formData, [name]: parseFloat(value) || 0 });
+    } else if (name === 'latitude' || name === 'longitude') {
+      setFormData({ ...formData, [name]: parseFloat(value) || null });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
-  const fetchEvents = () => {
-    fetchDestinations();
+  const handleActivityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const activities = value.split(',').map(item => item.trim());
+    setFormData({ ...formData, activities });
+  };
+
+  const handleCategoryToggle = (category: string) => {
+    let newCategories = [...formData.categories];
+    if (newCategories.includes(category)) {
+      newCategories = newCategories.filter(c => c !== category);
+    } else {
+      newCategories.push(category);
+    }
+    setFormData({ ...formData, categories: newCategories });
   };
   
-  const formatArrayForDisplay = (arr?: string[] | null): string => {
-    if (!arr || arr.length === 0) return 'None';
-    return arr.join(', ');
+  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const images = value.split(',').map(url => url.trim());
+    setFormData({ ...formData, additional_images: images });
   };
 
-  // Organize fields into categories for better form organization
-  const formFieldCategories = [
-    {
-      title: "Basic Information",
-      fields: [
-        { name: 'name', label: 'Name', type: 'text', required: true, gridSpan: false },
-        { name: 'location', label: 'Location', type: 'text', required: true, gridSpan: false },
-        { name: 'description', label: 'Description', type: 'textarea', gridSpan: true },
-        { name: 'price', label: 'Base Price', type: 'number', required: true, gridSpan: false },
-        { name: 'image_url', label: 'Main Image URL', type: 'text', gridSpan: true },
-      ]
-    },
-    {
-      title: "Details",
-      fields: [
-        { name: 'difficulty_level', label: 'Difficulty Level', type: 'text', gridSpan: false },
-        { name: 'duration_recommended', label: 'Recommended Duration', type: 'text', gridSpan: false },
-        { name: 'best_time_to_visit', label: 'Best Time to Visit', type: 'text', gridSpan: false },
-        { name: 'weather_info', label: 'Weather Information', type: 'text', gridSpan: false },
-        { name: 'getting_there', label: 'Getting There', type: 'textarea', gridSpan: true },
-      ]
-    },
-    {
-      title: "Features",
-      fields: [
-        { name: 'activities', label: 'Activities (comma separated)', type: 'text', gridSpan: true },
-        { name: 'amenities', label: 'Amenities (comma separated)', type: 'text', gridSpan: true },
-        { name: 'what_to_bring', label: 'What to Bring (comma separated)', type: 'text', gridSpan: true },
-        { name: 'highlights', label: 'Highlights (comma separated)', type: 'text', gridSpan: true },
-      ]
-    },
-    {
-      title: "Additional Information",
-      fields: [
-        { name: 'categories', label: 'Categories (comma separated)', type: 'text', gridSpan: true },
-        { name: 'additional_images', label: 'Additional Images (comma separated URLs)', type: 'text', gridSpan: true },
-        { name: 'payment_url', label: 'Payment URL', type: 'text', gridSpan: true },
-        { name: 'is_featured', label: 'Featured Destination', type: 'switch', gridSpan: false },
-      ]
-    }
-  ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Include all necessary fields, including latitude and longitude
+      const destinationData = {
+        ...formData,
+        price: formData.price || 0,
+        latitude: formData.latitude,
+        longitude: formData.longitude
+      };
 
-  const renderFormField = (field: any, formInstance: any) => {
-    return (
-      <FormField
-        key={field.name}
-        control={formInstance.control}
-        name={field.name}
-        render={({ field: fieldProps }) => (
-          <FormItem className={field.gridSpan ? "col-span-2" : ""}>
-            <FormLabel>{field.label}{field.required && ' *'}</FormLabel>
-            <FormControl>
-              {field.type === 'textarea' ? (
-                <Textarea 
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                  {...fieldProps}
-                  className={field.name === 'description' ? "min-h-[100px]" : ""}
-                />
-              ) : field.type === 'switch' ? (
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    checked={fieldProps.value}
-                    onCheckedChange={fieldProps.onChange}
-                    id={field.name}
-                  />
-                  <span className="text-sm text-gray-600">{fieldProps.value ? 'Yes' : 'No'}</span>
-                </div>
-              ) : (
-                <Input 
-                  placeholder={`Enter ${field.label.toLowerCase()}`} 
-                  type={field.type}
-                  step={field.type === 'number' ? "0.01" : undefined}
-                  {...fieldProps} 
-                />
-              )}
-            </FormControl>
-            {field.name.includes('separated') && (
-              <FormDescription className="text-xs">
-                Separate multiple items with commas
-              </FormDescription>
-            )}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
+      if (editId) {
+        await updateDestination(editId, destinationData);
+        toast({ description: 'Destination updated successfully!' });
+      } else {
+        await createDestination(destinationData);
+        toast({ description: 'Destination created successfully!' });
+      }
+      
+      setOpen(false);
+      resetForm();
+      loadDestinations();
+    } catch (error) {
+      console.error('Error saving destination:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save destination. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleEdit = (destination: Destination) => {
+    setEditId(destination.id);
+    setFormData({
+      name: destination.name || '',
+      location: destination.location || '',
+      description: destination.description || '',
+      price: destination.price || 0,
+      image_url: destination.image_url || '',
+      activities: destination.activities || [],
+      best_time_to_visit: destination.best_time_to_visit || '',
+      duration_recommended: destination.duration_recommended || '',
+      difficulty_level: destination.difficulty_level || 'moderate',
+      categories: destination.categories || [],
+      included_services: destination.included_services || [],
+      excluded_services: destination.excluded_services || [],
+      additional_images: destination.additional_images || [],
+      notes: destination.notes || '',
+      booking_info: destination.booking_info || '',
+      payment_url: destination.payment_url || '',
+      latitude: destination.latitude || null,
+      longitude: destination.longitude || null
+    });
+    setOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this destination?')) {
+      try {
+        await deleteDestination(id);
+        toast({ description: 'Destination deleted successfully!' });
+        loadDestinations();
+      } catch (error) {
+        console.error('Error deleting destination:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete destination. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    }
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <Card className="shadow-lg">
-        <CardHeader className="bg-gray-50 border-b flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl">Destination Management</CardTitle>
-            <CardDescription>Add, edit, and remove destinations</CardDescription>
-          </div>
-          <Button onClick={() => setIsAddDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Destination
-          </Button>
-        </CardHeader>
-        <CardContent className="p-6">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
-            </div>
-          ) : (
-            <div className="border rounded-md overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-gray-50">
-                  <TableRow>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Featured</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Destinations Management</h2>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              onClick={resetForm}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              Add New Destination
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editId ? 'Edit Destination' : 'Add New Destination'}
+              </DialogTitle>
+              <DialogDescription>
+                {editId
+                  ? 'Update the destination details below.'
+                  : 'Fill in the details to create a new destination.'}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="block text-sm font-medium">
+                    Name
+                  </label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="location" className="block text-sm font-medium">
+                    Location
+                  </label>
+                  <Input
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="price" className="block text-sm font-medium">
+                    Price ($)
+                  </label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="difficulty_level" className="block text-sm font-medium">
+                    Difficulty Level
+                  </label>
+                  <Select
+                    value={formData.difficulty_level}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, difficulty_level: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select difficulty level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {difficultyLevels.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="description" className="block text-sm font-medium">
+                  Description
+                </label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="image_url" className="block text-sm font-medium">
+                    Primary Image URL
+                  </label>
+                  <Input
+                    id="image_url"
+                    name="image_url"
+                    value={formData.image_url}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="best_time_to_visit" className="block text-sm font-medium">
+                    Best Time to Visit
+                  </label>
+                  <Input
+                    id="best_time_to_visit"
+                    name="best_time_to_visit"
+                    value={formData.best_time_to_visit}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="latitude" className="block text-sm font-medium">
+                    Latitude
+                  </label>
+                  <Input
+                    id="latitude"
+                    name="latitude"
+                    type="number"
+                    step="any"
+                    value={formData.latitude ?? ''}
+                    onChange={handleInputChange}
+                    placeholder="e.g. -17.9244"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="longitude" className="block text-sm font-medium">
+                    Longitude
+                  </label>
+                  <Input
+                    id="longitude"
+                    name="longitude"
+                    type="number"
+                    step="any"
+                    value={formData.longitude ?? ''}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 25.8573"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="activities" className="block text-sm font-medium">
+                  Activities (comma-separated)
+                </label>
+                <Input
+                  id="activities"
+                  name="activities"
+                  value={formData.activities.join(', ')}
+                  onChange={handleActivityChange}
+                  placeholder="e.g. Hiking, Swimming, Sightseeing"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="additional_images" className="block text-sm font-medium">
+                  Additional Images (comma-separated URLs)
+                </label>
+                <Input
+                  id="additional_images"
+                  name="additional_images"
+                  value={formData.additional_images.join(', ')}
+                  onChange={handleAdditionalImagesChange}
+                  placeholder="e.g. https://example.com/image1.jpg, https://example.com/image2.jpg"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium mb-2">Categories</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {categories.map((category) => (
+                    <div key={category} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category}`}
+                        checked={formData.categories.includes(category)}
+                        onCheckedChange={() => handleCategoryToggle(category)}
+                      />
+                      <label
+                        htmlFor={`category-${category}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {category}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="duration_recommended" className="block text-sm font-medium">
+                  Recommended Duration
+                </label>
+                <Input
+                  id="duration_recommended"
+                  name="duration_recommended"
+                  value={formData.duration_recommended}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 2-3 days"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="booking_info" className="block text-sm font-medium">
+                  Booking Information
+                </label>
+                <Textarea
+                  id="booking_info"
+                  name="booking_info"
+                  value={formData.booking_info}
+                  onChange={handleInputChange}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="notes" className="block text-sm font-medium">
+                  Additional Notes
+                </label>
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  rows={3}
+                />
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Save</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-10">Loading destinations...</div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Categories</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {destinations.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-4">
+                    No destinations found. Create one to get started.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                destinations.map((destination) => (
+                  <TableRow key={destination.id}>
+                    <TableCell className="font-medium">{destination.name}</TableCell>
+                    <TableCell>{destination.location}</TableCell>
+                    <TableCell>${destination.price}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {destination.categories?.slice(0, 3).map((category) => (
+                          <span
+                            key={category}
+                            className="bg-indigo-100 text-indigo-800 text-xs rounded px-2 py-1"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                        {destination.categories && destination.categories.length > 3 && (
+                          <span className="text-xs text-muted-foreground">
+                            +{destination.categories.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(destination)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(destination.id)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {destinations.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                        No destinations found. Click "Add Destination" to create one.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    destinations.map((destination) => (
-                      <TableRow key={destination.id} className="hover:bg-gray-50">
-                        <TableCell>
-                          <div className="h-12 w-12 rounded bg-gray-100 flex items-center justify-center overflow-hidden">
-                            {destination.image_url ? (
-                              <img 
-                                src={destination.image_url} 
-                                alt={destination.name}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-gray-400 text-xs">No image</span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{destination.name}</TableCell>
-                        <TableCell>{destination.location}</TableCell>
-                        <TableCell>${destination.price.toFixed(2)}</TableCell>
-                        <TableCell>
-                          {destination.is_featured ? (
-                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                              Featured
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-gray-600 bg-transparent">
-                              No
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2 justify-end">
-                            <Button 
-                              variant="outline"
-                              size="icon"
-                              className="hover:bg-gray-100"
-                              onClick={() => handleEditDestination(destination)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="outline"
-                              size="icon"
-                              className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                              onClick={() => handleDeleteDestination(destination.id)}
-                              disabled={isDeleting}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Add Destination Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Destination</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new destination.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleAddDestination)} className="space-y-6">
-                {formFieldCategories.map((category) => (
-                  <div key={category.title} className="border p-4 rounded-md">
-                    <h3 className="text-lg font-medium mb-4">{category.title}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {category.fields.map(field => renderFormField(field, form))}
-                    </div>
-                  </div>
-                ))}
-                
-                <div className="border p-4 rounded-md">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium">Additional Costs</h3>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center"
-                      onClick={() => {
-                        setAddingCost(true);
-                        setEditingCostIndex(null);
-                        costForm.reset();
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Add Cost
-                    </Button>
-                  </div>
-                  
-                  {addingCost ? (
-                    <div className="border rounded-md p-4 mb-4 bg-white">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <FormField
-                          control={costForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Name *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g. Guide fee" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={costForm.control}
-                          name="price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Price *</FormLabel>
-                              <FormControl>
-                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={costForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem className="col-span-2">
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Describe this additional cost" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => {
-                            setAddingCost(false);
-                            setEditingCostIndex(null);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="button" 
-                          onClick={handleAddCost}
-                        >
-                          {editingCostIndex !== null ? 'Update Cost' : 'Add Cost'}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                  
-                  {additionalCosts.length > 0 ? (
-                    <div className="border rounded-md overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-100">
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {additionalCosts.map((cost, index) => (
-                            <TableRow key={index} className="bg-white">
-                              <TableCell className="font-medium">{cost.name}</TableCell>
-                              <TableCell>${cost.price.toFixed(2)}</TableCell>
-                              <TableCell>{cost.description || '-'}</TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2 justify-end">
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => handleEditCost(cost, index)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => handleRemoveCost(index)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500 bg-white rounded-md border">
-                      No additional costs added. Click "Add Cost" to create one.
-                    </div>
-                  )}
-                </div>
-                
-                <DialogFooter>
-                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Destination
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Destination Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Destination</DialogTitle>
-            <DialogDescription>
-              Update the destination details.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            <Form {...editForm}>
-              <form onSubmit={editForm.handleSubmit(handleSaveDestination)} className="space-y-6">
-                {formFieldCategories.map((category) => (
-                  <div key={category.title} className="border p-4 rounded-md">
-                    <h3 className="text-lg font-medium mb-4">{category.title}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {category.fields.map(field => renderFormField(field, editForm))}
-                    </div>
-                  </div>
-                ))}
-                
-                <div className="border p-4 rounded-md">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium">Additional Costs</h3>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center"
-                      onClick={() => {
-                        setAddingCost(true);
-                        setEditingCostIndex(null);
-                        costForm.reset();
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Add Cost
-                    </Button>
-                  </div>
-                  
-                  {addingCost ? (
-                    <div className="border rounded-md p-4 mb-4 bg-white">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <FormField
-                          control={costForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Name *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g. Guide fee" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={costForm.control}
-                          name="price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Price *</FormLabel>
-                              <FormControl>
-                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={costForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem className="col-span-2">
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Describe this additional cost" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => {
-                            setAddingCost(false);
-                            setEditingCostIndex(null);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="button" 
-                          onClick={handleAddCost}
-                        >
-                          {editingCostIndex !== null ? 'Update Cost' : 'Add Cost'}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                  
-                  {additionalCosts.length > 0 ? (
-                    <div className="border rounded-md overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-100">
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {additionalCosts.map((cost, index) => (
-                            <TableRow key={index} className="bg-white">
-                              <TableCell className="font-medium">{cost.name}</TableCell>
-                              <TableCell>${cost.price.toFixed(2)}</TableCell>
-                              <TableCell>{cost.description || '-'}</TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2 justify-end">
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => handleEditCost(cost, index)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => handleRemoveCost(index)}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500 bg-white rounded-md border">
-                      No additional costs added. Click "Add Cost" to create one.
-                    </div>
-                  )}
-                </div>
-                
-                <DialogFooter>
-                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </div>
-        </DialogContent>
-      </Dialog>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 };
