@@ -29,14 +29,13 @@ import ItineraryCreatePage from "./pages/ItineraryCreatePage";
 import ItineraryDetailsPage from "./pages/ItineraryDetailsPage";
 import ItinerarySharedPage from "./pages/ItinerarySharedPage";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
@@ -181,6 +180,8 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <Toaster />
+        <Sonner />
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

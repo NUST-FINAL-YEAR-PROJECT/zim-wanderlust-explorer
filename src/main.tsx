@@ -8,7 +8,6 @@ import SplashScreen from './components/SplashScreen.tsx'
 import { Toaster } from '@/components/ui/toaster'
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
 
 const Root = () => {
   const [showSplash, setShowSplash] = useState(true);
