@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
+import HeroSearchBar from "./HeroSearchBar";
 
 // Updated hero images with the new uploaded images
 const heroImages = [
@@ -63,11 +65,7 @@ const heroImages = [
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showResults, setShowResults] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
   // Check auth status
@@ -98,31 +96,6 @@ const HeroCarousel = () => {
     setCurrentSlide((prev) => (prev === 0 ? heroImages.length - 1 : prev - 1));
   };
   
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.trim()) {
-      setShowResults(true);
-      // We'll show some quick results here - in a real app this would be fetched
-      setSearchResults([
-        { id: 1, name: "Victoria Falls", type: "destination" },
-        { id: 2, name: "Hwange National Park", type: "destination" },
-        { id: 3, name: "HIFA Festival", type: "event" }
-      ]);
-    } else {
-      setShowResults(false);
-      setSearchResults([]);
-    }
-  };
-
-  const handleSearchSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
-    if (searchQuery.trim()) {
-      navigate(`/browse?search=${encodeURIComponent(searchQuery)}`);
-      setShowResults(false);
-    }
-  };
-
   const handleSignIn = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/auth");
@@ -152,7 +125,6 @@ const HeroCarousel = () => {
   };
   
   const handleExploreDestination = (title: string) => {
-    // Navigate to the specific destination if possible
     navigate(`/browse?search=${encodeURIComponent(title)}&tab=destinations`);
   };
   
@@ -163,18 +135,6 @@ const HeroCarousel = () => {
     }, 7000);
     
     return () => clearInterval(timer);
-  }, []);
-
-  // Close search results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowResults(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
   // Animation variants
@@ -336,76 +296,14 @@ const HeroCarousel = () => {
             {heroImages[currentSlide].description}
           </motion.p>
           
-          {/* Search Bar with Results Panel */}
+          {/* Enhanced Search Bar */}
           <motion.div 
-            className="w-full max-w-3xl mx-auto mb-10 relative"
-            ref={searchRef}
+            className="w-full max-w-3xl mx-auto mb-10"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 0.8 }}
           >
-            <form onSubmit={handleSearchSubmit} className="flex gap-2">
-              <div className="relative flex-1 bg-white rounded-lg overflow-hidden shadow-md">
-                <input
-                  type="text"
-                  placeholder="Where would you like to explore?"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-12 py-6 text-base w-full shadow-sm border-0 focus-visible:ring-indigo-500 rounded-lg"
-                />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-indigo-500">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                </div>
-              </div>
-              <Button 
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white h-[52px] px-6 rounded-lg shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/40"
-              >
-                Search
-              </Button>
-            </form>
-            
-            {/* Search Results Panel */}
-            {showResults && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
-                <div className="p-4">
-                  <h3 className="font-medium text-lg mb-2">Quick Results</h3>
-                  <div className="space-y-2">
-                    {searchResults.map((result) => (
-                      <div 
-                        key={result.id}
-                        className="p-2 hover:bg-indigo-50 rounded cursor-pointer flex items-center"
-                        onClick={() => {
-                          if (result.type === 'destination') {
-                            navigate(`/destination/${result.id}/details`);
-                          } else {
-                            navigate(`/booking/event/${result.id}`);
-                          }
-                          setShowResults(false);
-                        }}
-                      >
-                        <div className="w-10 h-10 rounded bg-indigo-100 mr-3 flex-shrink-0"></div>
-                        <div className="flex-grow">
-                          <p className="font-medium">{result.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {result.type === 'destination' ? 'Popular destination' : 'Event'}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="text-center">
-                      <Button 
-                        variant="link" 
-                        onClick={() => handleSearchSubmit()} 
-                        className="text-indigo-600"
-                      >
-                        See all results
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            <HeroSearchBar />
           </motion.div>
           
           <motion.div 
