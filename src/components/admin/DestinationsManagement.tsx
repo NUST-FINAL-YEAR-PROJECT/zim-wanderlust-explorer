@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/components/ui/use-toast';
-import { createDestination, getDestinations, updateDestination, deleteDestination, Destination } from '@/models/Destination';
+import { getDestinations, updateDestination, deleteDestination, addDestination, Destination } from '@/models/Destination';
 
 const DestinationsManagement = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -48,11 +48,12 @@ const DestinationsManagement = () => {
     duration_recommended: '',
     difficulty_level: 'moderate',
     categories: [] as string[],
-    included_services: [] as string[],
-    excluded_services: [] as string[],
+    amenities: [] as string[],
+    what_to_bring: [] as string[],
+    highlights: [] as string[],
     additional_images: [] as string[],
-    notes: '',
-    booking_info: '',
+    weather_info: '',
+    getting_there: '',
     payment_url: '',
     latitude: null as number | null,
     longitude: null as number | null
@@ -115,11 +116,12 @@ const DestinationsManagement = () => {
       duration_recommended: '',
       difficulty_level: 'moderate',
       categories: [],
-      included_services: [],
-      excluded_services: [],
+      amenities: [],
+      what_to_bring: [],
+      highlights: [],
       additional_images: [],
-      notes: '',
-      booking_info: '',
+      weather_info: '',
+      getting_there: '',
       payment_url: '',
       latitude: null,
       longitude: null
@@ -161,6 +163,24 @@ const DestinationsManagement = () => {
     setFormData({ ...formData, additional_images: images });
   };
 
+  const handleAmenitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const amenities = value.split(',').map(item => item.trim());
+    setFormData({ ...formData, amenities });
+  };
+
+  const handleWhatToBringChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const items = value.split(',').map(item => item.trim());
+    setFormData({ ...formData, what_to_bring: items });
+  };
+
+  const handleHighlightsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const highlights = value.split(',').map(item => item.trim());
+    setFormData({ ...formData, highlights });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -177,7 +197,7 @@ const DestinationsManagement = () => {
         await updateDestination(editId, destinationData);
         toast({ description: 'Destination updated successfully!' });
       } else {
-        await createDestination(destinationData);
+        await addDestination(destinationData);
         toast({ description: 'Destination created successfully!' });
       }
       
@@ -207,11 +227,12 @@ const DestinationsManagement = () => {
       duration_recommended: destination.duration_recommended || '',
       difficulty_level: destination.difficulty_level || 'moderate',
       categories: destination.categories || [],
-      included_services: destination.included_services || [],
-      excluded_services: destination.excluded_services || [],
+      amenities: destination.amenities || [],
+      what_to_bring: destination.what_to_bring || [],
+      highlights: destination.highlights || [],
       additional_images: destination.additional_images || [],
-      notes: destination.notes || '',
-      booking_info: destination.booking_info || '',
+      weather_info: destination.weather_info || '',
+      getting_there: destination.getting_there || '',
       payment_url: destination.payment_url || '',
       latitude: destination.latitude || null,
       longitude: destination.longitude || null
@@ -425,6 +446,45 @@ const DestinationsManagement = () => {
               </div>
 
               <div className="space-y-2">
+                <label htmlFor="amenities" className="block text-sm font-medium">
+                  Amenities (comma-separated)
+                </label>
+                <Input
+                  id="amenities"
+                  name="amenities"
+                  value={formData.amenities.join(', ')}
+                  onChange={handleAmenitiesChange}
+                  placeholder="e.g. Parking, WiFi, Restaurant"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="what_to_bring" className="block text-sm font-medium">
+                  What to Bring (comma-separated)
+                </label>
+                <Input
+                  id="what_to_bring"
+                  name="what_to_bring"
+                  value={formData.what_to_bring.join(', ')}
+                  onChange={handleWhatToBringChange}
+                  placeholder="e.g. Sunscreen, Hat, Water bottle"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="highlights" className="block text-sm font-medium">
+                  Highlights (comma-separated)
+                </label>
+                <Input
+                  id="highlights"
+                  name="highlights"
+                  value={formData.highlights.join(', ')}
+                  onChange={handleHighlightsChange}
+                  placeholder="e.g. Amazing views, Unique wildlife, Cultural experience"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label className="block text-sm font-medium mb-2">Categories</label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {categories.map((category) => (
@@ -459,28 +519,43 @@ const DestinationsManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="booking_info" className="block text-sm font-medium">
-                  Booking Information
+                <label htmlFor="weather_info" className="block text-sm font-medium">
+                  Weather Information
                 </label>
                 <Textarea
-                  id="booking_info"
-                  name="booking_info"
-                  value={formData.booking_info}
+                  id="weather_info"
+                  name="weather_info"
+                  value={formData.weather_info || ''}
                   onChange={handleInputChange}
                   rows={3}
+                  placeholder="Weather details and tips"
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="notes" className="block text-sm font-medium">
-                  Additional Notes
+                <label htmlFor="getting_there" className="block text-sm font-medium">
+                  Getting There
                 </label>
                 <Textarea
-                  id="notes"
-                  name="notes"
-                  value={formData.notes}
+                  id="getting_there"
+                  name="getting_there"
+                  value={formData.getting_there || ''}
                   onChange={handleInputChange}
                   rows={3}
+                  placeholder="Transportation and directions information"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="payment_url" className="block text-sm font-medium">
+                  Payment URL
+                </label>
+                <Input
+                  id="payment_url"
+                  name="payment_url"
+                  value={formData.payment_url || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://payment-gateway.com/xyz"
                 />
               </div>
 
