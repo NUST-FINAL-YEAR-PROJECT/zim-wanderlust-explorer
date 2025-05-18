@@ -12,6 +12,7 @@ const Hero = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     // Check if user is logged in
@@ -52,11 +53,11 @@ const Hero = () => {
   }, []);
 
   const handleSearch = (query: string) => {
+    setSearchQuery(query);
     navigate(`/browse?search=${encodeURIComponent(query)}`);
   };
 
   const handleSignIn = () => {
-    console.log("Sign in button clicked, navigating to /auth");
     setIsLoading(true);
     try {
       navigate("/auth");
@@ -220,7 +221,7 @@ const Hero = () => {
       </motion.div>
       
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-        <div className="max-w-4xl animate-fade-in">
+        <div className="max-w-4xl">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -247,7 +248,7 @@ const Hero = () => {
             variants={searchBarVariants}
             className="w-full max-w-3xl mx-auto mb-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20"
           >
-            <HomepageSearchBar />
+            <HomepageSearchBar onSearch={handleSearch} />
           </motion.div>
           
           <motion.div 
@@ -257,8 +258,9 @@ const Hero = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover="hover"
+              whileTap="tap"
+              variants={buttonVariants}
             >
               <Button 
                 variant="default"
@@ -270,8 +272,9 @@ const Hero = () => {
             </motion.div>
             
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover="hover"
+              whileTap="tap"
+              variants={buttonVariants}
             >
               <Button 
                 variant="outline" 

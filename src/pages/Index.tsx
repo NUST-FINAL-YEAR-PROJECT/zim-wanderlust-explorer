@@ -9,13 +9,16 @@ import Footer from "@/components/Footer";
 import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
-import HeroCarousel from "@/components/HeroCarousel";
 import AiAssistant from "@/components/AiAssistant";
 import StatsCounter from "@/components/StatsCounter";
 import { ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import FeaturedSection from "@/components/FeaturedSection";
+import HeroCarousel from "@/components/HeroCarousel";
+import MapExplorer from "@/components/MapExplorer";
+import WhyZimbabwe from "@/components/WhyZimbabwe";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -121,9 +124,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Hero Carousel */}
       <HeroCarousel />
+      
+      {/* Featured Experiences Section */}
+      <FeaturedSection />
       
       {/* Popular Destinations/Events Section */}
       <motion.div 
@@ -232,6 +238,12 @@ const Index = () => {
           </Tabs>
         </div>
       </motion.div>
+      
+      {/* Why Visit Zimbabwe Section */}
+      <WhyZimbabwe />
+      
+      {/* Map Explorer */}
+      <MapExplorer />
       
       {/* Stats Counter Section */}
       <StatsCounter />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,11 +6,11 @@ import { Search, Filter } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { searchDestinations } from "@/models/Destination";
 import { searchEvents } from "@/models/Event";
 
-const HomepageSearchBar = () => {
+const HomepageSearchBar = ({ onSearch }: { onSearch?: (query: string) => void }) => {
   const [activeTab, setActiveTab] = useState("stay");
   const [searchText, setSearchText] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -64,6 +63,13 @@ const HomepageSearchBar = () => {
     // Save search term
     saveRecentSearch(searchText);
     
+    // If onSearch prop is provided (for in-page search), use it
+    if (onSearch) {
+      onSearch(searchText);
+      return;
+    }
+    
+    // Otherwise navigate to search results page
     const params = new URLSearchParams();
     params.append('search', searchText);
     params.append('tab', activeTab === "stay" ? "destinations" : "events");
