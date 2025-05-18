@@ -4,6 +4,13 @@ import { Destination } from '@/models/Destination';
 import { Card } from '@/components/ui/card';
 import { ExternalLink } from 'lucide-react';
 
+// Define the window.google property
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 type DestinationMapProps = {
   destination: Destination;
   className?: string;
