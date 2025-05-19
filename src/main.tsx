@@ -39,7 +39,7 @@ const Root = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="min-h-screen bg-gradient-to-br from-indigo-50 to-white"
+            className="min-h-screen bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950 dark:to-indigo-900"
           >
             <App />
           </motion.div>
@@ -51,9 +51,9 @@ const Root = () => {
       <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
         <AlertDialogContent className="border-0 shadow-xl rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center text-indigo-800">
-              <div className="bg-indigo-100 p-2 rounded-full mr-2">
-                <RefreshCw className="h-5 w-5 text-indigo-600" />
+            <AlertDialogTitle className="flex items-center text-indigo-800 dark:text-indigo-200">
+              <div className="bg-indigo-100 dark:bg-indigo-800/50 p-2 rounded-full mr-2">
+                <RefreshCw className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
               </div>
               Application Error
             </AlertDialogTitle>
@@ -64,7 +64,7 @@ const Root = () => {
           <AlertDialogFooter>
             <Button 
               onClick={() => window.location.reload()} 
-              className="bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white"
+              className="bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white dark:from-indigo-700 dark:to-indigo-900 dark:hover:from-indigo-600 dark:hover:to-indigo-800"
             >
               Refresh Page
             </Button>
