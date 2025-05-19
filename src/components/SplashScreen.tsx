@@ -41,7 +41,7 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-900"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-700"
         >
           <div className="text-center">
             {children || (
@@ -52,6 +52,22 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                   transition={{ duration: 0.5 }}
                   className="mb-8"
                 >
+                  <div className="flex items-center justify-center mb-4">
+                    <motion.div 
+                      animate={{ 
+                        rotate: [0, 360],
+                        scale: [0.8, 1, 0.8]
+                      }} 
+                      transition={{ 
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut" 
+                      }}
+                      className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg shadow-indigo-500/30"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-indigo-600"></div>
+                    </motion.div>
+                  </div>
                   <h1 className="text-5xl md:text-7xl font-display font-bold text-white">
                     ExploreZim
                   </h1>
@@ -60,8 +76,11 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
 
                 <motion.div 
                   className="w-full max-w-md mx-auto mb-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
                 >
-                  <Progress value={progress} className="h-2 bg-white/10" />
+                  <Progress value={progress} className="h-2 bg-white/10" indicatorClassName="bg-white" />
                 </motion.div>
               </>
             )}

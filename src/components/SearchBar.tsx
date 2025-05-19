@@ -2,17 +2,18 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, MapPin, Calendar } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { searchDestinations } from "@/models/Destination";
 import { searchEvents } from "@/models/Event";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
-  initialValue?: string; // Added initialValue as optional prop
+  initialValue?: string;
 }
 
 const SearchBar = ({ onSearch, initialValue = "" }: SearchBarProps) => {
@@ -132,66 +133,77 @@ const SearchBar = ({ onSearch, initialValue = "" }: SearchBarProps) => {
           </div>
           
           {/* Quick Search Results */}
-          {showResults && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto">
-              <div className="p-4">
-                <h3 className="font-medium text-gray-500 text-xs uppercase tracking-wider mb-3">
-                  {isTyping ? 'Searching...' : 'Quick Results'}
-                </h3>
-                <div className="space-y-3">
-                  {isTyping ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="animate-pulse w-6 h-6 rounded-full bg-indigo-200"></div>
-                    </div>
-                  ) : results.length > 0 ? (
-                    <>
-                      {results.map((result) => (
-                        <div 
-                          key={`${result.type}-${result.id}`}
-                          className="p-2 hover:bg-indigo-50 rounded-lg cursor-pointer flex items-center"
-                          onClick={() => handleResultClick(result)}
-                        >
-                          <div 
-                            className="w-12 h-12 rounded overflow-hidden mr-3 flex-shrink-0 bg-indigo-100"
-                            style={result.image_url ? {
-                              backgroundImage: `url(${result.image_url})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center'
-                            } : {}}
-                          ></div>
-                          <div className="flex-grow">
-                            <p className="font-medium">{result.name || result.title}</p>
-                            <p className="text-sm text-gray-500">
-                              {result.type === 'destination' ? result.location : result.event_type || 'Event'}
-                            </p>
-                          </div>
-                          <Badge 
-                            className={`ml-2 ${result.type === 'destination' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800'}`}
-                            variant="outline"
-                          >
-                            {result.type === 'destination' ? 'Place' : 'Event'}
-                          </Badge>
-                        </div>
-                      ))}
-                      <div className="text-center pt-2 border-t">
-                        <Button 
-                          variant="link" 
-                          onClick={() => handleSubmit()}
-                          className="text-indigo-600"
-                        >
-                          See all results
-                        </Button>
+          <AnimatePresence>
+            {showResults && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"
+              >
+                <div className="p-4">
+                  <h3 className="font-medium text-gray-500 text-xs uppercase tracking-wider mb-3">
+                    {isTyping ? 'Searching...' : 'Quick Results'}
+                  </h3>
+                  <div className="space-y-3">
+                    {isTyping ? (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="animate-pulse w-6 h-6 rounded-full bg-indigo-200"></div>
                       </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500">
-                      No results match your search
-                    </div>
-                  )}
+                    ) : results.length > 0 ? (
+                      <>
+                        {results.map((result) => (
+                          <div 
+                            key={`${result.type}-${result.id}`}
+                            className="p-2 hover:bg-indigo-50 rounded-lg cursor-pointer flex items-center"
+                            onClick={() => handleResultClick(result)}
+                          >
+                            <div 
+                              className="w-12 h-12 rounded overflow-hidden mr-3 flex-shrink-0 bg-indigo-100"
+                              style={result.image_url ? {
+                                backgroundImage: `url(${result.image_url})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                              } : {}}
+                            ></div>
+                            <div className="flex-grow">
+                              <p className="font-medium">{result.name || result.title}</p>
+                              <p className="text-sm text-gray-500">
+                                {result.type === 'destination' ? 
+                                  <span className="flex items-center"><MapPin size={12} className="mr-1" /> {result.location}</span> : 
+                                  <span className="flex items-center"><Calendar size={12} className="mr-1" /> {result.event_type || 'Event'}</span>
+                                }
+                              </p>
+                            </div>
+                            <Badge 
+                              className={`ml-2 ${result.type === 'destination' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800'}`}
+                              variant="outline"
+                            >
+                              {result.type === 'destination' ? 'Place' : 'Event'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <div className="text-center pt-2 border-t">
+                          <Button 
+                            variant="link" 
+                            onClick={() => handleSubmit()}
+                            className="text-indigo-600"
+                          >
+                            See all results
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        No results match your search
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         
         <Popover open={showFilters} onOpenChange={setShowFilters}>
