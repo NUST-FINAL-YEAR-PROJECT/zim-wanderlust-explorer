@@ -38,8 +38,8 @@ const Root = () => {
             key="app"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="min-h-screen bg-white"
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="min-h-screen bg-gradient-to-br from-indigo-50 to-white"
           >
             <App />
           </motion.div>
@@ -49,7 +49,7 @@ const Root = () => {
       <Toaster />
       
       <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-0 shadow-xl rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center text-indigo-800">
               <div className="bg-indigo-100 p-2 rounded-full mr-2">
@@ -62,7 +62,10 @@ const Root = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button onClick={() => window.location.reload()} variant="gradient">
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white"
+            >
               Refresh Page
             </Button>
           </AlertDialogFooter>

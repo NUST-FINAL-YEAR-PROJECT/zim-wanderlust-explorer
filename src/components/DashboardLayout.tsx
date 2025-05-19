@@ -9,10 +9,10 @@ import {
   Settings, 
   LogOut, 
   Menu, 
-  Bookmark,
   Heart,
   User,
-  HelpCircle
+  HelpCircle,
+  ChevronRight
 } from 'lucide-react';
 import {
   Sidebar,
@@ -35,6 +35,7 @@ import { signOut } from '@/models/Auth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { motion } from 'framer-motion';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -126,24 +127,32 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         ? user.email.substring(0, 2).toUpperCase() 
         : 'U';
 
+  // Animation variants
+  const sidebarItemVariants = {
+    hover: { x: 5, transition: { type: "spring", stiffness: 300 } }
+  };
+
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar variant={isMobile ? "floating" : "sidebar"} className="border-r">
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-indigo-50 to-white">
+        <Sidebar 
+          variant={isMobile ? "floating" : "sidebar"} 
+          className="border-r border-indigo-100 shadow-md bg-white z-20"
+        >
           <SidebarHeader>
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="rounded-full bg-gradient-to-r from-primary to-accent p-1.5 text-white">
+            <div className="flex items-center gap-3 px-4 py-5">
+              <div className="rounded-full bg-gradient-to-r from-indigo-600 to-indigo-800 p-1.5 text-white">
                 <MapPin size={20} />
               </div>
               <div className="flex flex-col">
-                <h3 className="font-display font-bold text-lg tracking-tight">Zimbabwe Tourism</h3>
-                <p className="text-xs text-muted-foreground">Discover the beauty</p>
+                <h3 className="font-display font-bold text-lg tracking-tight text-indigo-900">ExploreZim</h3>
+                <p className="text-xs text-indigo-400">Discover the beauty</p>
               </div>
             </div>
           </SidebarHeader>
           <SidebarContent className="pb-6">
             <SidebarGroup>
-              <SidebarGroupLabel className="font-display">Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-display text-indigo-900 text-xs uppercase tracking-wide">Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => (
@@ -156,18 +165,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                               isActive={location.pathname === item.path}
                               tooltip={item.title}
                             >
-                              <Link to={item.path} className={cn(
-                                "transition-all duration-300",
-                                location.pathname === item.path 
-                                  ? "text-primary font-medium" 
-                                  : "text-sidebar-foreground hover:text-primary"
-                              )}>
-                                <item.icon className="dashboard-icon" />
-                                <span>{item.title}</span>
-                              </Link>
+                              <motion.div
+                                whileHover="hover"
+                                variants={sidebarItemVariants}
+                              >
+                                <Link to={item.path} className={cn(
+                                  "transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-lg",
+                                  location.pathname === item.path 
+                                    ? "text-white font-medium bg-gradient-to-r from-indigo-600 to-indigo-800 shadow-md" 
+                                    : "text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50"
+                                )}>
+                                  <item.icon className="h-5 w-5" />
+                                  <span>{item.title}</span>
+                                  {location.pathname === item.path && (
+                                    <ChevronRight className="ml-auto h-5 w-5" />
+                                  )}
+                                </Link>
+                              </motion.div>
                             </SidebarMenuButton>
                           </TooltipTrigger>
-                          <TooltipContent side="right">
+                          <TooltipContent side="right" className="bg-indigo-800 text-white">
                             {item.description}
                           </TooltipContent>
                         </Tooltip>
@@ -179,37 +196,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </SidebarGroup>
             
             <SidebarGroup>
-              <SidebarGroupLabel className="font-display">Support</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-display text-indigo-900 text-xs uppercase tracking-wide">Support</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <a href="#" className="text-sidebar-foreground hover:text-primary transition-colors duration-300">
-                        <HelpCircle className="dashboard-icon" />
-                        <span>Help & Support</span>
-                      </a>
+                      <motion.div
+                        whileHover="hover"
+                        variants={sidebarItemVariants}
+                      >
+                        <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 transition-colors duration-300">
+                          <HelpCircle className="h-5 w-5" />
+                          <span>Help & Support</span>
+                        </a>
+                      </motion.div>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter className="border-t pt-2">
-            <div className="mb-3 px-3 py-2">
+          <SidebarFooter className="border-t border-indigo-100 pt-2">
+            <div className="mb-3 px-4 py-3">
               <div className="flex items-center gap-3">
-                <Avatar>
+                <Avatar className="border-2 border-indigo-100">
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <p className="text-sm font-medium">{displayName}</p>
-                  <p className="text-xs text-muted-foreground">{profile?.role || 'User'}</p>
+                  <p className="text-sm font-medium text-indigo-900">{displayName}</p>
+                  <p className="text-xs text-indigo-400">{profile?.role || 'User'}</p>
                 </div>
               </div>
             </div>
             <Button 
               variant="outline" 
-              className="w-full flex items-center gap-2 text-gray-600 hover:text-primary hover:border-primary transition-colors duration-300" 
+              className="w-full flex items-center gap-2 border-indigo-200 text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 hover:border-indigo-300 transition-colors duration-300 m-2" 
               onClick={handleSignOut}
             >
               <LogOut size={16} />
@@ -219,22 +241,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Sidebar>
         
         <div className="flex-1 overflow-auto">
-          <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md py-3 px-6 shadow-sm">
+          <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md py-4 px-6 shadow-sm border-b border-indigo-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="h-8 w-8" />
+                <SidebarTrigger className="h-8 w-8 text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 rounded-lg" />
                 <div>
-                  <h1 className="text-xl font-display font-semibold">
+                  <h1 className="text-xl font-display font-semibold text-indigo-900">
                     {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
                   </h1>
-                  <p className="text-sm text-muted-foreground hidden sm:block">
-                    {navigationItems.find(item => item.path === location.pathname)?.description || 'Welcome to Zimbabwe Tourism'}
+                  <p className="text-sm text-indigo-400 hidden sm:block">
+                    {navigationItems.find(item => item.path === location.pathname)?.description || 'Welcome to ExploreZim'}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" asChild className="hover:text-primary transition-colors duration-300">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full h-10 w-10 text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50"
+                  asChild
+                >
                   <Link to="/settings">
                     <User className="h-5 w-5" />
                   </Link>

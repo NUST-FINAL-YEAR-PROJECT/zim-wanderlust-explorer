@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Progress } from "@/components/ui/progress";
+import { MapPin } from "lucide-react";
 
 interface WelcomeSplashProps {
   duration?: number;
@@ -64,41 +65,66 @@ const WelcomeSplash = ({ duration = 2500, onComplete }: WelcomeSplashProps) => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-900"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-700"
         >
           <motion.div 
-            className="text-center px-6"
+            className="text-center px-6 max-w-2xl"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
           >
-            <motion.div variants={itemVariants}>
-              <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">
+            <motion.div variants={itemVariants} className="mb-6">
+              <h1 className="text-4xl md:text-6xl font-display font-bold text-white drop-shadow-md mb-4">
                 Welcome back, {displayName}!
               </h1>
               
-              <p className="text-xl text-white/80 mb-8">
+              <p className="text-xl text-white/90">
                 Get ready to continue your Zimbabwe adventure
               </p>
             </motion.div>
             
             <motion.div
               variants={itemVariants}
-              className="w-24 h-24 mx-auto mb-8 rounded-full bg-white/10 flex items-center justify-center"
+              className="relative mx-auto mb-10 flex justify-center"
             >
-              <motion.div 
-                initial={{ rotate: 0 }} 
-                animate={{ rotate: 360 }} 
-                transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity }}
-                className="text-5xl"
+              <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+                <motion.div 
+                  animate={{ 
+                    rotate: [0, 360],
+                    scale: [0.8, 1, 0.8]
+                  }} 
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut" 
+                  }}
+                  className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center"
+                >
+                  <MapPin size={24} className="text-white" />
+                </motion.div>
+              </div>
+              
+              <motion.div
+                className="absolute -top-2 -right-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1, rotate: [0, 10, 0, -10, 0] }}
+                transition={{ 
+                  delay: 0.5, 
+                  duration: 0.8,
+                  rotate: { repeat: 5, duration: 0.3, repeatDelay: 0.1 }
+                }}
               >
-                ✨
+                <div className="text-3xl">✨</div>
               </motion.div>
             </motion.div>
             
-            <motion.div variants={itemVariants} className="w-full max-w-md mx-auto mb-6">
-              <Progress value={progress} className="h-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" />
+            <motion.div variants={itemVariants} className="w-full max-w-md mx-auto">
+              <Progress 
+                value={progress} 
+                className="h-2 bg-white/10 overflow-hidden rounded-full before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-indigo-400 before:to-purple-500" 
+              />
+              <p className="text-white/60 text-sm mt-2">Preparing your experience...</p>
             </motion.div>
           </motion.div>
         </motion.div>

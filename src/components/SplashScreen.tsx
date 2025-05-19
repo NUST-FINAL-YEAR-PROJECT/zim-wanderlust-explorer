@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { MapPin } from "lucide-react";
 
 interface SplashScreenProps {
   duration?: number;
@@ -44,16 +45,24 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
           transition={{ duration: 0.8 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-700"
         >
-          <div className="text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-center px-6 max-w-lg"
+          >
             {children || (
               <>
                 <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
                   className="mb-8"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut" 
+                  }}
                 >
-                  <div className="flex items-center justify-center mb-4">
+                  <div className="flex items-center justify-center mb-6">
                     <motion.div 
                       animate={{ 
                         rotate: [0, 360],
@@ -64,28 +73,44 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                         repeat: Infinity,
                         ease: "easeInOut" 
                       }}
-                      className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg shadow-indigo-500/30"
+                      className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-indigo-900/30"
                     >
-                      <div className="w-10 h-10 rounded-full bg-indigo-600"></div>
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-700 flex items-center justify-center">
+                        <MapPin size={32} className="text-white" />
+                      </div>
                     </motion.div>
                   </div>
-                  <h1 className="text-5xl md:text-7xl font-display font-bold text-white">
+                  <h1 className="text-5xl md:text-7xl font-display font-bold text-white drop-shadow-md">
                     ExploreZim
                   </h1>
-                  <p className="text-xl text-white/80 mt-4">Discover the Beauty of Zimbabwe</p>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className="text-xl text-white/90 mt-4"
+                  >
+                    Discover the Beauty of Zimbabwe
+                  </motion.p>
                 </motion.div>
 
                 <motion.div 
                   className="w-full max-w-md mx-auto mb-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
                 >
-                  <Progress value={progress} className={cn("h-2", "bg-white/10")} />
+                  <Progress 
+                    value={progress} 
+                    className={cn(
+                      "h-2 rounded-full overflow-hidden bg-white/10",
+                      "before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-indigo-400 before:to-purple-500"
+                    )} 
+                  />
+                  <p className="text-white/60 text-sm mt-2">Loading experience...</p>
                 </motion.div>
               </>
             )}
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
