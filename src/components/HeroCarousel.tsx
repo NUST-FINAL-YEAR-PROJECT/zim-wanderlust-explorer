@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import HeroSearchBar from "./HeroSearchBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -36,31 +36,6 @@ const heroImages = [
     url: "/lovable-uploads/4d89aba9-e022-4e41-95ec-7b887bfbd453.png",
     title: "Elephant Encounters",
     description: "Get up close with gentle giants on guided safari tours"
-  }, 
-  {
-    url: "/hwange.jpg",
-    title: "Hwange National Park",
-    description: "Explore Zimbabwe's largest wildlife sanctuary with incredible safari experiences"
-  }, 
-  {
-    url: "/great-zimbabwe.jpg",
-    title: "Great Zimbabwe",
-    description: "Visit the ancient stone city that gave Zimbabwe its name"
-  }, 
-  {
-    url: "/nyanga.jpg",
-    title: "Nyanga National Park",
-    description: "Discover scenic mountains, waterfalls and Zimbabwe's highest peak"
-  }, 
-  {
-    url: "/gonarezhou.jpg",
-    title: "Gonarezhou National Park",
-    description: "Encounter wildlife in the 'Place of Elephants' with its striking Chilojo Cliffs"
-  }, 
-  {
-    url: "/mana-pools.jpg",
-    title: "Mana Pools",
-    description: "Encounter wildlife in this UNESCO World Heritage Site along the Zambezi River"
   }
 ];
 
@@ -104,7 +79,6 @@ const HeroCarousel = () => {
   };
   
   const handleSignIn = () => {
-    setLoading(true);
     navigate("/auth");
   };
   
@@ -203,9 +177,9 @@ const HeroCarousel = () => {
         ))}
       </div>
       
-      {/* Sign In Button - Enhanced with loading state */}
+      {/* Fixed position Sign In Button with higher z-index */}
       <motion.div 
-        className="absolute top-6 right-6 z-20"
+        className="fixed top-6 right-6 z-[100]"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
@@ -214,7 +188,7 @@ const HeroCarousel = () => {
           <Button 
             variant="secondary" 
             disabled
-            className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 shadow-lg"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-300 shadow-lg"
           >
             <motion.div
               animate={{ rotate: 360 }}
@@ -227,98 +201,56 @@ const HeroCarousel = () => {
           </Button>
         ) : isLoggedIn ? (
           <div className="flex gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="secondary" 
-                    onClick={handleDashboard}
-                    className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 shadow-lg"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Dashboard
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Go to your dashboard</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleSignOut}
-                    className="bg-transparent backdrop-blur-md border-white/30 text-white hover:bg-white/20 hover:text-white transition-all duration-300"
-                  >
-                    Sign Out
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Sign out of your account</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button 
+              variant="secondary" 
+              onClick={handleDashboard}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-300 shadow-lg"
+            >
+              <User className="h-4 w-4 mr-2" />
+              Dashboard
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 hover:text-white transition-all duration-300"
+            >
+              Sign Out
+            </Button>
           </div>
         ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="secondary" 
-                  onClick={handleSignIn}
-                  className="bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-md border-indigo-500/20 text-white hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
-                >
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Sign in to your account</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button 
+            variant="secondary" 
+            onClick={handleSignIn}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-300 flex items-center gap-2 shadow-lg"
+          >
+            <LogIn className="h-4 w-4" />
+            Sign In
+          </Button>
         )}
       </motion.div>
       
       {/* Navigation Arrows with hover effects */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-indigo-600/70 hover:bg-indigo-700 border-indigo-500 text-white" 
-                onClick={prevSlide}
-              >
-                <ChevronLeft size={24} />
-              </Button>
-            </motion.div>
-          </TooltipTrigger>
-          <TooltipContent side="right">Previous</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-indigo-600/70 hover:bg-indigo-700 border-indigo-500 text-white" 
+          onClick={prevSlide}
+        >
+          <ChevronLeft size={24} />
+        </Button>
+      </motion.div>
       
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-indigo-600/70 hover:bg-indigo-700 border-indigo-500 text-white" 
-                onClick={nextSlide}
-              >
-                <ChevronRight size={24} />
-              </Button>
-            </motion.div>
-          </TooltipTrigger>
-          <TooltipContent side="left">Next</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-indigo-600/70 hover:bg-indigo-700 border-indigo-500 text-white" 
+          onClick={nextSlide}
+        >
+          <ChevronRight size={24} />
+        </Button>
+      </motion.div>
       
       {/* Content */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-4">

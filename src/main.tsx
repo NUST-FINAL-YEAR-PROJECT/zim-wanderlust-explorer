@@ -62,7 +62,7 @@ const Root = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button onClick={() => window.location.reload()} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={() => window.location.reload()} variant="gradient">
               Refresh Page
             </Button>
           </AlertDialogFooter>

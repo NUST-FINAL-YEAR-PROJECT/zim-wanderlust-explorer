@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface SplashScreenProps {
   duration?: number;
@@ -80,7 +81,7 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Progress value={progress} className="h-2 bg-white/10" indicatorClassName="bg-white" />
+                  <Progress value={progress} className={cn("h-2", "bg-white/10")} />
                 </motion.div>
               </>
             )}

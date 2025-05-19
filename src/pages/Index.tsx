@@ -245,9 +245,6 @@ const Index = () => {
       {/* Map Explorer */}
       <MapExplorer />
       
-      {/* Stats Counter Section */}
-      <StatsCounter />
-      
       {/* CTA Section */}
       <motion.section 
         className="py-20 bg-cover bg-center relative" 
@@ -288,8 +285,9 @@ const Index = () => {
             >
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <Button 
-                  className="bg-white hover:bg-gray-100 text-indigo-700 text-lg px-8 py-6 rounded-xl shadow-lg"
+                  variant="gradient"
                   onClick={handleStartPlanning}
+                  className="text-lg px-8 py-6 rounded-xl shadow-lg"
                 >
                   {isLoggedIn ? "Go to Dashboard" : "Start Planning"}
                 </Button>
@@ -309,7 +307,6 @@ const Index = () => {
       </motion.section>
       
       <Footer />
-      
       <AiAssistant />
     </div>
   );
