@@ -11,7 +11,7 @@ import { getDestinations, searchDestinations } from "@/models/Destination";
 import { getEvents, searchEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import DestinationCategories from "@/components/DestinationCategories";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Filter, Search, Calendar, MapPin, Grid, ChevronDown } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -194,7 +194,7 @@ const Browse = () => {
               <p className="text-indigo-100 mb-4">Discover the beauty, culture and adventure of Zimbabwe</p>
             </div>
             <div className="w-full lg:w-2/3">
-              <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
+              <SearchBar onSearch={handleSearch} />
             </div>
           </div>
           
@@ -281,51 +281,49 @@ const Browse = () => {
           </div>
           
           {/* Filters Panel */}
-          <AnimatePresence>
-            {filtersVisible && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden mb-6"
-              >
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-indigo-100">
-                  <h3 className="font-medium mb-3">Filter By:</h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {filterOptions.map(filter => (
-                      <Button
-                        key={filter}
-                        variant={selectedFilters.includes(filter) ? "default" : "outline"}
-                        size="sm"
-                        className={selectedFilters.includes(filter) 
-                          ? "bg-indigo-600" 
-                          : "border-indigo-200 text-indigo-700"}
-                        onClick={() => toggleFilter(filter)}
-                      >
-                        {filter}
-                      </Button>
-                    ))}
-                  </div>
-                  
-                  <div className="flex justify-between mt-4">
+          {filtersVisible && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-6"
+            >
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-indigo-100">
+                <h3 className="font-medium mb-3">Filter By:</h3>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {filterOptions.map(filter => (
                     <Button
-                      variant="ghost"
-                      onClick={() => setSelectedFilters([])}
+                      key={filter}
+                      variant={selectedFilters.includes(filter) ? "default" : "outline"}
+                      size="sm"
+                      className={selectedFilters.includes(filter) 
+                        ? "bg-indigo-600" 
+                        : "border-indigo-200 text-indigo-700"}
+                      onClick={() => toggleFilter(filter)}
                     >
-                      Clear Filters
+                      {filter}
                     </Button>
-                    
-                    <Button 
-                      onClick={() => setFiltersVisible(false)}
-                      className="bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      Apply Filters
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                
+                <div className="flex justify-between mt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedFilters([])}
+                  >
+                    Clear Filters
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setFiltersVisible(false)}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Apply Filters
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
           
           <TabsContent value="destinations" className="space-y-6 animate-fade-in">
             {loading ? (

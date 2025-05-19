@@ -12,10 +12,11 @@ import { searchEvents } from "@/models/Event";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  initialValue?: string; // Added initialValue as optional prop
 }
 
-const SearchBar = ({ onSearch }: SearchBarProps) => {
-  const [query, setQuery] = useState("");
+const SearchBar = ({ onSearch, initialValue = "" }: SearchBarProps) => {
+  const [query, setQuery] = useState(initialValue);
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -24,6 +25,13 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [isTyping, setIsTyping] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  
+  // Update query if initialValue changes
+  useEffect(() => {
+    if (initialValue) {
+      setQuery(initialValue);
+    }
+  }, [initialValue]);
   
   const categories = [
     "National Parks", "Historical Sites", "Adventure", "Cultural", "Wildlife", "Relaxation"
