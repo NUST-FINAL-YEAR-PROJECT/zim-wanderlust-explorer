@@ -171,8 +171,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                                 <Link to={item.path} className={cn(
                                   "transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-lg",
                                   location.pathname === item.path 
-                                    ? "text-white font-medium bg-gradient-to-r from-indigo-600 to-indigo-800 shadow-md" 
-                                    : "text-indigo-700 dark:text-indigo-200 hover:text-indigo-900 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-indigo-800/50"
+                                    ? "text-white font-medium bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-md" 
+                                    : "text-indigo-700 dark:text-indigo-200 hover:text-white hover:bg-indigo-500/90 dark:hover:text-white dark:hover:bg-indigo-600/50"
                                 )}>
                                   <item.icon className="h-5 w-5" />
                                   <span>{item.title}</span>
@@ -204,7 +204,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         whileHover="hover"
                         variants={sidebarItemVariants}
                       >
-                        <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-700 dark:text-indigo-200 hover:text-indigo-900 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-indigo-800/50 transition-colors duration-300">
+                        <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-700 dark:text-indigo-200 hover:text-white hover:bg-indigo-500/90 dark:hover:text-white dark:hover:bg-indigo-600/50 transition-colors duration-300">
                           <HelpCircle className="h-5 w-5" />
                           <span>Help & Support</span>
                         </a>
@@ -230,7 +230,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
             <Button 
               variant="outline" 
-              className="w-full flex items-center gap-2 border-indigo-200 text-indigo-700 dark:text-indigo-200 dark:border-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-800 dark:hover:text-white hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors duration-300 mx-2" 
+              className="w-full flex items-center gap-2 border-indigo-200 text-indigo-700 dark:text-indigo-200 dark:border-indigo-700 hover:text-white hover:bg-indigo-500/90 dark:hover:bg-indigo-600/50 dark:hover:text-white hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors duration-300 mx-2" 
               onClick={handleSignOut}
             >
               <LogOut size={16} />

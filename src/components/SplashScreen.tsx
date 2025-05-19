@@ -43,7 +43,7 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-700 dark:from-indigo-950 dark:to-indigo-800"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-indigo-800 dark:from-indigo-800 dark:to-indigo-900"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -103,7 +103,7 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                     value={progress} 
                     className={cn(
                       "h-2 rounded-full overflow-hidden bg-white/10",
-                      "before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-indigo-400 before:to-indigo-600"
+                      "before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/60 before:to-white/90"
                     )} 
                   />
                   <p className="text-white/60 text-sm mt-2">Loading experience...</p>
