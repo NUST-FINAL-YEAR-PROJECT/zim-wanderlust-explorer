@@ -65,7 +65,7 @@ const WelcomeSplash = ({ duration = 2500, onComplete }: WelcomeSplashProps) => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-indigo-800 dark:from-indigo-800 dark:to-indigo-900"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-500 to-sky-600 dark:from-blue-600 dark:to-sky-800"
         >
           <motion.div 
             className="text-center px-6 max-w-2xl"

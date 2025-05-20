@@ -43,7 +43,7 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-indigo-800 dark:from-indigo-800 dark:to-indigo-900"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-500 to-sky-600 dark:from-blue-600 dark:to-sky-800"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -73,9 +73,9 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                         repeat: Infinity,
                         ease: "easeInOut" 
                       }}
-                      className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-indigo-900/30"
+                      className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-blue-900/30"
                     >
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-700 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center">
                         <MapPin size={32} className="text-white" />
                       </div>
                     </motion.div>

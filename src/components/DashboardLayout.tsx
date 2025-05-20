@@ -133,25 +133,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950 dark:to-indigo-900 dark:text-white">
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-indigo-950 dark:text-white">
         <Sidebar 
           variant={isMobile ? "floating" : "sidebar"} 
-          className="border-r border-indigo-100 shadow-md bg-white dark:bg-indigo-900 dark:border-indigo-800 z-20"
+          className="border-r border-sky-100 shadow-md bg-white dark:bg-blue-900 dark:border-blue-800 z-20"
         >
           <SidebarHeader>
             <div className="flex items-center gap-3 px-4 py-5">
-              <div className="rounded-full bg-gradient-to-r from-indigo-600 to-indigo-800 p-1.5 text-white">
+              <div className="rounded-full bg-gradient-to-r from-blue-500 to-sky-600 p-1.5 text-white">
                 <MapPin size={20} />
               </div>
               <div className="flex flex-col">
-                <h3 className="font-display font-bold text-lg tracking-tight text-indigo-900 dark:text-white">ExploreZim</h3>
-                <p className="text-xs text-indigo-400 dark:text-indigo-300">Discover the beauty</p>
+                <h3 className="font-display font-bold text-lg tracking-tight text-blue-900 dark:text-white">ExploreZim</h3>
+                <p className="text-xs text-blue-400 dark:text-blue-300">Discover the beauty</p>
               </div>
             </div>
           </SidebarHeader>
           <SidebarContent className="pb-6">
             <SidebarGroup>
-              <SidebarGroupLabel className="font-display text-indigo-900 dark:text-indigo-200 text-xs uppercase tracking-wide">Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-display text-blue-900 dark:text-blue-200 text-xs uppercase tracking-wide">Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => (
@@ -171,8 +171,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                                 <Link to={item.path} className={cn(
                                   "transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-lg",
                                   location.pathname === item.path 
-                                    ? "text-white font-medium bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-md" 
-                                    : "text-indigo-700 dark:text-indigo-200 hover:text-white hover:bg-indigo-500/90 dark:hover:text-white dark:hover:bg-indigo-600/50"
+                                    ? "text-white font-medium bg-gradient-to-r from-blue-500 to-sky-500 shadow-md" 
+                                    : "text-blue-800 dark:text-blue-200 hover:text-white hover:bg-blue-500/90 dark:hover:text-white dark:hover:bg-blue-600/50"
                                 )}>
                                   <item.icon className="h-5 w-5" />
                                   <span>{item.title}</span>
@@ -183,7 +183,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                               </motion.div>
                             </SidebarMenuButton>
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-indigo-800 text-white">
+                          <TooltipContent side="right" className="bg-blue-700 text-white">
                             {item.description}
                           </TooltipContent>
                         </Tooltip>
@@ -195,7 +195,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </SidebarGroup>
             
             <SidebarGroup>
-              <SidebarGroupLabel className="font-display text-indigo-900 dark:text-indigo-200 text-xs uppercase tracking-wide">Support</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-display text-blue-900 dark:text-blue-200 text-xs uppercase tracking-wide">Support</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
@@ -204,7 +204,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         whileHover="hover"
                         variants={sidebarItemVariants}
                       >
-                        <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-700 dark:text-indigo-200 hover:text-white hover:bg-indigo-500/90 dark:hover:text-white dark:hover:bg-indigo-600/50 transition-colors duration-300">
+                        <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-800 dark:text-blue-200 hover:text-white hover:bg-blue-500/90 dark:hover:text-white dark:hover:bg-blue-600/50 transition-colors duration-300">
                           <HelpCircle className="h-5 w-5" />
                           <span>Help & Support</span>
                         </a>
@@ -215,22 +215,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter className="border-t border-indigo-100 dark:border-indigo-800 pt-2">
+          <SidebarFooter className="border-t border-sky-100 dark:border-blue-800 pt-2">
             <div className="mb-3 px-4 py-3">
               <div className="flex items-center gap-3">
-                <Avatar className="border-2 border-indigo-100 dark:border-indigo-700">
+                <Avatar className="border-2 border-sky-100 dark:border-blue-700">
                   <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-sky-500 text-white">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <p className="text-sm font-medium text-indigo-900 dark:text-white">{displayName}</p>
-                  <p className="text-xs text-indigo-400 dark:text-indigo-300">{profile?.role || 'User'}</p>
+                  <p className="text-sm font-medium text-blue-900 dark:text-white">{displayName}</p>
+                  <p className="text-xs text-blue-400 dark:text-blue-300">{profile?.role || 'User'}</p>
                 </div>
               </div>
             </div>
             <Button 
               variant="outline" 
-              className="w-full flex items-center gap-2 border-indigo-200 text-indigo-700 dark:text-indigo-200 dark:border-indigo-700 hover:text-white hover:bg-indigo-500/90 dark:hover:bg-indigo-600/50 dark:hover:text-white hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors duration-300 mx-2" 
+              className="w-full flex items-center gap-2 border-sky-200 text-blue-700 dark:text-blue-200 dark:border-blue-700 hover:text-white hover:bg-blue-500/90 dark:hover:bg-blue-600/50 dark:hover:text-white hover:border-sky-300 dark:hover:border-blue-600 transition-colors duration-300 mx-2" 
               onClick={handleSignOut}
             >
               <LogOut size={16} />
@@ -240,15 +240,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Sidebar>
         
         <div className="flex-1 overflow-auto">
-          <header className="sticky top-0 z-10 bg-white/80 dark:bg-indigo-900/80 backdrop-blur-md py-4 px-6 shadow-sm border-b border-indigo-100 dark:border-indigo-800">
+          <header className="sticky top-0 z-10 bg-white/80 dark:bg-blue-900/80 backdrop-blur-md py-4 px-6 shadow-sm border-b border-sky-100 dark:border-blue-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="h-8 w-8 text-indigo-700 dark:text-indigo-200 hover:text-indigo-900 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-indigo-800/50 rounded-lg" />
+                <SidebarTrigger className="h-8 w-8 text-blue-700 dark:text-blue-200 hover:text-blue-900 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-blue-800/50 rounded-lg" />
                 <div>
-                  <h1 className="text-xl font-display font-semibold text-indigo-900 dark:text-white">
+                  <h1 className="text-xl font-display font-semibold text-blue-900 dark:text-white">
                     {navigationItems.find(item => item.path === location.pathname)?.title || 'Dashboard'}
                   </h1>
-                  <p className="text-sm text-indigo-400 dark:text-indigo-300 hidden sm:block">
+                  <p className="text-sm text-blue-400 dark:text-blue-300 hidden sm:block">
                     {navigationItems.find(item => item.path === location.pathname)?.description || 'Welcome to ExploreZim'}
                   </p>
                 </div>
@@ -258,7 +258,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full h-10 w-10 text-indigo-700 dark:text-indigo-200 hover:text-indigo-900 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-indigo-800/50"
+                  className="rounded-full h-10 w-10 text-blue-700 dark:text-blue-200 hover:text-blue-900 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-blue-800/50"
                   asChild
                 >
                   <Link to="/settings">

@@ -7,109 +7,109 @@
 
 @layer base {
   :root {
-    --background: 250 98% 98%;
-    --foreground: 250 10% 15%;
+    --background: 210 100% 98%;
+    --foreground: 210 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 250 10% 15%;
+    --card-foreground: 210 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 250 10% 15%;
+    --popover-foreground: 210 10% 15%;
 
-    --primary: 252 56% 57%;
+    --primary: 210 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 250 30% 96%;
-    --secondary-foreground: 250 10% 15%;
+    --secondary: 210 30% 96%;
+    --secondary-foreground: 210 10% 15%;
 
-    --muted: 250 30% 96%;
-    --muted-foreground: 250 10% 45%;
+    --muted: 210 30% 96%;
+    --muted-foreground: 210 10% 45%;
 
-    --accent: 267 75% 63%;
+    --accent: 200 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 250 30% 90%;
-    --input: 250 30% 90%;
-    --ring: 252 56% 57%;
+    --border: 210 30% 90%;
+    --input: 210 30% 90%;
+    --ring: 210 100% 50%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 250 10% 15%;
-    --sidebar-primary: 252 56% 57%;
+    --sidebar-foreground: 210 10% 15%;
+    --sidebar-primary: 210 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 267 75% 63%;
+    --sidebar-accent: 200 100% 50%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 250 30% 90%;
-    --sidebar-ring: 252 56% 57%;
+    --sidebar-border: 210 30% 90%;
+    --sidebar-ring: 210 100% 50%;
     
-    --admin-bg: 250 30% 98%;
-    --admin-fg: 250 10% 15%;
+    --admin-bg: 210 30% 98%;
+    --admin-fg: 210 10% 15%;
     --admin-card: 0 0% 100%;
-    --admin-card-fg: 250 10% 15%;
-    --admin-primary: 252 56% 57%;
-    --admin-primary-hover: 252 56% 52%;
-    --admin-secondary: 250 30% 96%;
-    --admin-accent: 267 75% 63%;
-    --admin-muted: 250 30% 90%;
-    --admin-muted-fg: 250 10% 45%;
-    --admin-border: 250 30% 90%;
-    --admin-highlight: 267 75% 63%;
+    --admin-card-fg: 210 10% 15%;
+    --admin-primary: 210 100% 50%;
+    --admin-primary-hover: 210 100% 45%;
+    --admin-secondary: 210 30% 96%;
+    --admin-accent: 200 100% 50%;
+    --admin-muted: 210 30% 90%;
+    --admin-muted-fg: 210 10% 45%;
+    --admin-border: 210 30% 90%;
+    --admin-highlight: 200 100% 50%;
   }
 
   .dark {
-    --background: 250 15% 10%;
+    --background: 210 15% 10%;
     --foreground: 0 0% 98%;
 
-    --card: 250 15% 12%;
+    --card: 210 15% 12%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 250 15% 12%;
+    --popover: 210 15% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 252 56% 57%;
+    --primary: 210 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 250 15% 18%;
+    --secondary: 210 15% 18%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 250 15% 18%;
-    --muted-foreground: 250 10% 70%;
+    --muted: 210 15% 18%;
+    --muted-foreground: 210 10% 70%;
 
-    --accent: 267 75% 63%;
+    --accent: 200 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 250 15% 20%;
-    --input: 250 15% 20%;
-    --ring: 252 56% 57%;
+    --border: 210 15% 20%;
+    --input: 210 15% 20%;
+    --ring: 210 100% 50%;
 
-    --sidebar-background: 250 15% 8%;
+    --sidebar-background: 210 15% 8%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 252 56% 57%;
+    --sidebar-primary: 210 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 267 75% 63%;
+    --sidebar-accent: 200 100% 50%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 250 15% 16%;
-    --sidebar-ring: 252 56% 57%;
+    --sidebar-border: 210 15% 16%;
+    --sidebar-ring: 210 100% 50%;
     
-    --admin-bg: 250 15% 10%;
+    --admin-bg: 210 15% 10%;
     --admin-fg: 0 0% 98%;
-    --admin-card: 250 15% 12%;
+    --admin-card: 210 15% 12%;
     --admin-card-fg: 0 0% 98%;
-    --admin-primary: 252 56% 57%;
-    --admin-primary-hover: 252 56% 62%;
-    --admin-secondary: 250 15% 18%;
-    --admin-accent: 267 75% 63%;
-    --admin-muted: 250 15% 18%;
-    --admin-muted-fg: 250 10% 70%;
-    --admin-border: 250 15% 20%;
-    --admin-highlight: 267 75% 63%;
+    --admin-primary: 210 100% 50%;
+    --admin-primary-hover: 210 100% 55%;
+    --admin-secondary: 210 15% 18%;
+    --admin-accent: 200 100% 50%;
+    --admin-muted: 210 15% 18%;
+    --admin-muted-fg: 210 10% 70%;
+    --admin-border: 210 15% 20%;
+    --admin-highlight: 200 100% 50%;
   }
 }
 
