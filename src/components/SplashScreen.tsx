@@ -97,7 +97,10 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                   variants={logoVariants}
                   initial="initial"
                   animate="animate"
-                  animate={{ y: [0, -10, 0] }}
+                  // Fixed: Combined the floating animation with the variants animate
+                  whileInView={{ 
+                    y: [0, -10, 0]
+                  }}
                   transition={{ 
                     y: {
                       duration: 2,
