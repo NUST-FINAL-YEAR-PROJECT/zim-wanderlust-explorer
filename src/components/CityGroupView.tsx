@@ -9,8 +9,22 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import DestinationCard from './DestinationCard';
 import EventCard from './EventCard';
-import { Destination } from '@/models/Destination';
-import { Event } from '@/models/Event';
+
+interface Destination {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  [key: string]: any;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  description?: string;
+  image_url?: string;
+  [key: string]: any;
+}
 
 interface CityGroupViewProps {
   data: {

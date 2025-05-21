@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MapPin } from 'lucide-react';
 import CityGroupView from '@/components/CityGroupView';
-import { getDestinations } from '@/models/Destination';
-import { getEvents } from '@/models/Event';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { getAllCitiesWithContent, getCityContent } from '@/models/Location';
 
 const CitiesExplorer = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,72 +18,50 @@ const CitiesExplorer = () => {
     events: any[];
   }>>([]);
 
-  // Fetch destinations and events data
-  const { data: destinations = [], isLoading: isLoadingDestinations } = useQuery({
-    queryKey: ['destinations'],
-    queryFn: getDestinations,
-  });
-
-  const { data: events = [], isLoading: isLoadingEvents } = useQuery({
-    queryKey: ['events'],
-    queryFn: getEvents,
+  // Fetch cities with content using react-query
+  const { data: cities = [], isLoading: isLoadingCities } = useQuery({
+    queryKey: ['cities'],
+    queryFn: getAllCitiesWithContent,
   });
 
   // Process and group data by city
   useEffect(() => {
-    if (!isLoadingDestinations && !isLoadingEvents) {
-      const citiesMap = new Map<string, { 
-        city: string; 
-        destinations: any[]; 
-        events: any[];
-      }>();
-
-      // Group destinations by city (location)
-      destinations.forEach(destination => {
-        if (!destination.location) return;
-        
-        const city = destination.location;
-        if (!citiesMap.has(city)) {
-          citiesMap.set(city, { city, destinations: [], events: [] });
+    // If we have cities and aren't loading, fetch content for each city
+    if (cities.length && !isLoadingCities) {
+      const fetchCityContent = async () => {
+        try {
+          const cityContentPromises = cities.map(city => getCityContent(city));
+          const citiesContent = await Promise.all(cityContentPromises);
+          
+          // Filter by search query if provided
+          let filteredCities = citiesContent;
+          if (searchQuery) {
+            const lowerCaseQuery = searchQuery.toLowerCase();
+            filteredCities = filteredCities.filter(cityData => 
+              cityData.city.toLowerCase().includes(lowerCaseQuery) ||
+              cityData.destinations.some(d => 
+                d.name?.toLowerCase().includes(lowerCaseQuery) ||
+                (d.description && d.description.toLowerCase().includes(lowerCaseQuery))
+              ) ||
+              cityData.events.some(e => 
+                e.title?.toLowerCase().includes(lowerCaseQuery) ||
+                (e.description && e.description.toLowerCase().includes(lowerCaseQuery))
+              )
+            );
+          }
+          
+          // Sort by city name
+          filteredCities.sort((a, b) => a.city.localeCompare(b.city));
+          setGroupedData(filteredCities);
+        } catch (error) {
+          console.error("Error fetching city content:", error);
+          setGroupedData([]);
         }
-        citiesMap.get(city)?.destinations.push(destination);
-      });
+      };
 
-      // Group events by city (location)
-      events.forEach(event => {
-        if (!event.location) return;
-        
-        const city = event.location;
-        if (!citiesMap.has(city)) {
-          citiesMap.set(city, { city, destinations: [], events: [] });
-        }
-        citiesMap.get(city)?.events.push(event);
-      });
-
-      // Convert map to array and filter by search query if provided
-      let groupedArray = Array.from(citiesMap.values());
-      
-      if (searchQuery) {
-        const lowerCaseQuery = searchQuery.toLowerCase();
-        groupedArray = groupedArray.filter(group => 
-          group.city.toLowerCase().includes(lowerCaseQuery) ||
-          group.destinations.some(d => 
-            d.name.toLowerCase().includes(lowerCaseQuery) ||
-            (d.description && d.description.toLowerCase().includes(lowerCaseQuery))
-          ) ||
-          group.events.some(e => 
-            e.title.toLowerCase().includes(lowerCaseQuery) ||
-            (e.description && e.description.toLowerCase().includes(lowerCaseQuery))
-          )
-        );
-      }
-      
-      // Sort by city name
-      groupedArray.sort((a, b) => a.city.localeCompare(b.city));
-      
-      setGroupedData(groupedArray);
+      fetchCityContent();
     }
-  }, [destinations, events, isLoadingDestinations, isLoadingEvents, searchQuery]);
+  }, [cities, isLoadingCities, searchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +109,7 @@ const CitiesExplorer = () => {
         </div>
 
         {/* City group view */}
-        {isLoadingDestinations || isLoadingEvents ? (
+        {isLoadingCities ? (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Skeleton className="h-[calc(100vh-300px)]" />
             <div className="md:col-span-3 space-y-6">
