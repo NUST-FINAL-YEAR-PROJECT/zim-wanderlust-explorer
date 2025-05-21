@@ -1,190 +1,49 @@
-
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
-
-import Index from "./pages/Index";
+import Home from "./pages/Home";
 import Browse from "./pages/Browse";
-import PublicDestinationDetails from "./pages/PublicDestinationDetails";
-import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import Bookings from "./pages/Bookings";
+import Events from "./pages/Events";
 import Destinations from "./pages/Destinations";
 import DestinationDetails from "./pages/DestinationDetails";
-import BookingForm from "./pages/BookingForm";
-import PaymentPage from "./pages/PaymentPage";
-import InvoicePage from "./pages/InvoicePage";
-import Events from "./pages/Events";
-import EventBookingPage from "./pages/EventBookingPage";
-import Settings from "./pages/Settings";
-import WishlistPage from "./pages/WishlistPage";
-import ItinerariesPage from "./pages/ItinerariesPage";
-import ItineraryCreatePage from "./pages/ItineraryCreatePage";
-import ItineraryDetailsPage from "./pages/ItineraryDetailsPage";
-import ItinerarySharedPage from "./pages/ItinerarySharedPage";
+import EventBooking from "./pages/EventBooking";
+import PublicDestinationDetails from "./pages/PublicDestinationDetails";
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import CitiesExplorer from "./pages/CitiesExplorer";
 
-// Create a new QueryClient instance
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <ThemeProvider defaultTheme="light" storageKey="zimbabwe-travels-theme">
+          <Toaster />
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Home />} />
             <Route path="/browse" element={<Browse />} />
-            <Route path="/destination/:id/details" element={<PublicDestinationDetails />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/itinerary/shared/:shareCode" element={<ItinerarySharedPage />} />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requireAdmin={true}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/bookings" 
-              element={
-                <ProtectedRoute>
-                  <Bookings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/destinations" 
-              element={
-                <ProtectedRoute>
-                  <Destinations />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/destination/:id" 
-              element={
-                <ProtectedRoute>
-                  <DestinationDetails />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/booking/:id" 
-              element={
-                <ProtectedRoute>
-                  <BookingForm />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/booking/event/:id" 
-              element={
-                <ProtectedRoute>
-                  <EventBookingPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/payment/:id" 
-              element={
-                <ProtectedRoute>
-                  <PaymentPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/invoice/:id" 
-              element={
-                <ProtectedRoute>
-                  <InvoicePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/events" 
-              element={
-                <ProtectedRoute>
-                  <Events />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/wishlist" 
-              element={
-                <ProtectedRoute>
-                  <WishlistPage />
-                </ProtectedRoute>
-              } 
-            />
-            {/* Itinerary Routes */}
-            <Route 
-              path="/itineraries" 
-              element={
-                <ProtectedRoute>
-                  <ItinerariesPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/itineraries/create" 
-              element={
-                <ProtectedRoute>
-                  <ItineraryCreatePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/itinerary/:id" 
-              element={
-                <ProtectedRoute>
-                  <ItineraryDetailsPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/destinations" element={<Destinations />} />
+            <Route path="/destination/:id" element={<DestinationDetails />} />
+            <Route path="/booking/event/:id" element={<EventBooking />} />
+            <Route path="/public/destination/:id" element={<PublicDestinationDetails />} />
+            <Route path="/cities" element={<CitiesExplorer />} />
           </Routes>
-        </BrowserRouter>
-        <Toaster />
-        <Sonner />
+        </ThemeProvider>
       </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;
