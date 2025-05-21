@@ -17,6 +17,17 @@ import {
 } from '@tanstack/react-query'
 import CitiesExplorer from "./pages/CitiesExplorer";
 import { AuthProvider } from "./contexts/AuthContext";
+import Index from "./pages/Index";
+import WishlistPage from "./pages/WishlistPage";
+import BookingForm from "./pages/BookingForm";
+import Bookings from "./pages/Bookings";
+import ItinerariesPage from "./pages/ItinerariesPage";
+import ItineraryCreatePage from "./pages/ItineraryCreatePage";
+import ItineraryDetailsPage from "./pages/ItineraryDetailsPage";
+import PaymentPage from "./pages/PaymentPage";
+import Settings from "./pages/Settings";
+import EventBookingPage from "./pages/EventBookingPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient()
 
@@ -27,50 +38,128 @@ function App() {
         <ThemeProvider defaultTheme="light" storageKey="zimbabwe-travels-theme">
           <Toaster />
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
             <Route path="/browse" element={<Browse />} />
             <Route path="/auth" element={<Auth />} />
-            <Route 
-              path="/dashboard" 
+            <Route path="/public/destination/:id" element={<PublicDestinationDetails />} />
+            
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/events" 
+            <Route
+              path="/events"
               element={
                 <ProtectedRoute>
                   <Events />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/destinations" 
+            <Route
+              path="/destinations"
               element={
                 <ProtectedRoute>
                   <Destinations />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/destination/:id" 
+            <Route
+              path="/destination/:id"
               element={
                 <ProtectedRoute>
                   <DestinationDetails />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route path="/public/destination/:id" element={<PublicDestinationDetails />} />
-            <Route 
-              path="/cities" 
+            <Route
+              path="/cities"
               element={
                 <ProtectedRoute>
                   <CitiesExplorer />
                 </ProtectedRoute>
-              } 
+              }
             />
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <WishlistPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/booking/:id"
+              element={
+                <ProtectedRoute>
+                  <BookingForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookings"
+              element={
+                <ProtectedRoute>
+                  <Bookings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/itineraries"
+              element={
+                <ProtectedRoute>
+                  <ItinerariesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/itineraries/create"
+              element={
+                <ProtectedRoute>
+                  <ItineraryCreatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/itinerary/:id"
+              element={
+                <ProtectedRoute>
+                  <ItineraryDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payment/:id"
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/booking/event/:id"
+              element={
+                <ProtectedRoute>
+                  <EventBookingPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </ThemeProvider>
       </AuthProvider>
