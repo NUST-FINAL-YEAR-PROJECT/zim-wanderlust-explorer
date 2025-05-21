@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -11,16 +11,18 @@ import {
   Heart,
   User,
   HelpCircle,
-  ChevronRight
+  ChevronRight,
+  LogIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
-import { Sidebar } from '@/components/ui/sidebar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { signOut } from '@/models/Auth';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -28,7 +30,9 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isOpen, setIsOpen] = useState(!isMobile);
 
@@ -44,10 +48,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleSignOut = async () => {
     try {
+      await signOut();
       toast({
         title: 'Signed out',
         description: 'You have been successfully signed out.',
       });
+      navigate('/auth');
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -107,8 +113,47 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     hover: { x: 5, transition: { type: "spring", stiffness: 300 } }
   };
 
-  const displayName = "User";
-  const initials = "U";
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || "User";
+  const initials = displayName.substring(0, 1).toUpperCase();
+
+  const renderAuthSection = () => {
+    if (user) {
+      return (
+        <>
+          <div className="mb-3 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Avatar className="border-2 border-blue-100 dark:border-blue-700">
+                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <p className="text-sm font-medium text-blue-900 dark:text-white">{displayName}</p>
+                <p className="text-xs text-blue-400 dark:text-blue-300">{user.email}</p>
+              </div>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center gap-2 border-blue-200 text-blue-700 dark:text-blue-200 dark:border-blue-700 hover:text-white hover:bg-blue-500 dark:hover:bg-blue-600/50 dark:hover:text-white hover:border-blue-300 dark:hover:border-blue-600 transition-colors duration-300 mx-2 mb-4" 
+            onClick={handleSignOut}
+          >
+            <LogOut size={16} />
+            <span>Sign Out</span>
+          </Button>
+        </>
+      );
+    }
+    
+    return (
+      <Button 
+        variant="default" 
+        className="w-full flex items-center gap-2 transition-colors duration-300 mx-2 mb-4" 
+        onClick={() => navigate('/auth')}
+      >
+        <LogIn size={16} />
+        <span>Sign In</span>
+      </Button>
+    );
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-indigo-950 dark:text-white">
@@ -184,25 +229,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
           
           <div className="absolute bottom-0 left-0 right-0 border-t border-blue-100 dark:border-blue-800 pt-2 bg-white dark:bg-blue-900">
-            <div className="mb-3 px-4 py-3">
-              <div className="flex items-center gap-3">
-                <Avatar className="border-2 border-blue-100 dark:border-blue-700">
-                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <p className="text-sm font-medium text-blue-900 dark:text-white">{displayName}</p>
-                  <p className="text-xs text-blue-400 dark:text-blue-300">User</p>
-                </div>
-              </div>
-            </div>
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center gap-2 border-blue-200 text-blue-700 dark:text-blue-200 dark:border-blue-700 hover:text-white hover:bg-blue-500 dark:hover:bg-blue-600/50 dark:hover:text-white hover:border-blue-300 dark:hover:border-blue-600 transition-colors duration-300 mx-2 mb-4" 
-              onClick={handleSignOut}
-            >
-              <LogOut size={16} />
-              <span>Sign Out</span>
-            </Button>
+            {renderAuthSection()}
           </div>
         </div>
       )}
@@ -252,25 +279,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
             
             <div className="absolute bottom-0 left-0 right-0 border-t border-blue-100 dark:border-blue-800 pt-2 bg-white dark:bg-blue-900">
-              <div className="mb-3 px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="border-2 border-blue-100 dark:border-blue-700">
-                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium text-blue-900 dark:text-white">{displayName}</p>
-                    <p className="text-xs text-blue-400 dark:text-blue-300">User</p>
-                  </div>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                className="w-[calc(100%-1rem)] flex items-center gap-2 border-blue-200 text-blue-700 dark:text-blue-200 dark:border-blue-700 hover:text-white hover:bg-blue-500 dark:hover:bg-blue-600/50 dark:hover:text-white hover:border-blue-300 dark:hover:border-blue-600 transition-colors duration-300 mx-2 mb-4" 
-                onClick={handleSignOut}
-              >
-                <LogOut size={16} />
-                <span>Sign Out</span>
-              </Button>
+              {renderAuthSection()}
             </div>
           </SheetContent>
         </Sheet>
@@ -301,16 +310,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-full h-10 w-10 text-blue-700 dark:text-blue-200 hover:text-blue-900 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-blue-800/50"
-                asChild
-              >
-                <Link to="/settings">
-                  <User className="h-5 w-5" />
-                </Link>
-              </Button>
+              {!user && (
+                <Button 
+                  variant="default"
+                  className="rounded-lg text-white"
+                  onClick={() => navigate('/auth')}
+                >
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Sign In
+                </Button>
+              )}
+              {user && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full h-10 w-10 text-blue-700 dark:text-blue-200 hover:text-blue-900 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-blue-800/50"
+                  asChild
+                >
+                  <Link to="/settings">
+                    <User className="h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </header>

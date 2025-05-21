@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import CityGroupView from '@/components/CityGroupView';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { getAllCitiesWithContent, getCityContent } from '@/models/Location';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CitiesExplorer = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,6 +19,14 @@ const CitiesExplorer = () => {
     destinations: any[];
     events: any[];
   }>>([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
 
   // Fetch cities with content using react-query
   const { data: cities = [], isLoading: isLoadingCities } = useQuery({
