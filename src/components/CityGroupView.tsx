@@ -9,22 +9,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import DestinationCard from './DestinationCard';
 import EventCard from './EventCard';
-
-interface Destination {
-  id: string;
-  name: string;
-  description?: string;
-  image_url?: string;
-  [key: string]: any;
-}
-
-interface Event {
-  id: string;
-  title: string;
-  description?: string;
-  image_url?: string;
-  [key: string]: any;
-}
+import { Destination } from '@/models/Destination';
+import { Event } from '@/models/Event';
 
 interface CityGroupViewProps {
   data: {
@@ -113,7 +99,10 @@ const CityGroupView = ({ data, className }: CityGroupViewProps) => {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {activeCityData.destinations.map((destination) => (
-                        <DestinationCard key={destination.id} destination={destination} />
+                        <DestinationCard 
+                          key={destination.id} 
+                          destination={destination} 
+                        />
                       ))}
                     </div>
                   </div>
@@ -126,7 +115,19 @@ const CityGroupView = ({ data, className }: CityGroupViewProps) => {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {activeCityData.events.map((event) => (
-                        <EventCard key={event.id} event={event} />
+                        <EventCard 
+                          key={event.id} 
+                          event={{
+                            id: event.id,
+                            title: event.title,
+                            description: event.description || '',
+                            location: event.location || 'Location not specified',
+                            start_date: event.start_date,
+                            end_date: event.end_date,
+                            image_url: event.image_url,
+                            price: event.price
+                          }} 
+                        />
                       ))}
                     </div>
                   </div>
@@ -149,7 +150,10 @@ const CityGroupView = ({ data, className }: CityGroupViewProps) => {
                 {activeCityData.destinations.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {activeCityData.destinations.map((destination) => (
-                      <DestinationCard key={destination.id} destination={destination} />
+                      <DestinationCard 
+                        key={destination.id} 
+                        destination={destination} 
+                      />
                     ))}
                   </div>
                 ) : (
@@ -166,7 +170,19 @@ const CityGroupView = ({ data, className }: CityGroupViewProps) => {
                 {activeCityData.events.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {activeCityData.events.map((event) => (
-                      <EventCard key={event.id} event={event} />
+                      <EventCard 
+                        key={event.id} 
+                        event={{
+                          id: event.id,
+                          title: event.title,
+                          description: event.description || '',
+                          location: event.location || 'Location not specified',
+                          start_date: event.start_date,
+                          end_date: event.end_date,
+                          image_url: event.image_url,
+                          price: event.price
+                        }} 
+                      />
                     ))}
                   </div>
                 ) : (
