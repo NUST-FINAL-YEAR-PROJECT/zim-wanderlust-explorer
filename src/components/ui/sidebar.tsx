@@ -1,3 +1,4 @@
+
 import {
   Sheet,
   SheetContent,
@@ -27,13 +28,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import {
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useAuth,
-  useUser,
-} from "@clerk/clerk-react"
 import { Link } from "react-router-dom"
 
 // Import your icons
@@ -56,9 +50,6 @@ import {
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
-  const { signOut } = useAuth()
-  const { user } = useUser()
-
   const links = [
     {
       href: "/dashboard",
