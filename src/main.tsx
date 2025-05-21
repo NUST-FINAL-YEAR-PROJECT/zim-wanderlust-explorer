@@ -2,6 +2,7 @@
 import { createRoot } from 'react-dom/client'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import SplashScreen from './components/SplashScreen.tsx'
@@ -29,7 +30,7 @@ const Root = () => {
   }, []);
 
   return (
-    <>
+    <BrowserRouter>
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       
       <AnimatePresence mode="wait">
@@ -71,7 +72,7 @@ const Root = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </BrowserRouter>
   );
 };
 
