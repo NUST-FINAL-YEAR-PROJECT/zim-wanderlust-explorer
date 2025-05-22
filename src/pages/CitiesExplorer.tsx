@@ -1,203 +1,186 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Search, MapPin, Globe, X } from 'lucide-react';
 import CityGroupView from '@/components/CityGroupView';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MapPin, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { getAllCitiesWithContent, getCityContent } from '@/models/Location';
-import { useAuth } from '@/contexts/AuthContext';
+import { getCities } from '@/models/Location';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 const CitiesExplorer = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [groupedData, setGroupedData] = useState<Array<{
-    city: string;
-    destinations: any[];
-    events: any[];
-  }>>([]);
+  const [activeTab, setActiveTab] = useState<string>('all');
   const navigate = useNavigate();
-  const { user } = useAuth();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-    }
-  }, [user, navigate]);
-
-  // Fetch cities with content using react-query
-  const { data: cities = [], isLoading: isLoadingCities, isError } = useQuery({
+  // Fetch all cities
+  const { data: cities, isLoading, error } = useQuery({
     queryKey: ['cities'],
-    queryFn: getAllCitiesWithContent,
+    queryFn: getCities,
     meta: {
-      onError: (error: any) => {
-        console.error('Error fetching cities:', error);
-        toast.error("Error fetching cities", {
-          description: "Please try again later"
+      onError: (error: Error) => {
+        toast.error("Failed to load cities", {
+          description: error.message
         });
       }
     }
   });
 
-  // Process and group data by city
-  useEffect(() => {
-    // If we have cities and aren't loading, fetch content for each city
-    if (cities.length && !isLoadingCities) {
-      const fetchCityContent = async () => {
-        try {
-          const cityContentPromises = cities.map(city => getCityContent(city));
-          const citiesContent = await Promise.all(cityContentPromises);
-          
-          // Filter by search query if provided
-          let filteredCities = citiesContent;
-          if (searchQuery) {
-            const lowerCaseQuery = searchQuery.toLowerCase();
-            filteredCities = filteredCities.filter(cityData => 
-              cityData.city.toLowerCase().includes(lowerCaseQuery) ||
-              cityData.destinations.some(d => 
-                d.name?.toLowerCase().includes(lowerCaseQuery) ||
-                (d.description && d.description.toLowerCase().includes(lowerCaseQuery))
-              ) ||
-              cityData.events.some(e => 
-                e.title?.toLowerCase().includes(lowerCaseQuery) ||
-                (e.description && e.description.toLowerCase().includes(lowerCaseQuery))
-              )
-            );
-          }
-          
-          // Sort by city name
-          filteredCities.sort((a, b) => a.city.localeCompare(b.city));
-          setGroupedData(filteredCities);
-        } catch (error) {
-          console.error("Error fetching city content:", error);
-          toast.error("Error loading city data", {
-            description: "Please try again later"
-          });
-          
-          setGroupedData([]);
-        }
-      };
+  if (error) {
+    toast.error("Error loading cities", {
+      description: "Please try again later"
+    });
+  }
 
-      fetchCityContent();
-    }
-  }, [cities, isLoadingCities, searchQuery]);
+  const filteredCities = cities?.filter(city => 
+    city.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Search is applied via useEffect
-  };
+  // Group cities by first letter
+  const groupedCities: { [key: string]: string[] } = {};
+  
+  if (filteredCities) {
+    filteredCities.forEach(city => {
+      const firstLetter = city.charAt(0).toUpperCase();
+      if (!groupedCities[firstLetter]) {
+        groupedCities[firstLetter] = [];
+      }
+      groupedCities[firstLetter].push(city);
+    });
+  }
 
-  const clearSearch = () => {
-    setSearchQuery('');
-  };
+  // Sort keys alphabetically
+  const sortedKeys = Object.keys(groupedCities).sort();
 
   return (
     <DashboardLayout>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-6 pb-8"
-      >
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-700 p-6 md:p-8 mb-8 shadow-lg">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="relative z-10"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Globe className="h-8 w-8 text-white" />
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">
-                Explore Zimbabwe by City
-              </h1>
-            </div>
-            <p className="text-blue-100 text-lg mb-6 max-w-2xl">
-              Discover destinations, accommodations, and events grouped by city for easy exploration
-            </p>
-
-            <form onSubmit={handleSearchSubmit} className="max-w-lg">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300" size={18} />
-                <Input
-                  placeholder="Search cities, destinations, or events..."
-                  className="pl-10 pr-10 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-blue-200 w-full focus:ring-2 focus:ring-white/30"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button 
-                    type="button"
-                    onClick={clearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white"
-                  >
-                    <X size={18} />
-                  </button>
-                )}
+      <div className="container mx-auto py-8">
+        <Card className="border-t-4 border-indigo-500 shadow-md hover:shadow-lg transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-display text-indigo-700 dark:text-indigo-300">
+                  <MapPin className="inline-block mr-2 h-6 w-6" />
+                  Zimbabwe Cities Explorer
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  Discover destinations and attractions in cities across Zimbabwe
+                </CardDescription>
               </div>
-            </form>
-          </motion.div>
-          
-          <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-blue-500/30 blur-2xl"></div>
-          <div className="absolute top-10 -right-10 w-40 h-40 rounded-full bg-indigo-500/20 blur-3xl"></div>
-        </div>
-
-        {/* City group view */}
-        {isLoadingCities ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Skeleton className="h-[calc(100vh-300px)]" />
-            <div className="md:col-span-3 space-y-6">
-              <Skeleton className="h-20 w-2/3" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <Skeleton key={i} className="h-80" />
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : isError ? (
-          <div className="text-center py-16 bg-white dark:bg-blue-900/30 rounded-xl shadow-md border border-blue-100 dark:border-blue-800">
-            <div className="mb-6 bg-red-50 dark:bg-red-800/40 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
-              <X className="h-10 w-10 text-red-500 dark:text-red-400" />
-            </div>
-            <h3 className="text-2xl font-medium text-blue-900 dark:text-blue-100 mb-3">Error loading cities</h3>
-            <p className="text-blue-600 dark:text-blue-400 mb-8 max-w-md mx-auto">
-              We encountered a problem while loading the city data.
-            </p>
-            <Button 
-              onClick={() => window.location.reload()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Try again
-            </Button>
-          </div>
-        ) : groupedData.length > 0 ? (
-          <CityGroupView data={groupedData} />
-        ) : (
-          <div className="text-center py-16 bg-white dark:bg-blue-900/30 rounded-xl shadow-md border border-blue-100 dark:border-blue-800">
-            <div className="mb-6 bg-blue-50 dark:bg-blue-800/40 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
-              <MapPin className="h-10 w-10 text-blue-500 dark:text-blue-400" />
-            </div>
-            <h3 className="text-2xl font-medium text-blue-900 dark:text-blue-100 mb-3">No cities found</h3>
-            <p className="text-blue-600 dark:text-blue-400 mb-8 max-w-md mx-auto">
-              {searchQuery ? 'No cities match your search criteria.' : 'There are currently no cities with destinations or events.'}
-            </p>
-            {searchQuery && (
               <Button 
-                variant="outline"
-                onClick={clearSearch}
-                className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                onClick={() => navigate('/destinations')}
+                className="bg-indigo-600 hover:bg-indigo-700 transition-colors"
               >
-                Clear Search
+                All Destinations
               </Button>
-            )}
-          </div>
-        )}
-      </motion.div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="mb-6 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search cities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500"
+              />
+            </div>
+            
+            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4 bg-indigo-100 dark:bg-indigo-900/30">
+                <TabsTrigger value="all" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">All Cities</TabsTrigger>
+                <TabsTrigger value="popular" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Popular</TabsTrigger>
+                <TabsTrigger value="national-parks" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">National Parks</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="all">
+                {isLoading ? (
+                  <div className="space-y-8">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="space-y-4">
+                        <Skeleton className="h-8 w-24" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {[1, 2, 3, 4, 5, 6].map(j => (
+                            <Skeleton key={j} className="h-10 w-full" />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : sortedKeys.length > 0 ? (
+                  <div className="space-y-8">
+                    {sortedKeys.map(letter => (
+                      <CityGroupView
+                        key={letter}
+                        letter={letter}
+                        cities={groupedCities[letter]}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <MapPin className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+                    <h3 className="text-xl font-medium mb-2">No cities found</h3>
+                    <p className="text-muted-foreground mb-6">Try adjusting your search query</p>
+                    <Button 
+                      onClick={() => setSearchQuery('')}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      Clear Search
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="popular">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {['Harare', 'Bulawayo', 'Victoria Falls', 'Mutare', 'Masvingo', 'Gweru'].map(city => (
+                    <Card 
+                      key={city}
+                      className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-indigo-500"
+                      onClick={() => navigate(`/destinations?city=${encodeURIComponent(city)}`)}
+                    >
+                      <CardContent className="p-4 flex items-center">
+                        <MapPin className="mr-2 h-5 w-5 text-indigo-500" />
+                        <span className="font-medium">{city}</span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="national-parks">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[
+                    'Hwange National Park', 
+                    'Mana Pools National Park', 
+                    'Gonarezhou National Park', 
+                    'Matobo National Park',
+                    'Nyanga National Park',
+                    'Victoria Falls National Park'
+                  ].map(park => (
+                    <Card 
+                      key={park}
+                      className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-green-500"
+                      onClick={() => navigate(`/destinations?query=${encodeURIComponent(park)}`)}
+                    >
+                      <CardContent className="p-4 flex items-center">
+                        <MapPin className="mr-2 h-5 w-5 text-green-500" />
+                        <span className="font-medium">{park}</span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 };

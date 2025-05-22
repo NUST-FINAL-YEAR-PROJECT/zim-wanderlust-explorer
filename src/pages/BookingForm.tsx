@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -26,7 +27,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
+import TransportRecommendations from '@/components/transport/TransportRecommendations';
 
 // Form schema using zod
 const bookingSchema = z.object({
@@ -188,31 +190,31 @@ const BookingForm = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-lg shadow-md">
           <h1 className="text-3xl font-bold">Book Your Trip to {destination.name}</h1>
-          <p className="text-muted-foreground mt-1">Fill out the form below to book your adventure</p>
+          <p className="mt-2 text-indigo-100">Fill out the form below to book your adventure and explore the beauty of Zimbabwe</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
+                <Card className="border-t-4 border-t-indigo-500 shadow-md hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
+                    <CardTitle className="text-xl font-display">Personal Information</CardTitle>
                     <CardDescription>
-                      Please provide your contact details
+                      Please provide your contact details for booking confirmation
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 pt-6">
                     <FormField
                       control={form.control}
                       name="contactName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Full Name</FormLabel>
+                          <FormLabel className="font-medium text-indigo-700 dark:text-indigo-300">Full Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter your full name" {...field} />
+                            <Input placeholder="Enter your full name" {...field} className="border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -224,9 +226,9 @@ const BookingForm = () => {
                       name="contactEmail"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email Address</FormLabel>
+                          <FormLabel className="font-medium text-indigo-700 dark:text-indigo-300">Email Address</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="Enter your email" {...field} />
+                            <Input type="email" placeholder="Enter your email" {...field} className="border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -238,9 +240,9 @@ const BookingForm = () => {
                       name="contactPhone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
+                          <FormLabel className="font-medium text-indigo-700 dark:text-indigo-300">Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter your phone number" {...field} />
+                            <Input placeholder="Enter your phone number" {...field} className="border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -249,30 +251,30 @@ const BookingForm = () => {
                   </CardContent>
                 </Card>
                 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Trip Details</CardTitle>
+                <Card className="border-t-4 border-t-purple-500 shadow-md hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+                    <CardTitle className="text-xl font-display">Trip Details</CardTitle>
                     <CardDescription>
                       Select your preferred date and number of travelers
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 pt-6">
                     <FormField
                       control={form.control}
                       name="preferredDate"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Preferred Date</FormLabel>
+                          <FormLabel className="font-medium text-indigo-700 dark:text-indigo-300">Preferred Date</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
                                   variant={"outline"}
-                                  className={`w-full justify-start text-left font-normal ${
+                                  className={`w-full justify-start text-left font-normal border-indigo-200 ${
                                     !field.value && "text-muted-foreground"
                                   }`}
                                 >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  <CalendarIcon className="mr-2 h-4 w-4 text-indigo-500" />
                                   {field.value ? (
                                     format(field.value, "PPP")
                                   ) : (
@@ -288,11 +290,12 @@ const BookingForm = () => {
                                 onSelect={field.onChange}
                                 disabled={(date) => date < new Date()}
                                 initialFocus
+                                className="border-indigo-200"
                               />
                             </PopoverContent>
                           </Popover>
-                          <FormDescription>
-                            Select your preferred travel date
+                          <FormDescription className="text-indigo-600/70 dark:text-indigo-400/70">
+                            Select your preferred travel date for the trip
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -304,16 +307,17 @@ const BookingForm = () => {
                       name="numberOfPeople"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Number of People</FormLabel>
+                          <FormLabel className="font-medium text-indigo-700 dark:text-indigo-300">Number of People</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
                               min="1" 
                               placeholder="Enter number of travelers" 
-                              {...field} 
+                              {...field}
+                              className="border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-indigo-600/70 dark:text-indigo-400/70">
                             Total cost will be calculated based on the number of travelers
                           </FormDescription>
                           <FormMessage />
@@ -325,24 +329,27 @@ const BookingForm = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 rounded-md transition-all duration-300 hover:shadow-lg"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Processing..." : "Continue to Payment"}
                 </Button>
               </form>
             </Form>
+
+            {/* Add Transport Recommendations Component */}
+            <TransportRecommendations destinationId={id || ""} />
           </div>
           
           <div>
-            <Card className="sticky top-6">
-              <CardHeader>
-                <CardTitle>Booking Summary</CardTitle>
+            <Card className="sticky top-6 border-t-4 border-t-amber-500 shadow-md hover:shadow-lg transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
+                <CardTitle className="text-xl font-display">Booking Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 rounded-md overflow-hidden">
+                    <div className="h-16 w-16 rounded-md overflow-hidden">
                       <img 
                         src={destination.image_url || '/placeholder.svg'} 
                         alt={destination.name}
@@ -350,20 +357,20 @@ const BookingForm = () => {
                       />
                     </div>
                     <div>
-                      <h3 className="font-medium">{destination.name}</h3>
+                      <h3 className="font-medium text-lg">{destination.name}</h3>
                       <p className="text-sm text-muted-foreground">{destination.location}</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="border-t pt-4">
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Base price</span>
-                    <span>${destination.price.toFixed(2)}</span>
+                <div className="mt-4 pt-4 border-t">
+                  <div className="flex justify-between py-2 text-indigo-800 dark:text-indigo-300">
+                    <span className="font-medium">Base price</span>
+                    <span className="font-semibold">${destination.price.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Number of travelers</span>
-                    <span>
+                  <div className="flex justify-between py-2 text-indigo-800 dark:text-indigo-300">
+                    <span className="font-medium">Number of travelers</span>
+                    <span className="font-semibold">
                       {form.watch('numberOfPeople') ? parseInt(form.watch('numberOfPeople')) : 1}
                     </span>
                   </div>
@@ -371,30 +378,42 @@ const BookingForm = () => {
                   {destination.additional_costs && Object.keys(destination.additional_costs).length > 0 && (
                     <>
                       {Object.entries(destination.additional_costs).map(([key, value]) => (
-                        <div key={key} className="flex justify-between py-1">
-                          <span className="text-muted-foreground">{key}</span>
-                          <span>${parseFloat(value as string).toFixed(2)}</span>
+                        <div key={key} className="flex justify-between py-2 text-indigo-800 dark:text-indigo-300">
+                          <span className="font-medium">{key}</span>
+                          <span className="font-semibold">${parseFloat(value as string).toFixed(2)}</span>
                         </div>
                       ))}
                     </>
                   )}
                   
-                  <div className="flex justify-between py-3 border-t border-b font-medium mt-2">
-                    <span>Total</span>
-                    <span className="text-lg">
+                  <div className="flex justify-between py-3 mt-2 border-t border-b font-semibold">
+                    <span className="text-lg">Total</span>
+                    <span className="text-xl text-indigo-700 dark:text-indigo-300">
                       ${(destination.price * (form.watch('numberOfPeople') ? parseInt(form.watch('numberOfPeople')) : 1)).toFixed(2)}
                     </span>
                   </div>
                 </div>
                 
-                <div className="bg-muted p-3 rounded-md text-sm">
-                  <p className="font-medium">Booking Notes:</p>
-                  <ul className="list-disc list-inside space-y-1 mt-2">
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 p-4 rounded-md text-sm mt-4">
+                  <p className="font-semibold text-indigo-800 dark:text-indigo-300 mb-2">Booking Notes:</p>
+                  <ul className="list-disc list-inside space-y-1 text-indigo-600/70 dark:text-indigo-400/70">
                     <li>Prices are per person</li>
                     <li>Cancelation available up to 48 hours before trip</li>
                     <li>Weather conditions may affect availability</li>
+                    <li>Transport options can be added separately</li>
                   </ul>
                 </div>
+                
+                {destination.highlights && destination.highlights.length > 0 && (
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="font-semibold text-indigo-800 dark:text-indigo-300 mb-2">Destination Highlights:</p>
+                    <ul className="list-disc list-inside space-y-1 text-indigo-600/70 dark:text-indigo-400/70">
+                      {destination.highlights.slice(0, 3).map((highlight, index) => (
+                        <li key={index}>{highlight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
