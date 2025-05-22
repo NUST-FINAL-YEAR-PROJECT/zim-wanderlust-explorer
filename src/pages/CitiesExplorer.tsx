@@ -5,12 +5,13 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, Globe, X } from 'lucide-react';
 import CityGroupView from '@/components/CityGroupView';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { getAllCitiesWithContent, getCityContent } from '@/models/Location';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/sonner';
 
 const CitiesExplorer = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,9 +30,17 @@ const CitiesExplorer = () => {
   }, [user, navigate]);
 
   // Fetch cities with content using react-query
-  const { data: cities = [], isLoading: isLoadingCities } = useQuery({
+  const { data: cities = [], isLoading: isLoadingCities, isError } = useQuery({
     queryKey: ['cities'],
     queryFn: getAllCitiesWithContent,
+    onError: (error) => {
+      console.error('Error fetching cities:', error);
+      toast({
+        title: 'Error fetching cities',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    }
   });
 
   // Process and group data by city
@@ -65,6 +74,11 @@ const CitiesExplorer = () => {
           setGroupedData(filteredCities);
         } catch (error) {
           console.error("Error fetching city content:", error);
+          toast({
+            title: 'Error loading city data',
+            description: 'Please try again later',
+            variant: 'destructive',
+          });
           setGroupedData([]);
         }
       };
@@ -78,6 +92,10 @@ const CitiesExplorer = () => {
     // Search is applied via useEffect
   };
 
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
   return (
     <DashboardLayout>
       <motion.div
@@ -87,18 +105,21 @@ const CitiesExplorer = () => {
         className="space-y-6 pb-8"
       >
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 mb-8 shadow-lg">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-700 p-6 md:p-8 mb-8 shadow-lg">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
             className="relative z-10"
           >
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-              Explore Zimbabwe by City
-            </h1>
+            <div className="flex items-center gap-2 mb-2">
+              <Globe className="h-8 w-8 text-white" />
+              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">
+                Explore Zimbabwe by City
+              </h1>
+            </div>
             <p className="text-blue-100 text-lg mb-6 max-w-2xl">
-              Discover destinations and events grouped by city for easy exploration
+              Discover destinations, accommodations, and events grouped by city for easy exploration
             </p>
 
             <form onSubmit={handleSearchSubmit} className="max-w-lg">
@@ -106,10 +127,19 @@ const CitiesExplorer = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300" size={18} />
                 <Input
                   placeholder="Search cities, destinations, or events..."
-                  className="pl-10 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-blue-200 w-full"
+                  className="pl-10 pr-10 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-blue-200 w-full focus:ring-2 focus:ring-white/30"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {searchQuery && (
+                  <button 
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
               </div>
             </form>
           </motion.div>
@@ -131,6 +161,22 @@ const CitiesExplorer = () => {
               </div>
             </div>
           </div>
+        ) : isError ? (
+          <div className="text-center py-16 bg-white dark:bg-blue-900/30 rounded-xl shadow-md border border-blue-100 dark:border-blue-800">
+            <div className="mb-6 bg-red-50 dark:bg-red-800/40 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+              <X className="h-10 w-10 text-red-500 dark:text-red-400" />
+            </div>
+            <h3 className="text-2xl font-medium text-blue-900 dark:text-blue-100 mb-3">Error loading cities</h3>
+            <p className="text-blue-600 dark:text-blue-400 mb-8 max-w-md mx-auto">
+              We encountered a problem while loading the city data.
+            </p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Try again
+            </Button>
+          </div>
         ) : groupedData.length > 0 ? (
           <CityGroupView data={groupedData} />
         ) : (
@@ -145,7 +191,7 @@ const CitiesExplorer = () => {
             {searchQuery && (
               <Button 
                 variant="outline"
-                onClick={() => setSearchQuery('')}
+                onClick={clearSearch}
                 className="border-blue-200 text-blue-700 hover:bg-blue-50"
               >
                 Clear Search

@@ -27,6 +27,18 @@ export interface Accommodation {
   updated_at: string;
 }
 
+// Helper function to parse room_types
+const parseRoomTypes = (item: any): Accommodation => {
+  return {
+    ...item,
+    room_types: item.room_types 
+      ? (Array.isArray(item.room_types) 
+          ? item.room_types 
+          : JSON.parse(item.room_types as unknown as string)) 
+      : null
+  };
+};
+
 export const getAccommodations = async (): Promise<Accommodation[]> => {
   const { data, error } = await supabase
     .from("accommodations")
@@ -39,10 +51,7 @@ export const getAccommodations = async (): Promise<Accommodation[]> => {
   }
 
   // Parse room_types from JSON to RoomType[]
-  return data.map(item => ({
-    ...item,
-    room_types: item.room_types ? (Array.isArray(item.room_types) ? item.room_types : JSON.parse(item.room_types as unknown as string)) : null
-  }));
+  return data.map(item => parseRoomTypes(item));
 };
 
 export const getFeaturedAccommodations = async (): Promise<Accommodation[]> => {
@@ -58,10 +67,7 @@ export const getFeaturedAccommodations = async (): Promise<Accommodation[]> => {
   }
 
   // Parse room_types from JSON to RoomType[]
-  return data.map(item => ({
-    ...item,
-    room_types: item.room_types ? (Array.isArray(item.room_types) ? item.room_types : JSON.parse(item.room_types as unknown as string)) : null
-  }));
+  return data.map(item => parseRoomTypes(item));
 };
 
 export const getAccommodationById = async (id: string): Promise<Accommodation | null> => {
@@ -79,10 +85,7 @@ export const getAccommodationById = async (id: string): Promise<Accommodation | 
   if (!data) return null;
 
   // Parse room_types from JSON to RoomType[]
-  return {
-    ...data,
-    room_types: data.room_types ? (Array.isArray(data.room_types) ? data.room_types : JSON.parse(data.room_types as unknown as string)) : null
-  };
+  return parseRoomTypes(data);
 };
 
 export const getAccommodationsByLocation = async (location: string): Promise<Accommodation[]> => {
@@ -98,8 +101,5 @@ export const getAccommodationsByLocation = async (location: string): Promise<Acc
   }
 
   // Parse room_types from JSON to RoomType[]
-  return data.map(item => ({
-    ...item,
-    room_types: item.room_types ? (Array.isArray(item.room_types) ? item.room_types : JSON.parse(item.room_types as unknown as string)) : null
-  }));
+  return data.map(item => parseRoomTypes(item));
 };

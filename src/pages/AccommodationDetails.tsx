@@ -118,10 +118,15 @@ const AccommodationDetails: React.FC = () => {
       description: `You've started booking ${selectedRoomType} at ${name} for ${format(selectedDate, "PPP")}`,
     });
 
-    // In a real app, we would navigate to a booking confirmation page
-    // navigate(`/booking/accommodation/${id}`, {
-    //   state: { selectedDate, selectedRoomType, guests }
-    // });
+    // Navigate to booking page
+    navigate(`/booking/accommodation/${id}`, {
+      state: { 
+        selectedDate: selectedDate.toISOString(), 
+        selectedRoomType, 
+        guests,
+        accommodation
+      }
+    });
   };
 
   const handleShare = () => {
