@@ -38,7 +38,11 @@ export const getAccommodations = async (): Promise<Accommodation[]> => {
     throw error;
   }
 
-  return data || [];
+  // Parse room_types from JSON to RoomType[]
+  return data.map(item => ({
+    ...item,
+    room_types: item.room_types ? (Array.isArray(item.room_types) ? item.room_types : JSON.parse(item.room_types as unknown as string)) : null
+  }));
 };
 
 export const getFeaturedAccommodations = async (): Promise<Accommodation[]> => {
@@ -53,7 +57,11 @@ export const getFeaturedAccommodations = async (): Promise<Accommodation[]> => {
     throw error;
   }
 
-  return data || [];
+  // Parse room_types from JSON to RoomType[]
+  return data.map(item => ({
+    ...item,
+    room_types: item.room_types ? (Array.isArray(item.room_types) ? item.room_types : JSON.parse(item.room_types as unknown as string)) : null
+  }));
 };
 
 export const getAccommodationById = async (id: string): Promise<Accommodation | null> => {
@@ -68,7 +76,13 @@ export const getAccommodationById = async (id: string): Promise<Accommodation | 
     throw error;
   }
 
-  return data;
+  if (!data) return null;
+
+  // Parse room_types from JSON to RoomType[]
+  return {
+    ...data,
+    room_types: data.room_types ? (Array.isArray(data.room_types) ? data.room_types : JSON.parse(data.room_types as unknown as string)) : null
+  };
 };
 
 export const getAccommodationsByLocation = async (location: string): Promise<Accommodation[]> => {
@@ -83,5 +97,9 @@ export const getAccommodationsByLocation = async (location: string): Promise<Acc
     throw error;
   }
 
-  return data || [];
+  // Parse room_types from JSON to RoomType[]
+  return data.map(item => ({
+    ...item,
+    room_types: item.room_types ? (Array.isArray(item.room_types) ? item.room_types : JSON.parse(item.room_types as unknown as string)) : null
+  }));
 };

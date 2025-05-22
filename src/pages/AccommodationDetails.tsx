@@ -257,10 +257,31 @@ const AccommodationDetails: React.FC = () => {
                   {latitude && longitude && (
                     <DestinationMap
                       destination={{
-                        ...accommodation,
+                        id: accommodation.id,
                         name: name || "",
+                        description: description || "",
                         location: location || "",
                         price: price_per_night,
+                        image_url: image_url || "",
+                        latitude: latitude,
+                        longitude: longitude,
+                        // Add required Destination properties that don't exist on Accommodation
+                        activities: [],
+                        best_time_to_visit: "",
+                        duration_recommended: "",
+                        difficulty_level: "",
+                        categories: [],
+                        getting_there: "",
+                        amenities: amenities || [],
+                        additional_images: additional_images || [],
+                        additional_costs: null,
+                        highlights: [],
+                        what_to_bring: [],
+                        is_featured: false,
+                        payment_url: null,
+                        weather_info: null,
+                        created_at: "",
+                        updated_at: ""
                       }}
                       height="100%"
                     />
