@@ -2,30 +2,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
+import ItineraryForm from "@/components/itinerary/ItineraryForm";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function ItineraryCreatePage() {
   const [error, setError] = useState<Error | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
 
   useEffect(() => {
     // Redirect if not logged in
     if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to create an itinerary",
-        variant: "destructive",
+      toast.error("Authentication required", {
+        description: "Please log in to create an itinerary"
       });
       navigate("/auth");
     }
-  }, [user, navigate, toast]);
+  }, [user, navigate]);
 
   // Add error boundary handling
   useEffect(() => {
@@ -87,7 +84,7 @@ export default function ItineraryCreatePage() {
         </div>
         
         <div className="bg-muted/30 p-6 rounded-lg">
-          <ItineraryForm onError={(err) => setError(err)} />
+          <ItineraryForm />
         </div>
       </div>
     </DashboardLayout>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Itinerary, getItinerary, updateItinerary, removeDestinationFromItinerary } from '@/models/Itinerary';
@@ -41,7 +40,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface ItineraryViewProps {
@@ -105,20 +104,18 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({ id, onEdit, isSharedView 
       );
       
       if (success) {
-        toast({
-          title: "Itinerary updated",
-          description: "Your changes have been saved successfully.",
+        toast.success("Itinerary updated", {
+          description: "Your changes have been saved successfully."
         });
+        
         fetchItinerary();
         setIsEditDialogOpen(false);
         if (onEdit) onEdit();
       }
     } catch (error) {
       console.error("Error updating itinerary:", error);
-      toast({
-        title: "Update failed",
-        description: "Failed to update itinerary. Please try again.",
-        variant: "destructive",
+      toast.error("Update failed", {
+        description: "Failed to update itinerary. Please try again."
       });
     }
   };
@@ -130,18 +127,16 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({ id, onEdit, isSharedView 
       const success = await removeDestinationFromItinerary(deletingDestinationId);
       
       if (success) {
-        toast({
-          title: "Destination removed",
-          description: "The destination has been removed from your itinerary.",
+        toast.success("Destination removed", {
+          description: "The destination has been removed from your itinerary."
         });
+        
         fetchItinerary();
       }
     } catch (error) {
       console.error("Error removing destination:", error);
-      toast({
-        title: "Error",
-        description: "Failed to remove destination. Please try again.",
-        variant: "destructive",
+      toast.error("Error", {
+        description: "Failed to remove destination. Please try again."
       });
     } finally {
       setDeletingDestinationId(null);
@@ -152,9 +147,8 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({ id, onEdit, isSharedView 
   const copyShareLink = () => {
     if (shareUrl) {
       navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Link copied",
-        description: "Share link copied to clipboard",
+      toast.success("Link copied", {
+        description: "Share link copied to clipboard"
       });
     }
   };

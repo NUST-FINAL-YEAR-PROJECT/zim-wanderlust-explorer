@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/components/ui/sonner';
-import DestinationSelector from './DestinationSelector';
+import { toast } from 'sonner';
+import { DestinationSelector } from './DestinationSelector';
 
 const ItineraryForm = () => {
   const { user } = useAuth();
@@ -34,10 +34,8 @@ const ItineraryForm = () => {
     if (newErrors.title) return;
     
     if (!user) {
-      toast({
-        title: "Authentication error",
-        description: "You must be logged in to create an itinerary",
-        variant: "destructive",
+      toast.error("Authentication error", {
+        description: "You must be logged in to create an itinerary"
       });
       return;
     }
@@ -48,9 +46,8 @@ const ItineraryForm = () => {
       const itinerary = await createItinerary(user.id, title, description);
       
       if (itinerary) {
-        toast({
-          title: "Success!",
-          description: "Your itinerary has been created. Now you can add destinations.",
+        toast.success("Success!", {
+          description: "Your itinerary has been created. Now you can add destinations."
         });
         navigate(`/itineraries/${itinerary.id}`);
       } else {
@@ -58,10 +55,8 @@ const ItineraryForm = () => {
       }
     } catch (error) {
       console.error("Error creating itinerary:", error);
-      toast({
-        title: "Error creating itinerary",
-        description: "Please try again later",
-        variant: "destructive",
+      toast.error("Error creating itinerary", {
+        description: "Please try again later"
       });
     } finally {
       setIsSubmitting(false);

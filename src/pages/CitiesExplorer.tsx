@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -11,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { getAllCitiesWithContent, getCityContent } from '@/models/Location';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const CitiesExplorer = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,13 +32,13 @@ const CitiesExplorer = () => {
   const { data: cities = [], isLoading: isLoadingCities, isError } = useQuery({
     queryKey: ['cities'],
     queryFn: getAllCitiesWithContent,
-    onError: (error) => {
-      console.error('Error fetching cities:', error);
-      toast({
-        title: 'Error fetching cities',
-        description: 'Please try again later',
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        console.error('Error fetching cities:', error);
+        toast.error("Error fetching cities", {
+          description: "Please try again later"
+        });
+      }
     }
   });
 
@@ -74,11 +73,10 @@ const CitiesExplorer = () => {
           setGroupedData(filteredCities);
         } catch (error) {
           console.error("Error fetching city content:", error);
-          toast({
-            title: 'Error loading city data',
-            description: 'Please try again later',
-            variant: 'destructive',
+          toast.error("Error loading city data", {
+            description: "Please try again later"
           });
+          
           setGroupedData([]);
         }
       };

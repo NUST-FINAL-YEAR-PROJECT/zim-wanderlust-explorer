@@ -1,7 +1,7 @@
 
 import { useParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { ItineraryView } from "@/components/itinerary/ItineraryView";
+import ItineraryView from "@/components/itinerary/ItineraryView";
 
 export default function ItineraryDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +21,7 @@ export default function ItineraryDetailsPage() {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
-        <ItineraryView itineraryId={id} />
+        <ItineraryView id={id} />
       </div>
     </DashboardLayout>
   );
