@@ -9,6 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accommodations: {
+        Row: {
+          additional_images: string[] | null
+          amenities: string[] | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          latitude: number | null
+          location: string
+          longitude: number | null
+          max_guests: number | null
+          name: string
+          price_per_night: number
+          rating: number | null
+          review_count: number | null
+          room_types: Json | null
+          updated_at: string
+        }
+        Insert: {
+          additional_images?: string[] | null
+          amenities?: string[] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          latitude?: number | null
+          location: string
+          longitude?: number | null
+          max_guests?: number | null
+          name: string
+          price_per_night: number
+          rating?: number | null
+          review_count?: number | null
+          room_types?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          additional_images?: string[] | null
+          amenities?: string[] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          max_guests?: number | null
+          name?: string
+          price_per_night?: number
+          rating?: number | null
+          review_count?: number | null
+          room_types?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       api_docs: {
         Row: {
           created_at: string

@@ -11,3 +11,4 @@ export * from './Wishlist';
 export * from './CartItem';
 export * from './Chat';
 export * from './Itinerary';
+export * from './Accommodation';

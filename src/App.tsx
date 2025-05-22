@@ -28,6 +28,8 @@ import PaymentPage from "./pages/PaymentPage";
 import Settings from "./pages/Settings";
 import EventBookingPage from "./pages/EventBookingPage";
 import NotFound from "./pages/NotFound";
+import Accommodations from "./pages/Accommodations";
+import AccommodationDetails from "./pages/AccommodationDetails";
 
 const queryClient = new QueryClient()
 
@@ -154,6 +156,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <EventBookingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/accommodations"
+              element={
+                <ProtectedRoute>
+                  <Accommodations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/accommodation/:id"
+              element={
+                <ProtectedRoute>
+                  <AccommodationDetails />
                 </ProtectedRoute>
               }
             />
