@@ -18,6 +18,7 @@ const TransportPage = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'private' | 'public' | 'air'>('all');
   const [sortOrder, setSortOrder] = useState<'price-low' | 'price-high' | 'rating'>('rating');
 
+  // Use the tanstack-query format with object options
   const { data: operators, isLoading } = useQuery({
     queryKey: ['transportOperators', activeTab],
     queryFn: () => activeTab === 'all' ? 
