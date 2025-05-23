@@ -22,13 +22,6 @@ const CitiesExplorer = () => {
   const { data: cities, isLoading, error } = useQuery({
     queryKey: ['cities'],
     queryFn: getCities,
-    meta: {
-      onError: (error: Error) => {
-        toast.error("Failed to load cities", {
-          description: error.message
-        });
-      }
-    }
   });
 
   if (error) {
@@ -37,7 +30,7 @@ const CitiesExplorer = () => {
     });
   }
 
-  const filteredCities = cities?.filter(city => 
+  const filteredCities = cities?.filter((city: string) => 
     city.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -45,7 +38,7 @@ const CitiesExplorer = () => {
   const groupedCities: { [key: string]: string[] } = {};
   
   if (filteredCities) {
-    filteredCities.forEach(city => {
+    filteredCities.forEach((city: string) => {
       const firstLetter = city.charAt(0).toUpperCase();
       if (!groupedCities[firstLetter]) {
         groupedCities[firstLetter] = [];

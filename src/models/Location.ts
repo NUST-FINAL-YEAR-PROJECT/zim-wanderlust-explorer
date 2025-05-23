@@ -49,6 +49,9 @@ export async function getAllCitiesWithContent() {
   }
 }
 
+// Export getCities as an alias for getAllCitiesWithContent
+export const getCities = getAllCitiesWithContent;
+
 // Function to get all content for a specific city
 export async function getCityContent(city: string) {
   try {
