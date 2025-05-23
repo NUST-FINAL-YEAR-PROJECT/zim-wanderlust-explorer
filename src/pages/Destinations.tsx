@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -97,171 +95,169 @@ const Destinations = () => {
   };
 
   return (
-    <DashboardLayout>
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-6 pb-8"
-      >
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 mb-8 shadow-lg">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="relative z-10"
-          >
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-              Explore Amazing Destinations
-            </h1>
-            <p className="text-blue-100 text-lg mb-6 max-w-2xl">
-              Discover Zimbabwe's best-kept secrets and popular attractions for your next adventure
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300" size={18} />
-                <Input
-                  placeholder="Search destinations by name or location..."
-                  className="pl-10 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-blue-200 w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Button 
-                onClick={() => setShowFilterPanel(!showFilterPanel)}
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 flex items-center gap-2"
-              >
-                <Filter size={16} />
-                Filters
-              </Button>
-            </div>
-          </motion.div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6 pb-8"
+    >
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 mb-8 shadow-lg">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="relative z-10"
+        >
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
+            Explore Amazing Destinations
+          </h1>
+          <p className="text-blue-100 text-lg mb-6 max-w-2xl">
+            Discover Zimbabwe's best-kept secrets and popular attractions for your next adventure
+          </p>
           
-          <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-blue-500/30 blur-2xl"></div>
-          <div className="absolute top-10 -right-10 w-40 h-40 rounded-full bg-indigo-500/20 blur-3xl"></div>
-        </div>
-
-        {/* Filter Panel */}
-        <AnimatePresence>
-          {showFilterPanel && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300" size={18} />
+              <Input
+                placeholder="Search destinations by name or location..."
+                className="pl-10 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-blue-200 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button 
+              onClick={() => setShowFilterPanel(!showFilterPanel)}
+              className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 flex items-center gap-2"
             >
-              <Card className="border-blue-100 dark:border-blue-800 mb-6 overflow-hidden bg-white/90 backdrop-blur-sm shadow-md">
-                <CardContent className="p-5">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block text-blue-700 dark:text-blue-300">Location</label>
-                      <Select value={locationFilter} onValueChange={setLocationFilter}>
-                        <SelectTrigger className="border-blue-200 dark:border-blue-700 focus:ring-blue-300">
-                          <SelectValue placeholder="All locations" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-blue-900 border-blue-200 dark:border-blue-700">
-                          <SelectItem value="all">All locations</SelectItem>
-                          {locations.map(location => (
-                            <SelectItem key={location} value={location}>
-                              {location}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium mb-2 block text-blue-700 dark:text-blue-300">Price Range</label>
-                      <Select value={priceFilter} onValueChange={setPriceFilter}>
-                        <SelectTrigger className="border-blue-200 dark:border-blue-700 focus:ring-blue-300">
-                          <SelectValue placeholder="All prices" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-blue-900 border-blue-200 dark:border-blue-700">
-                          <SelectItem value="all">All prices</SelectItem>
-                          <SelectItem value="low">Budget (Under $50)</SelectItem>
-                          <SelectItem value="medium">Mid-range ($50-$150)</SelectItem>
-                          <SelectItem value="high">Premium (Over $150)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium mb-2 block text-blue-700 dark:text-blue-300">Sort By</label>
-                      <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as any)}>
-                        <SelectTrigger className="border-blue-200 dark:border-blue-700 focus:ring-blue-300">
-                          <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-blue-900 border-blue-200 dark:border-blue-700">
-                          <SelectItem value="name">Name (A-Z)</SelectItem>
-                          <SelectItem value="price-low">Price (Low to High)</SelectItem>
-                          <SelectItem value="price-high">Price (High to Low)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+              <Filter size={16} />
+              Filters
+            </Button>
+          </div>
+        </motion.div>
+        
+        <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-blue-500/30 blur-2xl"></div>
+        <div className="absolute top-10 -right-10 w-40 h-40 rounded-full bg-indigo-500/20 blur-3xl"></div>
+      </div>
+
+      {/* Filter Panel */}
+      <AnimatePresence>
+        {showFilterPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <Card className="border-blue-100 dark:border-blue-800 mb-6 overflow-hidden bg-white/90 backdrop-blur-sm shadow-md">
+              <CardContent className="p-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-blue-700 dark:text-blue-300">Location</label>
+                    <Select value={locationFilter} onValueChange={setLocationFilter}>
+                      <SelectTrigger className="border-blue-200 dark:border-blue-700 focus:ring-blue-300">
+                        <SelectValue placeholder="All locations" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-blue-900 border-blue-200 dark:border-blue-700">
+                        <SelectItem value="all">All locations</SelectItem>
+                        {locations.map(location => (
+                          <SelectItem key={location} value={location}>
+                            {location}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   
-                  <div className="mt-6 flex justify-end gap-3">
-                    <Button 
-                      variant="outline" 
-                      onClick={handleClearFilters}
-                      className="border-blue-200 text-blue-700"
-                    >
-                      Clear Filters
-                    </Button>
-                    <Button 
-                      onClick={() => setShowFilterPanel(false)}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      Apply Filters
-                    </Button>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-blue-700 dark:text-blue-300">Price Range</label>
+                    <Select value={priceFilter} onValueChange={setPriceFilter}>
+                      <SelectTrigger className="border-blue-200 dark:border-blue-700 focus:ring-blue-300">
+                        <SelectValue placeholder="All prices" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-blue-900 border-blue-200 dark:border-blue-700">
+                        <SelectItem value="all">All prices</SelectItem>
+                        <SelectItem value="low">Budget (Under $50)</SelectItem>
+                        <SelectItem value="medium">Mid-range ($50-$150)</SelectItem>
+                        <SelectItem value="high">Premium (Over $150)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-blue-700 dark:text-blue-300">Sort By</label>
+                    <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as any)}>
+                      <SelectTrigger className="border-blue-200 dark:border-blue-700 focus:ring-blue-300">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-blue-900 border-blue-200 dark:border-blue-700">
+                        <SelectItem value="name">Name (A-Z)</SelectItem>
+                        <SelectItem value="price-low">Price (Low to High)</SelectItem>
+                        <SelectItem value="price-high">Price (High to Low)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex justify-end gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleClearFilters}
+                    className="border-blue-200 text-blue-700"
+                  >
+                    Clear Filters
+                  </Button>
+                  <Button 
+                    onClick={() => setShowFilterPanel(false)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Apply Filters
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-200">
-                {filteredDestinations.length} {filteredDestinations.length === 1 ? 'Destination' : 'Destinations'} Found
-              </h2>
-              <p className="text-sm text-blue-600 dark:text-blue-400">
-                {priceFilter !== 'all' || locationFilter !== 'all' ? 'Filtered results' : 'Showing all destinations'}
-              </p>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-200">
+              {filteredDestinations.length} {filteredDestinations.length === 1 ? 'Destination' : 'Destinations'} Found
+            </h2>
+            <p className="text-sm text-blue-600 dark:text-blue-400">
+              {priceFilter !== 'all' || locationFilter !== 'all' ? 'Filtered results' : 'Showing all destinations'}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex bg-blue-50 dark:bg-blue-900/50 rounded-lg p-1 border border-blue-100 dark:border-blue-800">
+              <Button
+                variant={view === 'grid' ? 'gradient' : 'ghost'}
+                size="sm"
+                onClick={() => setView('grid')}
+                className={`rounded-md ${view === 'grid' ? '' : 'text-blue-700 dark:text-blue-300'}`}
+              >
+                <Grid className="h-4 w-4 mr-1" /> Grid
+              </Button>
+              <Button
+                variant={view === 'list' ? 'gradient' : 'ghost'}
+                size="sm"
+                onClick={() => setView('list')}
+                className={`rounded-md ${view === 'list' ? '' : 'text-blue-700 dark:text-blue-300'}`}
+              >
+                <List className="h-4 w-4 mr-1" /> List
+              </Button>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="flex bg-blue-50 dark:bg-blue-900/50 rounded-lg p-1 border border-blue-100 dark:border-blue-800">
-                <Button
-                  variant={view === 'grid' ? 'gradient' : 'ghost'}
-                  size="sm"
-                  onClick={() => setView('grid')}
-                  className={`rounded-md ${view === 'grid' ? '' : 'text-blue-700 dark:text-blue-300'}`}
-                >
-                  <Grid className="h-4 w-4 mr-1" /> Grid
-                </Button>
-                <Button
-                  variant={view === 'list' ? 'gradient' : 'ghost'}
-                  size="sm"
-                  onClick={() => setView('list')}
-                  className={`rounded-md ${view === 'list' ? '' : 'text-blue-700 dark:text-blue-300'}`}
-                >
-                  <List className="h-4 w-4 mr-1" /> List
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Sliders size={16} className="text-blue-500" />
-                <span className="text-sm text-blue-600 dark:text-blue-400 hidden sm:inline">Sorted by:</span>
-                <span className="text-sm font-medium">
-                  {sortOrder === 'name' ? 'Name' : sortOrder === 'price-low' ? 'Price ↑' : 'Price ↓'}
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Sliders size={16} className="text-blue-500" />
+              <span className="text-sm text-blue-600 dark:text-blue-400 hidden sm:inline">Sorted by:</span>
+              <span className="text-sm font-medium">
+                {sortOrder === 'name' ? 'Name' : sortOrder === 'price-low' ? 'Price ↑' : 'Price ↓'}
+              </span>
             </div>
           </div>
           
@@ -462,7 +458,6 @@ const Destinations = () => {
           )}
         </div>
       </motion.div>
-    </DashboardLayout>
   );
 };
 

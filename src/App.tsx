@@ -33,20 +33,6 @@ import TransportPage from "@/pages/TransportPage";
 
 const queryClient = new QueryClient();
 
-// Routes that should use the dashboard layout
-const dashboardRoutes = [
-  "/dashboard",
-  "/destinations", 
-  "/events",
-  "/cities",
-  "/accommodations",
-  "/transport",
-  "/itineraries",
-  "/wishlist",
-  "/bookings",
-  "/settings"
-];
-
 export default function App() {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -69,13 +55,13 @@ export default function App() {
             {/* Admin route (has its own layout) */}
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             
-            {/* Dashboard routes with consistent sidebar layout */}
+            {/* Dashboard routes with consistent sidebar layout - single DashboardLayout wrapper */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><Dashboard /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/destinations" element={<DashboardLayout><Destinations /></DashboardLayout>} />
-            <Route path="/events" element={<DashboardLayout><Events /></DashboardLayout>} />
-            <Route path="/cities" element={<DashboardLayout><CitiesExplorer /></DashboardLayout>} />
-            <Route path="/accommodations" element={<DashboardLayout><Accommodations /></DashboardLayout>} />
-            <Route path="/transport" element={<DashboardLayout><TransportPage /></DashboardLayout>} />
+            <Route path="/destinations" element={<ProtectedRoute><DashboardLayout><Destinations /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/events" element={<ProtectedRoute><DashboardLayout><Events /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/cities" element={<ProtectedRoute><DashboardLayout><CitiesExplorer /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/accommodations" element={<ProtectedRoute><DashboardLayout><Accommodations /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/transport" element={<ProtectedRoute><DashboardLayout><TransportPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/itineraries" element={<ProtectedRoute><DashboardLayout><ItinerariesPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/itineraries/:id" element={<ProtectedRoute><DashboardLayout><ItineraryDetailsPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/itinerary/create" element={<ProtectedRoute><DashboardLayout><ItineraryCreatePage /></DashboardLayout></ProtectedRoute>} />
