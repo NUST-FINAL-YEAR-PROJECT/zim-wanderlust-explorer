@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -13,18 +13,36 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, LogOut, Settings, User, MapPin } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { 
+  Menu, 
+  LogOut, 
+  Settings, 
+  User, 
+  MapPin,
+  LayoutDashboard,
+  Calendar,
+  Heart,
+  Hotel,
+  Map,
+  Route,
+  BookOpen,
+  Car
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
   href: string;
+  icon: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMounted, setIsMounted] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -40,153 +58,210 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const navItems: NavItem[] = [
-    { label: "Home", href: "/" },
-    { label: "Destinations", href: "/destinations" },
-    { label: "Events", href: "/events" },
-    { label: "Cities", href: "/cities" },
-    { label: "Accommodations", href: "/accommodations" },
-    { label: "Transport", href: "/transport" },
-    { label: "Itineraries", href: "/itineraries" },
-    { label: "Wishlist", href: "/wishlist" },
-    { label: "Bookings", href: "/bookings" }
+    { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
+    { label: "Destinations", href: "/destinations", icon: <MapPin className="h-5 w-5" /> },
+    { label: "Events", href: "/events", icon: <Calendar className="h-5 w-5" /> },
+    { label: "Cities", href: "/cities", icon: <Map className="h-5 w-5" /> },
+    { label: "Accommodations", href: "/accommodations", icon: <Hotel className="h-5 w-5" /> },
+    { label: "Transport", href: "/transport", icon: <Car className="h-5 w-5" /> },
+    { label: "Itineraries", href: "/itineraries", icon: <Route className="h-5 w-5" /> },
+    { label: "Wishlist", href: "/wishlist", icon: <Heart className="h-5 w-5" /> },
+    { label: "Bookings", href: "/bookings", icon: <BookOpen className="h-5 w-5" /> }
   ];
 
-  const profileNavItems = [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Settings", href: "/settings" },
-    { label: "Admin Panel", href: "/admin" }
-  ];
+  const Sidebar = ({ isMobile = false }: { isMobile?: boolean }) => (
+    <div className={cn(
+      "flex h-full flex-col border-r bg-card",
+      isMobile ? "w-full" : "w-64"
+    )}>
+      <div className="flex h-14 items-center border-b px-4">
+        <Link to="/dashboard" className="flex items-center gap-2" onClick={() => isMobile && setSidebarOpen(false)}>
+          <div className="bg-primary p-2 rounded-lg">
+            <MapPin className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <span className="font-semibold text-lg">Zimbabwe Tourism</span>
+        </Link>
+      </div>
+      
+      <nav className="flex-1 space-y-1 p-4">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.href}
+            to={item.href}
+            onClick={() => isMobile && setSidebarOpen(false)}
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive 
+                  ? "bg-accent text-accent-foreground font-medium" 
+                  : "text-muted-foreground hover:text-foreground"
+              )
+            }
+          >
+            {item.icon}
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      {user && (
+        <div className="border-t p-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.user_metadata?.avatar_url || `/placeholder.svg`} />
+              <AvatarFallback>
+                {user.user_metadata?.name?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-medium truncate">
+                {user.user_metadata?.name || "User"}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-1">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-2 h-9"
+              onClick={() => {
+                navigate("/settings");
+                if (isMobile) setSidebarOpen(false);
+              }}
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-2 h-9 text-destructive hover:text-destructive"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-white dark:from-blue-950 dark:via-indigo-950 dark:to-gray-900">
-      <header className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-30 w-full shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center">
-                <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-2 rounded-lg shadow-md">
-                  <MapPin className="h-6 w-6 text-white" />
-                </div>
-                <span className="ml-3 text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                  Zimbabwe Tourism
-                </span>
-              </Link>
-              <nav className="hidden md:ml-10 md:flex md:space-x-8">
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    to={item.href}
-                    className={({ isActive }) =>
-                      `text-sm transition-all duration-200 px-3 py-2 rounded-lg ${
-                        isActive
-                          ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium shadow-md"
-                          : "text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                      }`
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
-              </nav>
-            </div>
+    <div className="min-h-screen flex">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex">
+        <Sidebar />
+      </div>
 
-            <div className="flex items-center space-x-4">
+      {/* Mobile Sidebar */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-64">
+          <Sidebar isMobile={true} />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Header for Mobile */}
+        <header className="lg:hidden bg-card border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+            </Sheet>
+            
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <div className="bg-primary p-1.5 rounded-md">
+                <MapPin className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="font-semibold">Zimbabwe Tourism</span>
+            </Link>
+            
+            <div className="flex items-center gap-2">
               <ModeToggle />
-              {isMounted && user ? (
+              {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8 border-2 border-amber-200 dark:border-amber-700">
-                        <AvatarImage src={user.user_metadata?.avatar_url || `/placeholder.svg`} alt={user.user_metadata?.name || "Avatar"} />
-                        <AvatarFallback className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url || `/placeholder.svg`} />
+                        <AvatarFallback>
                           {user.user_metadata?.name?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 border-amber-100 dark:border-amber-800" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-sm font-medium leading-none">{user.user_metadata?.name || "Guest"}</span>
-                        <span className="text-xs leading-none text-muted-foreground">
-                          {user.email}
-                        </span>
-                      </div>
-                    </DropdownMenuLabel>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {profileNavItems.map((item) => (
-                      <DropdownMenuItem key={item.href} onClick={() => navigate(item.href)} className="hover:bg-amber-50 dark:hover:bg-amber-900/20">
-                        {item.label}
-                        <User className="ml-auto h-4 w-4" />
-                      </DropdownMenuItem>
-                    ))}
+                    <DropdownMenuItem onClick={() => navigate("/settings")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                      Log out
-                      <LogOut className="ml-auto h-4 w-4" />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <Link to="/auth">
-                  <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md">
-                    Sign In
-                  </Button>
-                </Link>
               )}
-
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" className="md:hidden">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="sm:w-64">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center">
-                      <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-2 rounded-lg mr-2">
-                        <MapPin className="h-5 w-5 text-white" />
-                      </div>
-                      Menu
-                    </SheetTitle>
-                    <SheetDescription>
-                      Explore Zimbabwe Tourism
-                    </SheetDescription>
-                  </SheetHeader>
-                  <nav className="grid gap-4 text-sm mt-8">
-                    {navItems.map((item) => (
-                      <Link key={item.href} to={item.href} className="flex items-center space-x-3 py-3 px-2 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-all duration-200">
-                        <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        <span>{item.label}</span>
-                      </Link>
-                    ))}
-                    {user && (
-                      <>
-                        <Link to="/dashboard" className="flex items-center space-x-3 py-3 px-2 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-all duration-200">
-                          <User className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                          <span>Dashboard</span>
-                        </Link>
-                        <Link to="/settings" className="flex items-center space-x-3 py-3 px-2 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-all duration-200">
-                          <Settings className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                          <span>Settings</span>
-                        </Link>
-                        <Button variant="ghost" className="justify-start text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={handleSignOut}>
-                          <LogOut className="h-4 w-4 mr-2" />
-                          Log Out
-                        </Button>
-                      </>
-                    )}
-                  </nav>
-                </SheetContent>
-              </Sheet>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-grow">
-        {children}
-      </main>
+        {/* Desktop Header */}
+        <header className="hidden lg:flex bg-card border-b px-6 py-3">
+          <div className="flex items-center justify-between w-full">
+            <div>
+              <h1 className="text-lg font-semibold">
+                {navItems.find(item => location.pathname.startsWith(item.href))?.label || "Dashboard"}
+              </h1>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <ModeToggle />
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url || `/placeholder.svg`} />
+                        <AvatarFallback>
+                          {user.user_metadata?.name?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/settings")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
