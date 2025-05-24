@@ -56,8 +56,14 @@ export default function ItinerariesPage() {
       itinerary.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const now = new Date();
-    const startDate = itinerary.start_date ? new Date(itinerary.start_date) : null;
-    const endDate = itinerary.end_date ? new Date(itinerary.end_date) : null;
+    // Extract dates from destinations
+    const dates = itinerary.destinations.map(dest => ({
+      start: dest.startDate ? new Date(dest.startDate) : null,
+      end: dest.endDate ? new Date(dest.endDate) : null
+    }));
+    
+    const startDate = dates.length > 0 ? dates[0]?.start : null;
+    const endDate = dates.length > 0 ? dates[dates.length - 1]?.end : null;
     
     let matchesTab = true;
     if (activeTab === "upcoming") {
@@ -74,8 +80,8 @@ export default function ItinerariesPage() {
   };
 
   const handleShare = async (itinerary: any) => {
-    if (itinerary.share_code) {
-      const shareUrl = `${window.location.origin}/share/${itinerary.share_code}`;
+    if (itinerary.shareCode) {
+      const shareUrl = `${window.location.origin}/share/${itinerary.shareCode}`;
       try {
         await navigator.clipboard.writeText(shareUrl);
         toast.success("Share link copied to clipboard!");
@@ -168,95 +174,99 @@ export default function ItinerariesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredItineraries.map((itinerary) => (
-                <Card key={itinerary.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg mb-1">{itinerary.title}</CardTitle>
-                        {itinerary.description && (
-                          <CardDescription className="line-clamp-2">
-                            {itinerary.description}
-                          </CardDescription>
+              {filteredItineraries.map((itinerary) => {
+                // Extract dates from destinations
+                const dates = itinerary.destinations.map(dest => ({
+                  start: dest.startDate ? new Date(dest.startDate) : null,
+                  end: dest.endDate ? new Date(dest.endDate) : null
+                }));
+                
+                const startDate = dates.length > 0 ? dates[0]?.start : null;
+                const endDate = dates.length > 0 ? dates[dates.length - 1]?.end : null;
+
+                return (
+                  <Card key={itinerary.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-1">{itinerary.title}</CardTitle>
+                          {itinerary.description && (
+                            <CardDescription className="line-clamp-2">
+                              {itinerary.description}
+                            </CardDescription>
+                          )}
+                        </div>
+                        {itinerary.isPublic && (
+                          <Badge variant="secondary" className="ml-2">Public</Badge>
                         )}
                       </div>
-                      {itinerary.is_public && (
-                        <Badge variant="secondary" className="ml-2">Public</Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      {(itinerary.start_date || itinerary.end_date) && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          <span>
-                            {itinerary.start_date && format(new Date(itinerary.start_date), 'MMM d, yyyy')}
-                            {itinerary.start_date && itinerary.end_date && ' - '}
-                            {itinerary.end_date && format(new Date(itinerary.end_date), 'MMM d, yyyy')}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {itinerary.total_budget && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <span className="mr-2">💰</span>
-                          <span>Budget: ${itinerary.total_budget}</span>
-                        </div>
-                      )}
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
+                        {(startDate || endDate) && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            <span>
+                              {startDate && format(startDate, 'MMM d, yyyy')}
+                              {startDate && endDate && ' - '}
+                              {endDate && format(endDate, 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                        )}
 
-                      <div className="flex items-center justify-between pt-4">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/itineraries/${itinerary.id}`)}
-                          >
-                            <Eye className="mr-1 h-4 w-4" />
-                            View
-                          </Button>
-                          
-                          {itinerary.share_code && (
+                        <div className="flex items-center justify-between pt-4">
+                          <div className="flex gap-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleShare(itinerary)}
+                              onClick={() => navigate(`/itineraries/${itinerary.id}`)}
                             >
-                              <Share2 className="mr-1 h-4 w-4" />
-                              Share
+                              <Eye className="mr-1 h-4 w-4" />
+                              View
                             </Button>
-                          )}
-                        </div>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Itinerary</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{itinerary.title}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(itinerary.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            
+                            {itinerary.shareCode && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleShare(itinerary)}
                               >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                                <Share2 className="mr-1 h-4 w-4" />
+                                Share
+                              </Button>
+                            )}
+                          </div>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Itinerary</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{itinerary.title}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(itinerary.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </TabsContent>

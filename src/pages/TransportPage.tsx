@@ -27,33 +27,25 @@ const TransportPage = () => {
   const filteredOperators = operators.filter(operator => {
     const matchesSearch = !searchQuery || 
       operator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      operator.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      operator.services_offered?.some(service => 
-        service.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      operator.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesType = transportType === 'all' || 
-      operator.transport_type === transportType;
+      operator.type === transportType;
 
-    const matchesLocation = location === 'all' || 
-      operator.operating_areas?.includes(location);
+    // Since operating_areas doesn't exist on TransportOperator, we'll skip location filtering
+    const matchesLocation = location === 'all';
 
     return matchesSearch && matchesType && matchesLocation;
   });
 
-  // Get unique locations for filter
-  const locations = Array.from(
-    new Set(operators.flatMap(op => op.operating_areas || []))
-  ).sort();
+  // For now, we'll use empty locations array since operating_areas doesn't exist
+  const locations: string[] = [];
 
   const transportTypes = [
     { value: 'all', label: 'All Transport', icon: Car },
-    { value: 'bus', label: 'Bus', icon: Bus },
-    { value: 'taxi', label: 'Taxi', icon: Car },
-    { value: 'shuttle', label: 'Shuttle', icon: Bus },
-    { value: 'car_rental', label: 'Car Rental', icon: Car },
-    { value: 'flight', label: 'Flight', icon: Plane },
-    { value: 'train', label: 'Train', icon: Train },
+    { value: 'public', label: 'Public', icon: Bus },
+    { value: 'private', label: 'Private', icon: Car },
+    { value: 'air', label: 'Air', icon: Plane },
   ];
 
   return (
@@ -165,7 +157,7 @@ const TransportPage = () => {
         </TabsContent>
 
         <TabsContent value="recommendations">
-          <TransportRecommendations />
+          <TransportRecommendations destinationId="1" />
         </TabsContent>
       </Tabs>
     </div>

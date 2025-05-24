@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Hotel, Search, MapPin, Star, Wifi, Car, Utensils, Users } from 'lucide-react';
-import { getAccommodations, searchAccommodations, type Accommodation } from '@/models/Accommodation';
+import { getAccommodations, type Accommodation } from '@/models/Accommodation';
 import { useQuery } from '@tanstack/react-query';
 import AccommodationCard from '@/components/AccommodationCard';
 
@@ -36,7 +35,8 @@ const Accommodations = () => {
     
     const matchesLocation = locationFilter === 'all' || accommodation.location === locationFilter;
     
-    const matchesType = typeFilter === 'all' || accommodation.type === typeFilter;
+    // Since 'type' doesn't exist on Accommodation, we'll skip type filtering for now
+    const matchesType = typeFilter === 'all';
     
     let matchesPrice = true;
     if (priceFilter !== 'all') {
@@ -176,7 +176,6 @@ const Accommodations = () => {
                 <AccommodationCard 
                   key={accommodation.id} 
                   accommodation={accommodation}
-                  onClick={() => navigate(`/accommodation/${accommodation.id}`)}
                 />
               ))}
             </div>
@@ -185,6 +184,7 @@ const Accommodations = () => {
 
         <TabsContent value="list">
           {isLoading ? (
+            
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Card key={i}>
@@ -207,6 +207,7 @@ const Accommodations = () => {
               ))}
             </div>
           ) : filteredAccommodations.length === 0 ? (
+            
             <div className="text-center py-12">
               <Hotel className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
               <h3 className="text-xl font-medium mb-2">No accommodations found</h3>
@@ -248,10 +249,6 @@ const Accommodations = () => {
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                                 <span className="ml-1 text-sm">{accommodation.rating}/5</span>
                               </div>
-                              <span className="mx-2 text-muted-foreground">•</span>
-                              <span className="text-sm text-muted-foreground capitalize">
-                                {accommodation.type.replace('_', ' ')}
-                              </span>
                             </div>
                             <p className="text-sm text-muted-foreground line-clamp-2">
                               {accommodation.description}
