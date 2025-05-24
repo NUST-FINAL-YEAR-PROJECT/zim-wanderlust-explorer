@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +34,6 @@ import {
 } from "@/components/ui/popover";
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
   const { user, profile } = useAuth();
@@ -154,35 +154,10 @@ const Dashboard: React.FC = () => {
 
   const displayName = fullName || profile?.username || user?.email?.split('@')[0] || 'User';
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.4 }
-    }
-  };
-
   return (
-    <motion.div 
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className="space-y-6">
       {/* Greeting Section with Notification Bell */}
-      <motion.div variants={itemVariants} className="flex justify-between items-center rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-700 dark:to-indigo-900 p-6 text-white shadow-md">
+      <div className="flex justify-between items-center rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-700 dark:to-indigo-900 p-6 text-white shadow-md">
         <div>
           <h2 className="text-2xl font-bold">Welcome back, {displayName}</h2>
           <p className="mt-2 text-indigo-100">Discover Zimbabwe's best destinations and events</p>
@@ -242,10 +217,10 @@ const Dashboard: React.FC = () => {
             )}
           </PopoverContent>
         </Popover>
-      </motion.div>
+      </div>
 
       {/* Statistics Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
           <Card key={card.title} className={cn("dashboard-card shadow-md", card.color)}>
             <CardHeader className="pb-2">
@@ -262,10 +237,10 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         ))}
-      </motion.div>
+      </div>
 
       {/* My Itineraries Section */}
-      <motion.div variants={itemVariants}>
+      <div>
         <Card className="dashboard-card border-indigo-100 dark:border-indigo-700 shadow-md">
           <CardHeader className="pb-0 flex flex-row items-center justify-between">
             <div>
@@ -368,10 +343,10 @@ const Dashboard: React.FC = () => {
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Recent Bookings Table */}
-      <motion.div variants={itemVariants}>
+      <div>
         <Card className="dashboard-card border-indigo-100 dark:border-indigo-700 shadow-md">
           <CardHeader className="pb-0 flex flex-row items-center justify-between">
             <div>
@@ -460,7 +435,7 @@ const Dashboard: React.FC = () => {
                   </TableBody>
                 </Table>
               </div>
-            )
+            )}
             
             {bookings.length > 5 && (
               <div className="flex justify-center mt-4">
@@ -475,10 +450,10 @@ const Dashboard: React.FC = () => {
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Quick Links Section */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="dashboard-card shadow-md border-indigo-100 hover:shadow-lg transition-all duration-300 dark:border-indigo-700">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -547,10 +522,10 @@ const Dashboard: React.FC = () => {
             </Button>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Featured Section */}
-      <motion.div variants={itemVariants}>
+      <div>
         <Card className="dashboard-card relative overflow-hidden border-0 shadow-md">
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 to-indigo-800/90 dark:from-indigo-700/90 dark:to-indigo-900/90 z-0"></div>
           <CardContent className="p-6 relative z-10">
@@ -573,8 +548,8 @@ const Dashboard: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
