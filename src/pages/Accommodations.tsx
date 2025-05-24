@@ -1,147 +1,281 @@
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import DashboardLayout from "@/components/DashboardLayout";
-import { getAccommodations } from "@/models/Accommodation";
-import AccommodationCard from "@/components/AccommodationCard";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Hotel, SlidersHorizontal } from "lucide-react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Hotel, Search, MapPin, Star, Wifi, Car, Utensils, Users } from 'lucide-react';
+import { getAccommodations, searchAccommodations, type Accommodation } from '@/models/Accommodation';
+import { useQuery } from '@tanstack/react-query';
+import AccommodationCard from '@/components/AccommodationCard';
 
-const AccommodationsPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [sortBy, setSortBy] = React.useState("rating");
+const Accommodations = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [priceFilter, setPriceFilter] = useState('all');
 
-  const { data: accommodations = [], isLoading, isError } = useQuery({
-    queryKey: ["accommodations"],
+  const { data: accommodations = [], isLoading } = useQuery({
+    queryKey: ['accommodations'],
     queryFn: getAccommodations,
   });
 
-  const filteredAccommodations = React.useMemo(() => {
-    return accommodations.filter(
-      (acc) =>
-        acc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        acc.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [accommodations, searchQuery]);
+  // Get unique locations for filter
+  const locations = Array.from(new Set(accommodations.map(a => a.location).filter(Boolean))).sort();
 
-  const sortedAccommodations = React.useMemo(() => {
-    return [...filteredAccommodations].sort((a, b) => {
-      switch (sortBy) {
-        case "price-asc":
-          return a.price_per_night - b.price_per_night;
-        case "price-desc":
-          return b.price_per_night - a.price_per_night;
-        case "rating":
-        default:
-          return (b.rating || 0) - (a.rating || 0);
-      }
-    });
-  }, [filteredAccommodations, sortBy]);
+  // Filter accommodations based on search and filters
+  const filteredAccommodations = accommodations.filter(accommodation => {
+    const matchesSearch = !searchQuery || 
+      accommodation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      accommodation.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      accommodation.location.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesLocation = locationFilter === 'all' || accommodation.location === locationFilter;
+    
+    const matchesType = typeFilter === 'all' || accommodation.type === typeFilter;
+    
+    let matchesPrice = true;
+    if (priceFilter !== 'all') {
+      const price = accommodation.price_per_night;
+      if (priceFilter === 'budget' && price > 100) matchesPrice = false;
+      if (priceFilter === 'mid' && (price <= 100 || price > 300)) matchesPrice = false;
+      if (priceFilter === 'luxury' && price <= 300) matchesPrice = false;
+    }
+    
+    return matchesSearch && matchesLocation && matchesType && matchesPrice;
+  });
+
+  // Handle search form submission
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // The search is already applied via the filter
+  };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-blue-900 dark:text-white">
-              Accommodations
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Find the perfect place to stay in Zimbabwe
-            </p>
-          </div>
-        </header>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Accommodations</h1>
+          <p className="text-muted-foreground">Find the perfect place to stay in Zimbabwe</p>
+        </div>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            <Input
-              placeholder="Search by name or location..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      <div className="bg-white rounded-lg shadow p-4">
+        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
+          <div className="flex-1">
+            <label className="text-sm font-medium mb-1 block">Search</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                placeholder="Search accommodations..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="w-full sm:w-auto">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <SelectValue placeholder="Sort by" />
-                </div>
+          <div className="w-full md:w-48">
+            <label className="text-sm font-medium mb-1 block">Location</label>
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All locations" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="rating">Top Rated</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="all">All locations</SelectItem>
+                {locations.map(location => location && (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        <Separator />
-
-        {isLoading && (
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            ))}
+          <div className="w-full md:w-48">
+            <label className="text-sm font-medium mb-1 block">Type</label>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="hotel">Hotel</SelectItem>
+                <SelectItem value="lodge">Lodge</SelectItem>
+                <SelectItem value="guesthouse">Guesthouse</SelectItem>
+                <SelectItem value="resort">Resort</SelectItem>
+                <SelectItem value="backpacker">Backpacker</SelectItem>
+                <SelectItem value="safari_camp">Safari Camp</SelectItem>
+                <SelectItem value="apartment">Apartment</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
-
-        {isError && (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-8 text-center dark:border-red-900 dark:bg-red-950/50">
-            <Hotel className="h-12 w-12 text-red-400" />
-            <h3 className="mt-2 text-lg font-semibold text-red-700 dark:text-red-400">
-              Failed to load accommodations
-            </h3>
-            <p className="mt-1 text-red-600 dark:text-red-300">
-              Please try again later or contact support if the problem persists.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
+          <div className="w-full md:w-48">
+            <label className="text-sm font-medium mb-1 block">Price Range</label>
+            <Select value={priceFilter} onValueChange={setPriceFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All prices" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All prices</SelectItem>
+                <SelectItem value="budget">Budget ($0-$100)</SelectItem>
+                <SelectItem value="mid">Mid-range ($100-$300)</SelectItem>
+                <SelectItem value="luxury">Luxury ($300+)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
-
-        {!isLoading && !isError && sortedAccommodations.length === 0 && (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-800 dark:bg-gray-900">
-            <Hotel className="h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
-              No accommodations found
-            </h3>
-            <p className="mt-1 text-gray-500">
-              Try adjusting your search or filters to find something.
-            </p>
-          </div>
-        )}
-
-        {!isLoading && !isError && sortedAccommodations.length > 0 && (
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {sortedAccommodations.map((accommodation) => (
-              <AccommodationCard
-                key={accommodation.id}
-                accommodation={accommodation}
-                featured={accommodation.is_featured}
-              />
-            ))}
-          </div>
-        )}
+          <Button type="submit" className="mt-4 md:mt-0">
+            Apply Filters
+          </Button>
+        </form>
       </div>
-    </DashboardLayout>
+
+      <Tabs defaultValue="grid" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="grid">Grid View</TabsTrigger>
+          <TabsTrigger value="list">List View</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="grid">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Card key={i}>
+                  <Skeleton className="h-48 rounded-t-lg" />
+                  <CardContent className="p-4">
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2 mb-4" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-10 w-full mt-4" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredAccommodations.length === 0 ? (
+            <div className="text-center py-12">
+              <Hotel className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+              <h3 className="text-xl font-medium mb-2">No accommodations found</h3>
+              <p className="text-muted-foreground mb-6">
+                Try adjusting your search criteria or filters
+              </p>
+              <Button onClick={() => {
+                setSearchQuery('');
+                setLocationFilter('all');
+                setTypeFilter('all');
+                setPriceFilter('all');
+              }}>
+                Clear Filters
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAccommodations.map((accommodation) => (
+                <AccommodationCard 
+                  key={accommodation.id} 
+                  accommodation={accommodation}
+                  onClick={() => navigate(`/accommodation/${accommodation.id}`)}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="list">
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Card key={i}>
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <Skeleton className="h-24 w-32 rounded" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-4 w-1/3" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                      </div>
+                      <div className="text-right">
+                        <Skeleton className="h-6 w-20 mb-2" />
+                        <Skeleton className="h-10 w-24" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredAccommodations.length === 0 ? (
+            <div className="text-center py-12">
+              <Hotel className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+              <h3 className="text-xl font-medium mb-2">No accommodations found</h3>
+              <p className="text-muted-foreground mb-6">
+                Try adjusting your search criteria or filters
+              </p>
+              <Button onClick={() => {
+                setSearchQuery('');
+                setLocationFilter('all');
+                setTypeFilter('all');
+                setPriceFilter('all');
+              }}>
+                Clear Filters
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredAccommodations.map((accommodation) => (
+                <Card key={accommodation.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4" onClick={() => navigate(`/accommodation/${accommodation.id}`)}>
+                      <div className="w-32 h-24 flex-shrink-0">
+                        <img
+                          src={accommodation.image_url || '/placeholder.svg'}
+                          alt={accommodation.name}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg">{accommodation.name}</h3>
+                            <div className="flex items-center text-muted-foreground mb-2">
+                              <MapPin size={14} className="mr-1" />
+                              <span className="text-sm">{accommodation.location}</span>
+                            </div>
+                            <div className="flex items-center mb-2">
+                              <div className="flex items-center">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                <span className="ml-1 text-sm">{accommodation.rating}/5</span>
+                              </div>
+                              <span className="mx-2 text-muted-foreground">•</span>
+                              <span className="text-sm text-muted-foreground capitalize">
+                                {accommodation.type.replace('_', ' ')}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {accommodation.description}
+                            </p>
+                          </div>
+                          <div className="text-right ml-4">
+                            <div className="font-bold text-lg">${accommodation.price_per_night}</div>
+                            <div className="text-sm text-muted-foreground">per night</div>
+                            <Button size="sm" className="mt-2">
+                              View Details
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
-export default AccommodationsPage;
+export default Accommodations;

@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
 import ItineraryForm from "@/components/itinerary/ItineraryForm";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -46,47 +45,43 @@ export default function ItineraryCreatePage() {
   // Error handling for unexpected errors
   if (error) {
     return (
-      <DashboardLayout>
-        <div className="container mx-auto py-6">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              {error.message || "An unexpected error occurred. Please try again later."}
-            </AlertDescription>
-          </Alert>
-          <div className="mt-4">
-            <Button 
-              onClick={() => setError(null)} 
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-            >
-              Try Again
-            </Button>
-          </div>
+      <div className="container mx-auto py-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error.message || "An unexpected error occurred. Please try again later."}
+          </AlertDescription>
+        </Alert>
+        <div className="mt-4">
+          <Button 
+            onClick={() => setError(null)} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+          >
+            Try Again
+          </Button>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-6">
-        <div className="flex items-center mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(-1)}
-            className="mr-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-3xl font-bold tracking-tight">Create New Itinerary</h1>
-        </div>
-        
-        <div className="bg-muted/30 p-6 rounded-lg">
-          <ItineraryForm />
-        </div>
+    <div className="container mx-auto py-6">
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+          className="mr-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight">Create New Itinerary</h1>
       </div>
-    </DashboardLayout>
+      
+      <div className="bg-muted/30 p-6 rounded-lg">
+        <ItineraryForm />
+      </div>
+    </div>
   );
 }
