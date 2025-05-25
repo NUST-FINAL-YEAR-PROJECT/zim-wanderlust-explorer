@@ -26,6 +26,7 @@ const CitiesExplorer = () => {
   });
 
   if (error) {
+    console.error('Error loading cities:', error);
     toast.error("Error loading cities", {
       description: "Please try again later"
     });
@@ -33,12 +34,12 @@ const CitiesExplorer = () => {
 
   const filteredCities = cities?.filter((city: string) => 
     city.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) || [];
 
   // Group cities by first letter
   const groupedCities: { [key: string]: string[] } = {};
   
-  if (filteredCities) {
+  if (filteredCities.length > 0) {
     filteredCities.forEach((city: string) => {
       const firstLetter = city.charAt(0).toUpperCase();
       if (!groupedCities[firstLetter]) {
@@ -67,11 +68,11 @@ const CitiesExplorer = () => {
     parks: nationalParks.length
   };
 
-  const CityCard = ({ city, icon: Icon = MapPin, color = "indigo", query }: { 
+  const CityCard = ({ city, icon: Icon = MapPin, color = "indigo", isNationalPark = false }: { 
     city: string; 
     icon?: any; 
     color?: string; 
-    query?: string; 
+    isNationalPark?: boolean;
   }) => (
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
@@ -80,7 +81,13 @@ const CitiesExplorer = () => {
     >
       <Card 
         className={`group hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-${color}-500 hover:border-l-${color}-600 bg-gradient-to-br from-white to-${color}-50/30 dark:from-gray-800 dark:to-${color}-950/20`}
-        onClick={() => navigate(query ? `/destinations?query=${encodeURIComponent(query)}` : `/destinations?city=${encodeURIComponent(city)}`)}
+        onClick={() => {
+          if (isNationalPark) {
+            navigate(`/destinations?query=${encodeURIComponent(city)}`);
+          } else {
+            navigate(`/destinations?city=${encodeURIComponent(city)}`);
+          }
+        }}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -310,7 +317,7 @@ const CitiesExplorer = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <CityCard city={park} icon={TreePine} color="green" query={park} />
+                  <CityCard city={park} icon={TreePine} color="green" isNationalPark={true} />
                 </motion.div>
               ))}
             </div>

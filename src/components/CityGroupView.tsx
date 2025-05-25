@@ -13,6 +13,16 @@ interface CityGroupViewProps {
 const CityGroupView = ({ letter, cities }: CityGroupViewProps) => {
   const navigate = useNavigate();
 
+  const handleCityClick = (city: string) => {
+    try {
+      navigate(`/destinations?city=${encodeURIComponent(city)}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback navigation
+      navigate('/destinations');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -33,7 +43,7 @@ const CityGroupView = ({ letter, cities }: CityGroupViewProps) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {cities.map((city, index) => (
           <motion.div
-            key={city}
+            key={`${letter}-${city}-${index}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -41,8 +51,8 @@ const CityGroupView = ({ letter, cities }: CityGroupViewProps) => {
             whileTap={{ scale: 0.98 }}
           >
             <Card 
-              className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-indigo-500 hover:border-l-indigo-600 bg-gradient-to-br from-white to-indigo-50/30 dark:from-gray-800 dark:to-indigo-950/20 overflow-hidden"
-              onClick={() => navigate(`/destinations?city=${encodeURIComponent(city)}`)}
+              className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-indigo-500 hover:border-l-indigo-600 bg-gradient-to-br from-white to-indigo-50/30 dark:from-gray-800 dark:to-indigo-950/20 overflow-hidden relative"
+              onClick={() => handleCityClick(city)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">

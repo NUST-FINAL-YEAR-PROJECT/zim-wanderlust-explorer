@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users } from 'lucide-react';
 import { Destination } from '@/models/Destination';
 import { useQuery } from '@tanstack/react-query';
 import { getDestinationRating } from '@/models/Review';
@@ -24,25 +24,43 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
   const { data: rating = { average: 0, count: 0 }, isError } = useQuery({
     queryKey: ['destinationRating', destination.id],
     queryFn: () => getDestinationRating(destination.id),
-    retry: false, // Don't retry if there's an error
-    enabled: !!destination.id // Only run if destination.id exists
+    retry: false,
+    enabled: !!destination.id
   });
 
   // Check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session?.user);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session?.user);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      }
     };
     
     checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleViewDetails = () => {
-    if (isAuthenticated) {
-      navigate(`/destination/${destination.id}`);
-    } else {
-      navigate(`/browse?destination=${destination.id}`);
+    try {
+      if (isAuthenticated) {
+        navigate(`/destination/${destination.id}`);
+      } else {
+        navigate(`/browse/${destination.id}`);
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback navigation
+      navigate('/destinations');
     }
   };
 
@@ -55,13 +73,23 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
     return '/placeholder.svg';
   };
 
+  // Truncate description safely
+  const truncateDescription = (text: string | null, maxLength: number = 120) => {
+    if (!text) return 'No description available';
+    return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+  };
+
   return (
-    <Card className={`overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow ${className}`}>
+    <Card className={`overflow-hidden flex flex-col h-full hover:shadow-lg transition-all duration-300 ${className}`}>
       <div className="relative h-48 overflow-hidden">
         <img
           src={getDisplayImage()}
           alt={destination.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.svg';
+          }}
         />
         {isAuthenticated && (
           <div className="absolute top-2 right-2">
@@ -72,34 +100,84 @@ const DestinationCard = ({ destination, className = '' }: DestinationCardProps) 
             />
           </div>
         )}
+        {destination.is_featured && (
+          <div className="absolute top-2 left-2">
+            <Badge className="bg-amber-500 hover:bg-amber-600 text-white">
+              Featured
+            </Badge>
+          </div>
+        )}
       </div>
       
-      <CardContent className="p-4 flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-bold text-xl">{destination.name}</h3>
-          <Badge variant="outline" className="font-medium text-primary border-primary/20 bg-primary/5">
+      <CardContent className="p-4 flex-grow space-y-3">
+        <div className="flex justify-between items-start gap-2">
+          <h3 className="font-bold text-xl leading-tight line-clamp-2 flex-1">
+            {destination.name}
+          </h3>
+          <Badge variant="outline" className="font-medium text-primary border-primary/20 bg-primary/5 whitespace-nowrap">
             ${destination.price}
           </Badge>
         </div>
         
-        <div className="flex items-center text-muted-foreground mb-2">
+        <div className="flex items-center text-muted-foreground">
           <MapPin size={16} className="mr-1 flex-shrink-0" />
-          <span className="text-sm">{destination.location}</span>
+          <span className="text-sm truncate">{destination.location}</span>
         </div>
         
-        {!isError && rating && (
-          <div className="mb-3">
+        {!isError && rating && rating.count > 0 && (
+          <div>
             <RatingDisplay
               rating={rating.average}
               count={rating.count}
               showCount={true}
+              size="sm"
             />
           </div>
         )}
+
+        {/* Additional destination info */}
+        <div className="space-y-2">
+          {destination.duration_recommended && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock size={14} className="mr-1" />
+              <span>{destination.duration_recommended}</span>
+            </div>
+          )}
+          
+          {destination.difficulty_level && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Users size={14} className="mr-1" />
+              <span>{destination.difficulty_level}</span>
+            </div>
+          )}
+          
+          {destination.best_time_to_visit && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar size={14} className="mr-1" />
+              <span>{destination.best_time_to_visit}</span>
+            </div>
+          )}
+        </div>
         
-        <p className="text-sm text-muted-foreground line-clamp-3 flex-grow">
-          {destination.description}
+        <p className="text-sm text-muted-foreground line-clamp-3">
+          {truncateDescription(destination.description)}
         </p>
+
+        {/* Categories */}
+        {destination.categories && destination.categories.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {destination.categories.slice(0, 3).map((category, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {category}
+              </Badge>
+            ))}
+            {destination.categories.length > 3 && (
+              <Badge variant="secondary" className="text-xs">
+                +{destination.categories.length - 3} more
+              </Badge>
+            )}
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="p-4 pt-0">

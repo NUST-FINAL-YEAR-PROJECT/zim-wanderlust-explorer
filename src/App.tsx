@@ -11,7 +11,8 @@ import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Destinations from "@/pages/Destinations";
-import DestinationDetailsPage from "@/pages/DestinationDetailsPage";
+import DestinationDetails from "@/pages/DestinationDetails";
+import PublicDestinationDetails from "@/pages/PublicDestinationDetails";
 import Events from "@/pages/Events";
 import AdminDashboard from "@/pages/AdminDashboard";
 import WishlistPage from "@/pages/WishlistPage";
@@ -48,7 +49,8 @@ export default function App() {
             {/* Public routes without dashboard layout */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/destination/:id" element={<DestinationDetailsPage />} />
+            <Route path="/browse" element={<PublicDestinationDetails />} />
+            <Route path="/browse/:id" element={<PublicDestinationDetails />} />
             <Route path="/accommodation/:id" element={<AccommodationDetails />} />
             <Route path="/share/:shareCode" element={<ItinerarySharedPage />} />
             
@@ -58,6 +60,7 @@ export default function App() {
             {/* Dashboard routes with consistent sidebar layout - single DashboardLayout wrapper */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><Dashboard /></DashboardLayout></ProtectedRoute>} />
             <Route path="/destinations" element={<ProtectedRoute><DashboardLayout><Destinations /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/destination/:id" element={<ProtectedRoute><DashboardLayout><DestinationDetails /></DashboardLayout></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><DashboardLayout><Events /></DashboardLayout></ProtectedRoute>} />
             <Route path="/cities" element={<ProtectedRoute><DashboardLayout><CitiesExplorer /></DashboardLayout></ProtectedRoute>} />
             <Route path="/accommodations" element={<ProtectedRoute><DashboardLayout><Accommodations /></DashboardLayout></ProtectedRoute>} />
