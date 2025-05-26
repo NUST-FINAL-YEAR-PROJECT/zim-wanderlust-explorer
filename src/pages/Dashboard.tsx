@@ -16,7 +16,8 @@ import {
   Globe, 
   List,
   ChevronRight,
-  RefreshCw
+  Plus,
+  Eye
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getUserBookings } from '@/models/Booking';
@@ -26,7 +27,6 @@ import { Booking } from '@/models/Booking';
 import { Notification } from '@/models/Notification';
 import { Itinerary } from '@/models/Itinerary';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import {
   Popover,
@@ -103,7 +103,6 @@ const Dashboard: React.FC = () => {
     new Date(b.preferred_date) > new Date()
   ).length;
   
-  // Count unique destinations visited
   const uniqueDestinations = new Set(
     bookings
       .filter(b => b.status === 'completed')
@@ -111,44 +110,7 @@ const Dashboard: React.FC = () => {
       .filter(Boolean)
   ).size;
   
-  // Count total travelers
   const totalTravelers = bookings.reduce((sum, booking) => sum + booking.number_of_people, 0);
-
-  // Define stat cards
-  const statCards = [
-    {
-      title: "Total Bookings",
-      value: totalBookings,
-      description: "Across all destinations",
-      icon: Calendar,
-      color: "bg-indigo-50 dark:bg-indigo-900/50 border-indigo-100 dark:border-indigo-700/50",
-      iconClass: "text-indigo-600 dark:text-indigo-300",
-    },
-    {
-      title: "Upcoming Trips",
-      value: upcomingTrips,
-      description: "Scheduled for the future",
-      icon: TrendingUp,
-      color: "bg-indigo-50 dark:bg-indigo-900/50 border-indigo-100 dark:border-indigo-700/50",
-      iconClass: "text-indigo-600 dark:text-indigo-300",
-    },
-    {
-      title: "Places Visited",
-      value: uniqueDestinations,
-      description: "Unique destinations explored",
-      icon: Globe,
-      color: "bg-indigo-50 dark:bg-indigo-900/50 border-indigo-100 dark:border-indigo-700/50",
-      iconClass: "text-indigo-600 dark:text-indigo-300",
-    },
-    {
-      title: "Total Travelers",
-      value: totalTravelers,
-      description: "People in your bookings",
-      icon: Users,
-      color: "bg-indigo-50 dark:bg-indigo-900/50 border-indigo-100 dark:border-indigo-700/50",
-      iconClass: "text-indigo-600 dark:text-indigo-300",
-    },
-  ];
 
   const fullName = profile?.first_name && profile?.last_name 
     ? `${profile.first_name} ${profile.last_name}`
@@ -156,7 +118,6 @@ const Dashboard: React.FC = () => {
 
   const displayName = fullName || profile?.username || user?.email?.split('@')[0] || 'User';
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -179,38 +140,38 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <motion.div 
-        className="space-y-6"
+        className="space-y-6 max-w-7xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Greeting Section with Notification Bell */}
-        <motion.div variants={itemVariants} className="flex justify-between items-center rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-700 dark:to-indigo-900 p-6 text-white shadow-md">
+        {/* Header Section */}
+        <motion.div variants={itemVariants} className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold">Welcome back, {displayName}</h2>
-            <p className="mt-2 text-indigo-100">Discover Zimbabwe's best destinations and events</p>
+            <h1 className="text-3xl font-bold text-indigo-900 dark:text-white mb-2">
+              Welcome back, {displayName}
+            </h1>
+            <p className="text-indigo-600 dark:text-indigo-300">
+              Here's what's happening with your travels today
+            </p>
           </div>
+          
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" className="relative p-2 rounded-full hover:bg-white/10">
-                <Bell className="h-6 w-6 text-white" />
+              <Button variant="outline" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
                     {unreadCount}
                   </span>
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0 border-indigo-100 dark:border-indigo-700" align="end">
-              <div className="flex items-center justify-between p-4 border-b border-indigo-100 dark:border-indigo-700">
+            <PopoverContent className="w-80 max-h-64 overflow-y-auto p-0" align="end">
+              <div className="flex items-center justify-between p-4 border-b">
                 <h3 className="font-medium">Notifications</h3>
                 {unreadCount > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={handleMarkNotificationsRead}
-                    className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100"
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleMarkNotificationsRead}>
                     Mark all read
                   </Button>
                 )}
@@ -220,23 +181,17 @@ const Dashboard: React.FC = () => {
                   No notifications yet
                 </div>
               ) : (
-                <div>
-                  {notifications.map((notification) => (
+                <div className="max-h-48 overflow-y-auto">
+                  {notifications.slice(0, 5).map((notification) => (
                     <div 
                       key={notification.id} 
                       className={cn(
-                        "p-4 border-b border-indigo-100 dark:border-indigo-700 last:border-0 hover:bg-indigo-50 dark:hover:bg-indigo-800/50",
-                        !notification.is_read && "bg-indigo-50 dark:bg-indigo-800/50"
+                        "p-3 border-b last:border-0 hover:bg-muted/50",
+                        !notification.is_read && "bg-blue-50 dark:bg-blue-900/20"
                       )}
                     >
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-medium text-indigo-900 dark:text-white">{notification.title}</h4>
-                        <span className="text-xs text-muted-foreground">
-                          {notification.created_at && 
-                            format(new Date(notification.created_at), 'MMM d, h:mm a')}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <h4 className="font-medium text-sm">{notification.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {notification.description}
                       </p>
                     </div>
@@ -247,335 +202,314 @@ const Dashboard: React.FC = () => {
           </Popover>
         </motion.div>
 
-        {/* Statistics Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statCards.map((card) => (
-            <Card key={card.title} className={cn("dashboard-card shadow-md", card.color)}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-medium">{card.title}</CardTitle>
-                  <div className={cn("rounded-full p-2", card.iconClass.replace("text-", "bg-").replace("600", "100").replace("indigo-300", "indigo-800/20"))}>
-                    <card.icon className={cn("h-5 w-5", card.iconClass)} />
-                  </div>
+        {/* Stats Grid */}
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border-blue-100 dark:border-blue-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600 dark:text-blue-300">Total Bookings</p>
+                  <p className="text-2xl font-bold text-blue-900 dark:text-white">{totalBookings}</p>
                 </div>
-                <CardDescription>{card.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-indigo-900 dark:text-white">{card.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </motion.div>
-
-        {/* My Itineraries Section */}
-        <motion.div variants={itemVariants}>
-          <Card className="dashboard-card border-indigo-100 dark:border-indigo-700 shadow-md">
-            <CardHeader className="pb-0 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-xl text-indigo-900 dark:text-white">My Itineraries</CardTitle>
-                <CardDescription>Your planned travel routes</CardDescription>
+                <Calendar className="h-8 w-8 text-blue-600 dark:text-blue-300" />
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100" 
-                onClick={() => navigate('/itineraries')}
-              >
-                View All <ArrowRight className="h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center gap-4">
-                      <Skeleton className="h-12 w-12 rounded-md bg-indigo-100 dark:bg-indigo-800/50" />
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-4 w-1/3 bg-indigo-100 dark:bg-indigo-800/50" />
-                        <Skeleton className="h-3 w-1/4 bg-indigo-100 dark:bg-indigo-800/50" />
-                      </div>
-                      <Skeleton className="h-8 w-24 rounded-md bg-indigo-100 dark:bg-indigo-800/50" />
-                    </div>
-                  ))}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border-green-100 dark:border-green-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600 dark:text-green-300">Upcoming Trips</p>
+                  <p className="text-2xl font-bold text-green-900 dark:text-white">{upcomingTrips}</p>
                 </div>
-              ) : itineraries.length === 0 ? (
-                <div className="text-center py-8">
-                  <List className="mx-auto h-12 w-12 text-indigo-400 dark:text-indigo-300 mb-2" />
-                  <p className="text-indigo-400 dark:text-indigo-300 mb-4">You don't have any itineraries yet</p>
-                  <Button onClick={() => navigate('/itineraries/create')} className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
-                    Create New Itinerary
-                  </Button>
+                <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/50 dark:to-violet-900/50 border-purple-100 dark:border-purple-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-600 dark:text-purple-300">Places Visited</p>
+                  <p className="text-2xl font-bold text-purple-900 dark:text-white">{uniqueDestinations}</p>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {itineraries.slice(0, 3).map((itinerary) => {
-                    const totalDays = itinerary.destinations.length > 0
-                      ? differenceInDays(
-                          parseISO(itinerary.destinations[itinerary.destinations.length - 1].endDate),
-                          parseISO(itinerary.destinations[0].startDate)
-                        ) + 1
-                      : 0;
-                    
-                    return (
-                      <div 
-                        key={itinerary.id} 
-                        className="flex items-center justify-between p-4 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-800/20 cursor-pointer"
-                        onClick={() => navigate(`/itinerary/${itinerary.id}`)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="bg-indigo-100 dark:bg-indigo-700/50 p-2 rounded-md">
-                            <MapPin className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-indigo-900 dark:text-white">{itinerary.title}</h3>
-                            <p className="text-sm text-indigo-400 dark:text-indigo-300">
-                              {itinerary.destinations.length > 0 ? (
-                                <>
-                                  {itinerary.destinations.length} {itinerary.destinations.length === 1 ? 'destination' : 'destinations'} • {totalDays} {totalDays === 1 ? 'day' : 'days'}
-                                </>
-                              ) : (
-                                'No destinations yet'
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-indigo-400 dark:text-indigo-300" />
-                      </div>
-                    );
-                  })}
-                  
-                  {itineraries.length > 3 && (
-                    <div className="text-center mt-4">
-                      <Button 
-                        variant="outline"
-                        onClick={() => navigate('/itineraries')}
-                        className="border-indigo-200 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-300 dark:hover:text-white dark:hover:bg-indigo-800/50"
-                      >
-                        View All Itineraries
-                      </Button>
-                    </div>
-                  )}
+                <Globe className="h-8 w-8 text-purple-600 dark:text-purple-300" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/50 dark:to-amber-900/50 border-orange-100 dark:border-orange-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-600 dark:text-orange-300">Total Travelers</p>
+                  <p className="text-2xl font-bold text-orange-900 dark:text-white">{totalTravelers}</p>
                 </div>
-              )}
-              
-              {itineraries.length > 0 && itineraries.length <= 3 && (
-                <div className="mt-4 flex justify-center">
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate('/itineraries/create')}
-                    className="border-indigo-200 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-300 dark:hover:text-white dark:hover:bg-indigo-800/50"
-                  >
-                    Create New Itinerary
-                  </Button>
-                </div>
-              )}
+                <Users className="h-8 w-8 text-orange-600 dark:text-orange-300" />
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Recent Bookings Table */}
-        <motion.div variants={itemVariants}>
-          <Card className="dashboard-card border-indigo-100 dark:border-indigo-700 shadow-md">
-            <CardHeader className="pb-0 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-xl text-indigo-900 dark:text-white">Recent Bookings</CardTitle>
-                <CardDescription>Your recent travel activities</CardDescription>
-              </div>
-              {bookings.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="gap-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100" 
-                  onClick={() => navigate('/bookings')}
-                >
-                  View All <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent className="pt-6">
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center gap-4">
-                      <Skeleton className="h-12 w-12 rounded-md bg-indigo-100 dark:bg-indigo-800/50" />
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-4 w-1/3 bg-indigo-100 dark:bg-indigo-800/50" />
-                        <Skeleton className="h-3 w-1/4 bg-indigo-100 dark:bg-indigo-800/50" />
+        {/* Main Content Grid */}
+        <motion.div variants={itemVariants} className="grid lg:grid-cols-3 gap-6">
+          {/* Recent Activity */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Recent Bookings */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">Recent Bookings</CardTitle>
+                    <CardDescription>Your latest travel activities</CardDescription>
+                  </div>
+                  {bookings.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/bookings')}>
+                      <Eye className="h-4 w-4 mr-1" />
+                      View All
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-3 p-3">
+                        <Skeleton className="h-10 w-10 rounded-md" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-2/3" />
+                          <Skeleton className="h-3 w-1/3" />
+                        </div>
+                        <Skeleton className="h-6 w-16 rounded" />
                       </div>
-                      <Skeleton className="h-8 w-24 rounded-md bg-indigo-100 dark:bg-indigo-800/50" />
-                    </div>
-                  ))}
-                </div>
-              ) : bookings.length === 0 ? (
-                <div className="text-center py-8">
-                  <Calendar className="mx-auto h-12 w-12 text-indigo-400 dark:text-indigo-300 mb-2" />
-                  <p className="text-indigo-400 dark:text-indigo-300 mb-4">You don't have any bookings yet</p>
-                  <Button onClick={() => navigate('/destinations')} className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
-                    Explore Destinations
-                  </Button>
-                </div>
-              ) : (
-                <div className="rounded-lg overflow-hidden border border-indigo-100 dark:border-indigo-700/50">
-                  <Table>
-                    <TableHeader className="bg-indigo-50 dark:bg-indigo-800/30">
-                      <TableRow className="hover:bg-indigo-100/50 dark:hover:bg-indigo-800/50">
-                        <TableHead>Booking Date</TableHead>
-                        <TableHead>Destination/Event</TableHead>
-                        <TableHead>People</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {bookings.slice(0, 5).map((booking) => (
-                        <TableRow 
-                          key={booking.id}
-                          className="cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-800/20"
-                          onClick={() => navigate(`/bookings/${booking.id}`)}
-                        >
-                          <TableCell className="text-indigo-700 dark:text-indigo-200">
-                            {booking.booking_date && format(new Date(booking.booking_date), 'MMM d, yyyy')}
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium text-indigo-900 dark:text-white">
+                    ))}
+                  </div>
+                ) : bookings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground mb-4">No bookings yet</p>
+                    <Button onClick={() => navigate('/destinations')} size="sm">
+                      Explore Destinations
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {bookings.slice(0, 4).map((booking) => (
+                      <div 
+                        key={booking.id} 
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => navigate(`/bookings`)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-md">
+                            <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
                               {booking.booking_details?.destinationName || 
                                booking.booking_details?.eventName || 
                                "Booking"}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-indigo-700 dark:text-indigo-200">{booking.number_of_people}</TableCell>
-                          <TableCell>
-                            <span className={cn(
-                              "dashboard-badge",
-                              booking.status === 'confirmed' && "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-                              booking.status === 'pending' && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
-                              booking.status === 'cancelled' && "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
-                              booking.status === 'completed' && "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-300",
-                            )}>
-                              {booking.status && booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-indigo-900 dark:text-white">
-                            ${booking.total_price}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-              
-              {bookings.length > 5 && (
-                <div className="flex justify-center mt-4">
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate('/bookings')}
-                    className="border-indigo-200 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-300 dark:hover:text-white dark:hover:bg-indigo-800/50"
-                  >
-                    View All Bookings
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {booking.booking_date && format(new Date(booking.booking_date), 'MMM d, yyyy')} • {booking.number_of_people} people
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className={cn(
+                            "text-xs px-2 py-1 rounded-full",
+                            booking.status === 'confirmed' && "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300",
+                            booking.status === 'pending' && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300",
+                            booking.status === 'cancelled' && "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300",
+                            booking.status === 'completed' && "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300",
+                          )}>
+                            {booking.status && booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                          </span>
+                          <p className="text-sm font-medium mt-1">${booking.total_price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* My Itineraries */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">My Itineraries</CardTitle>
+                    <CardDescription>Your planned travel routes</CardDescription>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/itineraries')}>
+                    <Eye className="h-4 w-4 mr-1" />
+                    View All
                   </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex items-center gap-3 p-3">
+                        <Skeleton className="h-10 w-10 rounded-md" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-2/3" />
+                          <Skeleton className="h-3 w-1/3" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : itineraries.length === 0 ? (
+                  <div className="text-center py-6">
+                    <List className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground mb-3">No itineraries yet</p>
+                    <Button onClick={() => navigate('/itineraries/create')} size="sm">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Create Itinerary
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {itineraries.slice(0, 3).map((itinerary) => {
+                      const totalDays = itinerary.destinations.length > 0
+                        ? differenceInDays(
+                            parseISO(itinerary.destinations[itinerary.destinations.length - 1].endDate),
+                            parseISO(itinerary.destinations[0].startDate)
+                          ) + 1
+                        : 0;
+                      
+                      return (
+                        <div 
+                          key={itinerary.id} 
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => navigate(`/itinerary/${itinerary.id}`)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-md">
+                              <List className="h-4 w-4 text-purple-600 dark:text-purple-300" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{itinerary.title}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {itinerary.destinations.length} destinations • {totalDays} days
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Quick Links Section */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="dashboard-card shadow-md border-indigo-100 hover:shadow-lg transition-all duration-300 dark:border-indigo-700">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-medium text-indigo-900 dark:text-white">Explore Destinations</CardTitle>
-                <div className="bg-indigo-100 dark:bg-indigo-800/50 text-indigo-600 dark:text-indigo-300 p-2 rounded-full">
-                  <MapPin className="h-5 w-5" />
-                </div>
-              </div>
-              <CardDescription>Find your next adventure</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <p className="text-sm text-indigo-500 dark:text-indigo-300 mb-4">
-                Discover Zimbabwe's most beautiful locations and plan your perfect trip.
-              </p>
-              <Button 
-                onClick={() => navigate('/destinations')} 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white"
-              >
-                View Destinations
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="dashboard-card shadow-md border-indigo-100 hover:shadow-lg transition-all duration-300 dark:border-indigo-700">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-medium text-indigo-900 dark:text-white">Upcoming Events</CardTitle>
-                <div className="bg-indigo-100 dark:bg-indigo-800/50 text-indigo-600 dark:text-indigo-300 p-2 rounded-full">
-                  <CalendarDays className="h-5 w-5" />
-                </div>
-              </div>
-              <CardDescription>Experience local culture</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <p className="text-sm text-indigo-500 dark:text-indigo-300 mb-4">
-                Don't miss out on exciting festivals, exhibitions and cultural events.
-              </p>
-              <Button 
-                onClick={() => navigate('/events')} 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white"
-              >
-                View Events
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="dashboard-card shadow-md border-indigo-100 hover:shadow-lg transition-all duration-300 dark:border-indigo-700">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-medium text-indigo-900 dark:text-white">My Wishlist</CardTitle>
-                <div className="bg-indigo-100 dark:bg-indigo-800/50 text-indigo-600 dark:text-indigo-300 p-2 rounded-full">
-                  <Heart className="h-5 w-5" />
-                </div>
-              </div>
-              <CardDescription>Save for later</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <p className="text-sm text-indigo-500 dark:text-indigo-300 mb-4">
-                Keep track of destinations and events you want to experience in the future.
-              </p>
-              <Button 
-                onClick={() => navigate('/wishlist')} 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white"
-              >
-                View Wishlist
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Featured Section */}
-        <motion.div variants={itemVariants}>
-          <Card className="dashboard-card relative overflow-hidden border-0 shadow-md">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 to-indigo-800/90 dark:from-indigo-700/90 dark:to-indigo-900/90 z-0"></div>
-            <CardContent className="p-6 relative z-10">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="text-white">
-                  <h3 className="text-xl font-bold flex items-center gap-2">
-                    <RefreshCw className="h-5 w-5 animate-spin-slow" /> Featured: Victoria Falls Experience
-                  </h3>
-                  <p className="mt-2 text-indigo-100 max-w-xl">
-                    Experience the majestic Victoria Falls, one of the Seven Natural Wonders of the World.
-                    Book now and get a special 15% discount on guided tours!
-                  </p>
-                </div>
+          {/* Quick Actions Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardDescription>Get started with your next adventure</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-3">
                 <Button 
-                  onClick={() => navigate('/destination/victoria-falls')}
-                  className="bg-white text-indigo-700 hover:bg-white/90 dark:bg-indigo-50 dark:hover:bg-indigo-100 dark:text-indigo-800"
+                  onClick={() => navigate('/destinations')} 
+                  className="w-full justify-start h-auto p-3"
+                  variant="ghost"
                 >
-                  Learn More
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-md">
+                      <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-sm">Explore Destinations</p>
+                      <p className="text-xs text-muted-foreground">Find your next adventure</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 ml-auto" />
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+
+                <Button 
+                  onClick={() => navigate('/events')} 
+                  className="w-full justify-start h-auto p-3"
+                  variant="ghost"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-md">
+                      <CalendarDays className="h-4 w-4 text-green-600 dark:text-green-300" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-sm">Upcoming Events</p>
+                      <p className="text-xs text-muted-foreground">Experience local culture</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 ml-auto" />
+                </Button>
+
+                <Button 
+                  onClick={() => navigate('/wishlist')} 
+                  className="w-full justify-start h-auto p-3"
+                  variant="ghost"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-pink-100 dark:bg-pink-900/50 p-2 rounded-md">
+                      <Heart className="h-4 w-4 text-pink-600 dark:text-pink-300" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-sm">My Wishlist</p>
+                      <p className="text-xs text-muted-foreground">Save for later</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 ml-auto" />
+                </Button>
+
+                <Button 
+                  onClick={() => navigate('/itineraries/create')} 
+                  className="w-full justify-start h-auto p-3"
+                  variant="ghost"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-md">
+                      <Plus className="h-4 w-4 text-purple-600 dark:text-purple-300" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-sm">Plan Itinerary</p>
+                      <p className="text-xs text-muted-foreground">Create your trip</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 ml-auto" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Featured Destination */}
+            <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-bold text-lg">Featured Destination</h3>
+                    <p className="text-indigo-100 text-sm">Victoria Falls Experience</p>
+                  </div>
+                  <p className="text-indigo-100 text-sm leading-relaxed">
+                    Experience the majestic Victoria Falls, one of the Seven Natural Wonders of the World.
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/destination/victoria-falls')}
+                    className="w-full bg-white text-indigo-600 hover:bg-indigo-50"
+                  >
+                    Learn More
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </motion.div>
       </motion.div>
     </DashboardLayout>
