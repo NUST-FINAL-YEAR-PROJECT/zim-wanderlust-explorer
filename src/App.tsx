@@ -14,6 +14,7 @@ import SplashScreen from './components/SplashScreen.tsx'
 import Browse from "./pages/Browse";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Events from "./pages/Events";
 import Destinations from "./pages/Destinations";
 import DestinationDetails from "./pages/DestinationDetails";
@@ -84,6 +85,17 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    
+                    {/* Admin Routes */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute requireAdmin={true}>
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
                     <Route
                       path="/events"
                       element={

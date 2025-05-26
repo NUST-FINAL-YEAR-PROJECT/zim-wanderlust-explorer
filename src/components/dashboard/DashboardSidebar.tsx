@@ -9,7 +9,8 @@ import {
   Settings, 
   Heart,
   HelpCircle,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -18,6 +19,7 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -36,6 +38,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   handleSignOut,
   location
 }) => {
+  const { isAdmin } = useAuth();
+
   const navigationItems = [
     { 
       title: 'Dashboard', 
@@ -80,6 +84,16 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       description: 'Manage your account' 
     },
   ];
+
+  // Add admin dashboard for admin users
+  if (isAdmin) {
+    navigationItems.splice(1, 0, {
+      title: 'Admin Dashboard',
+      path: '/admin',
+      icon: Shield,
+      description: 'Admin management panel'
+    });
+  }
 
   // Animation variants
   const sidebarItemVariants = {
