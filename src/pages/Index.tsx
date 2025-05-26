@@ -11,7 +11,7 @@ import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import AiAssistant from "@/components/AiAssistant";
 import StatsCounter from "@/components/StatsCounter";
-import { ChevronRight } from "lucide-react";
+import { Calendar, CalendarDays, ChevronRight, Compass, Heart, Info, MapPin, Search, Ticket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -19,6 +19,7 @@ import FeaturedSection from "@/components/FeaturedSection";
 import HeroCarousel from "@/components/HeroCarousel";
 import MapExplorer from "@/components/MapExplorer";
 import WhyZimbabwe from "@/components/WhyZimbabwe";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("destinations");
@@ -123,10 +124,76 @@ const Index = () => {
     })
   };
 
+  // Quick action cards
+  const quickActions = [
+    {
+      title: "Find Destinations",
+      description: "Discover amazing places to visit in Zimbabwe",
+      icon: MapPin,
+      color: "from-indigo-500 to-indigo-600",
+      onClick: () => navigate("/destinations")
+    },
+    {
+      title: "Upcoming Events",
+      description: "Check out events happening around you",
+      icon: Calendar,
+      color: "from-purple-500 to-purple-600",
+      onClick: () => navigate("/events")
+    },
+    {
+      title: "Plan Your Trip",
+      description: "Create a custom itinerary for your visit",
+      icon: Compass,
+      color: "from-emerald-500 to-emerald-600",
+      onClick: () => navigate("/itineraries/create")
+    },
+    {
+      title: "Save Favorites",
+      description: "Keep track of places you want to visit",
+      icon: Heart,
+      color: "from-rose-500 to-rose-600",
+      onClick: () => navigate("/wishlist")
+    }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Hero Carousel with enhanced search functionality */}
       <HeroCarousel />
+      
+      {/* Quick Actions Section */}
+      <motion.div
+        className="container mx-auto px-4 py-12 -mt-8 relative z-10"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {quickActions.map((action, i) => (
+            <motion.div
+              key={action.title}
+              custom={i}
+              variants={cardVariants}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
+              onClick={action.onClick}
+              className="cursor-pointer"
+            >
+              <Card className="overflow-hidden border-indigo-100 hover:shadow-xl transition-all duration-300 h-full">
+                <CardHeader className={`bg-gradient-to-r ${action.color} text-white p-4`}>
+                  <div className="rounded-full bg-white/20 w-10 h-10 flex items-center justify-center mb-2">
+                    <action.icon size={20} />
+                  </div>
+                  <CardTitle className="text-lg">{action.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <CardDescription>{action.description}</CardDescription>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
       
       {/* Featured Experiences Section */}
       <FeaturedSection />
@@ -236,6 +303,49 @@ const Index = () => {
               )}
             </TabsContent>
           </Tabs>
+        </div>
+      </motion.div>
+      
+      {/* Travel Categories Section */}
+      <motion.div
+        className="bg-indigo-50/50 dark:bg-indigo-900/30 py-16"
+        initial="hidden"
+        whileInView="visible" 
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-display font-bold text-center text-indigo-900 dark:text-indigo-100 mb-3">Explore by Category</h2>
+          <p className="text-indigo-600/80 dark:text-indigo-300 text-center max-w-2xl mx-auto mb-10">Find the perfect Zimbabwe experience that matches your interests</p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {[
+              { name: "Wildlife Safaris", icon: <img src="/lovable-uploads/1ade5812-07e4-42d2-910d-e4aeb007e0db.png" alt="Wildlife" className="w-10 h-10 object-cover" />, color: "bg-amber-100 dark:bg-amber-900/30" },
+              { name: "Cultural Tours", icon: <img src="/lovable-uploads/4d89aba9-e022-4e41-95ec-7b887bfbd453.png" alt="Culture" className="w-10 h-10 object-cover" />, color: "bg-purple-100 dark:bg-purple-900/30" },
+              { name: "Adventure", icon: <img src="/lovable-uploads/6bfb6348-89bd-42b4-b8ea-b77d0d3bb6c8.png" alt="Adventure" className="w-10 h-10 object-cover" />, color: "bg-emerald-100 dark:bg-emerald-900/30" },
+              { name: "Festivals", icon: <Ticket className="w-10 h-10 text-rose-500" />, color: "bg-rose-100 dark:bg-rose-900/30" },
+              { name: "Historical Sites", icon: <Info className="w-10 h-10 text-blue-500" />, color: "bg-blue-100 dark:bg-blue-900/30" },
+              { name: "Nature Reserves", icon: <MapPin className="w-10 h-10 text-green-500" />, color: "bg-green-100 dark:bg-green-900/30" },
+              { name: "Photography Tours", icon: <Search className="w-10 h-10 text-indigo-500" />, color: "bg-indigo-100 dark:bg-indigo-900/30" },
+              { name: "Seasonal Events", icon: <CalendarDays className="w-10 h-10 text-orange-500" />, color: "bg-orange-100 dark:bg-orange-900/30" },
+            ].map((category, i) => (
+              <motion.div
+                key={category.name}
+                custom={i}
+                variants={cardVariants}
+                whileHover={{ y: -5, scale: 1.03, transition: { duration: 0.2 } }}
+                className="cursor-pointer"
+                onClick={() => navigate(`/browse?category=${encodeURIComponent(category.name)}`)}
+              >
+                <div className={`${category.color} rounded-xl p-4 h-full flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all duration-300`}>
+                  <div className="mb-3 flex items-center justify-center">
+                    {category.icon}
+                  </div>
+                  <h3 className="font-medium text-indigo-900 dark:text-indigo-100">{category.name}</h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </motion.div>
       

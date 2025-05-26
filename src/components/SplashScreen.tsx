@@ -36,30 +36,77 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
     };
   }, [duration, onComplete]);
 
+  // Animation variants
+  const containerVariants = {
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.8, ease: "easeInOut" }
+    }
+  };
+
+  const logoVariants = {
+    initial: { scale: 0.8, opacity: 0 },
+    animate: { 
+      scale: 1, 
+      opacity: 1,
+      transition: { duration: 0.7, ease: "easeOut" }
+    }
+  };
+
+  const titleVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, delay: 0.3 } 
+    }
+  };
+
+  const subtitleVariants = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1,
+      transition: { duration: 0.5, delay: 0.5 } 
+    }
+  };
+
+  const progressVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, delay: 0.7 } 
+    }
+  };
+
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-700 dark:from-indigo-950 dark:to-indigo-800"
+          variants={containerVariants}
+          exit="exit"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 dark:from-blue-700 dark:to-indigo-800"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
             className="text-center px-6 max-w-lg"
           >
             {children || (
               <>
                 <motion.div
                   className="mb-8"
-                  animate={{ y: [0, -10, 0] }}
+                  variants={logoVariants}
+                  initial="initial"
+                  animate="animate"
+                  // Fixed: Combined the floating animation with the variants animate
+                  whileInView={{ 
+                    y: [0, -10, 0]
+                  }}
                   transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut" 
+                    y: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut" 
+                    }
                   }}
                 >
                   <div className="flex items-center justify-center mb-6">
@@ -73,20 +120,25 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                         repeat: Infinity,
                         ease: "easeInOut" 
                       }}
-                      className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-indigo-900/30"
+                      className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-blue-900/30"
                     >
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-700 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
                         <MapPin size={32} className="text-white" />
                       </div>
                     </motion.div>
                   </div>
-                  <h1 className="text-5xl md:text-7xl font-display font-bold text-white drop-shadow-md">
+                  <motion.h1 
+                    variants={titleVariants}
+                    initial="initial"
+                    animate="animate"
+                    className="text-5xl md:text-7xl font-display font-bold text-white drop-shadow-md"
+                  >
                     ExploreZim
-                  </h1>
+                  </motion.h1>
                   <motion.p 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
+                    variants={subtitleVariants}
+                    initial="initial"
+                    animate="animate"
                     className="text-xl text-white/90 mt-4"
                   >
                     Discover the Beauty of Zimbabwe
@@ -94,18 +146,17 @@ const SplashScreen = ({ duration = 2000, onComplete, children }: SplashScreenPro
                 </motion.div>
 
                 <motion.div 
+                  variants={progressVariants}
+                  initial="initial"
+                  animate="animate"
                   className="w-full max-w-md mx-auto mb-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
                 >
-                  <Progress 
-                    value={progress} 
-                    className={cn(
-                      "h-2 rounded-full overflow-hidden bg-white/10",
-                      "before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-indigo-400 before:to-indigo-600"
-                    )} 
-                  />
+                  <div className="relative h-2 rounded-full overflow-hidden bg-white/10">
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-blue-300 to-indigo-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
                   <p className="text-white/60 text-sm mt-2">Loading experience...</p>
                 </motion.div>
               </>
