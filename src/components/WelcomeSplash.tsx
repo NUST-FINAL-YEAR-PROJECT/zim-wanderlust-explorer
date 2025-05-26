@@ -65,7 +65,7 @@ const WelcomeSplash = ({ duration = 2500, onComplete }: WelcomeSplashProps) => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-800"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 to-indigo-700 dark:from-indigo-950 dark:to-indigo-800"
         >
           <motion.div 
             className="text-center px-6 max-w-2xl"
@@ -99,7 +99,7 @@ const WelcomeSplash = ({ duration = 2500, onComplete }: WelcomeSplashProps) => {
                     repeat: Infinity,
                     ease: "easeInOut" 
                   }}
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center"
+                  className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center"
                 >
                   <MapPin size={24} className="text-white" />
                 </motion.div>
@@ -122,7 +122,7 @@ const WelcomeSplash = ({ duration = 2500, onComplete }: WelcomeSplashProps) => {
             <motion.div variants={itemVariants} className="w-full max-w-md mx-auto">
               <Progress 
                 value={progress} 
-                className="h-2 bg-white/10 overflow-hidden rounded-full before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-300 before:to-indigo-500" 
+                className="h-2 bg-white/10 overflow-hidden rounded-full before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-indigo-400 before:to-indigo-600" 
               />
               <p className="text-white/60 text-sm mt-2">Preparing your experience...</p>
             </motion.div>

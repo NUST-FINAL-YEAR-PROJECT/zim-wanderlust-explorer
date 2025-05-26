@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserBookings, cancelBooking } from '@/models/Booking';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -92,154 +94,156 @@ const Bookings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-2xl font-bold">My Bookings</h1>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => navigate('/destinations')}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
-          >
-            Browse Destinations
-          </Button>
-          <Button 
-            onClick={() => navigate('/events')}
-            variant="outline"
-          >
-            Browse Events
-          </Button>
-        </div>
-      </div>
-
-      <Card className="dashboard-card">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-1 block">Search</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <Input
-                  placeholder="Search by name, location or booking ID..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="w-full md:w-48">
-              <label className="text-sm font-medium mb-1 block">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="upcoming" className="w-full">
-        <TabsList className="mb-4 w-full justify-start">
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="past">Past</TabsTrigger>
-          <TabsTrigger value="all">All Bookings</TabsTrigger>
-        </TabsList>
-        
-        {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <Card key={i} className="dashboard-card">
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    <Skeleton className="h-16 w-16 rounded-md" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-5 w-1/3" />
-                      <Skeleton className="h-4 w-1/4" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </div>
-                    <Skeleton className="h-10 w-24" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <>
-            <TabsContent value="upcoming">
-              <BookingTable 
-                bookings={filteredBookings.filter(b => 
-                  new Date(b.preferred_date || '') > new Date() && 
-                  (b.status === 'pending' || b.status === 'confirmed')
-                )}
-                navigate={navigate}
-                onCancelBooking={setSelectedBookingId}
-              />
-            </TabsContent>
-            
-            <TabsContent value="past">
-              <BookingTable 
-                bookings={filteredBookings.filter(b => 
-                  new Date(b.preferred_date || '') < new Date() || 
-                  (b.status === 'completed' || b.status === 'cancelled')
-                )}
-                navigate={navigate}
-                onCancelBooking={setSelectedBookingId}
-              />
-            </TabsContent>
-            
-            <TabsContent value="all">
-              <BookingTable 
-                bookings={filteredBookings}
-                navigate={navigate}
-                onCancelBooking={setSelectedBookingId}
-              />
-            </TabsContent>
-          </>
-        )}
-      </Tabs>
-      
-      <Dialog 
-        open={!!selectedBookingId} 
-        onOpenChange={(open) => !open && setSelectedBookingId(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cancel Booking</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to cancel this booking? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <label className="text-sm font-medium mb-1 block">Reason for cancellation</label>
-            <Textarea 
-              placeholder="Please provide a reason for cancellation" 
-              value={cancellationReason}
-              onChange={(e) => setCancellationReason(e.target.value)}
-              className="mt-2"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedBookingId(null)}>
-              Cancel
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <h1 className="text-2xl font-bold">My Bookings</h1>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/destinations')}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Browse Destinations
             </Button>
             <Button 
-              variant="destructive" 
-              onClick={handleCancelBooking}
-              disabled={cancelMutation.isPending || !cancellationReason.trim()}
+              onClick={() => navigate('/events')}
+              variant="outline"
             >
-              {cancelMutation.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
+              Browse Events
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </div>
+        </div>
+
+        <Card className="dashboard-card">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-1 block">Search</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <Input
+                    placeholder="Search by name, location or booking ID..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="w-full md:w-48">
+                <label className="text-sm font-medium mb-1 block">Status</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="upcoming" className="w-full">
+          <TabsList className="mb-4 w-full justify-start">
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="past">Past</TabsTrigger>
+            <TabsTrigger value="all">All Bookings</TabsTrigger>
+          </TabsList>
+          
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <Card key={i} className="dashboard-card">
+                  <CardContent className="p-6">
+                    <div className="flex gap-4">
+                      <Skeleton className="h-16 w-16 rounded-md" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-5 w-1/3" />
+                        <Skeleton className="h-4 w-1/4" />
+                        <Skeleton className="h-4 w-2/3" />
+                      </div>
+                      <Skeleton className="h-10 w-24" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <>
+              <TabsContent value="upcoming">
+                <BookingTable 
+                  bookings={filteredBookings.filter(b => 
+                    new Date(b.preferred_date || '') > new Date() && 
+                    (b.status === 'pending' || b.status === 'confirmed')
+                  )}
+                  navigate={navigate}
+                  onCancelBooking={setSelectedBookingId}
+                />
+              </TabsContent>
+              
+              <TabsContent value="past">
+                <BookingTable 
+                  bookings={filteredBookings.filter(b => 
+                    new Date(b.preferred_date || '') < new Date() || 
+                    (b.status === 'completed' || b.status === 'cancelled')
+                  )}
+                  navigate={navigate}
+                  onCancelBooking={setSelectedBookingId}
+                />
+              </TabsContent>
+              
+              <TabsContent value="all">
+                <BookingTable 
+                  bookings={filteredBookings}
+                  navigate={navigate}
+                  onCancelBooking={setSelectedBookingId}
+                />
+              </TabsContent>
+            </>
+          )}
+        </Tabs>
+        
+        <Dialog 
+          open={!!selectedBookingId} 
+          onOpenChange={(open) => !open && setSelectedBookingId(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cancel Booking</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to cancel this booking? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <label className="text-sm font-medium mb-1 block">Reason for cancellation</label>
+              <Textarea 
+                placeholder="Please provide a reason for cancellation" 
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedBookingId(null)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleCancelBooking}
+                disabled={cancelMutation.isPending || !cancellationReason.trim()}
+              >
+                {cancelMutation.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
   );
 };
 
