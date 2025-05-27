@@ -1,464 +1,458 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Event, getEvents, addEvent, updateEvent, deleteEvent, EventInput } from '@/models/Event';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Edit, Trash2, Plus, Save, Copy } from 'lucide-react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Event, getEvents, addEvent, updateEvent, deleteEvent } from '@/models/Event';
+import { Plus, Edit, Trash2, Calendar, MapPin, DollarSign, Clock, Search, Filter } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-
-// Define the ticket type structure
-const ticketTypeSchema = z.object({
-  name: z.string().min(1, "Ticket name is required"),
-  price: z.coerce.number().min(0, "Price must be a positive number"),
-  quantity: z.coerce.number().int().min(0, "Quantity must be a positive integer"),
-  description: z.string().optional(),
-});
-
-type TicketType = z.infer<typeof ticketTypeSchema>;
-
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
-  }),
-  location: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
-  price: z.coerce.number().min(0).optional().nullable(),
-  start_date: z.string().optional().nullable(),
-  end_date: z.string().optional().nullable(),
-  image_url: z.string().url().optional().nullable(),
-  event_type: z.string().optional().nullable(),
-  program_type: z.string().optional().nullable(),
-  program_name: z.string().optional().nullable(),
-  program_url: z.string().url().optional().nullable(),
-  payment_url: z.string().url().optional().nullable(),
-  ticket_types: z.array(ticketTypeSchema).optional().nullable(),
-});
-
-type EventFormValues = z.infer<typeof formSchema>;
 
 const EventsManagement: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
-  const [addingTicket, setAddingTicket] = useState(false);
-  const [currentTicket, setCurrentTicket] = useState<TicketType | null>(null);
-  const [editingTicketIndex, setEditingTicketIndex] = useState<number | null>(null);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    location: '',
+    start_date: '',
+    end_date: '',
+    price: 0,
+    image_url: '',
+    event_type: '',
+    program_type: '',
+    program_name: '',
+  });
   const { toast } = useToast();
-
-  const form = useForm<EventFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      location: "",
-      description: "",
-      price: 0,
-      start_date: new Date().toISOString().split('T')[0],
-      end_date: new Date().toISOString().split('T')[0],
-      image_url: "",
-      event_type: "",
-      program_type: "",
-      program_name: "",
-      program_url: "",
-      payment_url: "",
-      ticket_types: [],
-    },
-  });
-
-  const editForm = useForm<EventFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      location: "",
-      description: "",
-      price: 0,
-      start_date: new Date().toISOString().split('T')[0],
-      end_date: new Date().toISOString().split('T')[0],
-      image_url: "",
-      event_type: "",
-      program_type: "",
-      program_name: "",
-      program_url: "",
-      payment_url: "",
-      ticket_types: [],
-    },
-  });
-
-  const ticketForm = useForm<TicketType>({
-    resolver: zodResolver(ticketTypeSchema),
-    defaultValues: {
-      name: "",
-      price: 0,
-      quantity: 0,
-      description: "",
-    }
-  });
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    if (selectedEvent && isEditDialogOpen) {
-      let currentTickets: TicketType[] = [];
-      
-      if (selectedEvent.ticket_types && Array.isArray(selectedEvent.ticket_types)) {
-        currentTickets = selectedEvent.ticket_types;
-      } else if (selectedEvent.ticket_types && typeof selectedEvent.ticket_types === 'object') {
-        currentTickets = Object.entries(selectedEvent.ticket_types).map(([name, details]) => ({
-          name,
-          ...details,
-        }));
-      }
-      
-      setTicketTypes(currentTickets);
-      
-      editForm.reset({
-        title: selectedEvent.title,
-        location: selectedEvent.location || "",
-        description: selectedEvent.description || "",
-        price: selectedEvent.price || 0,
-        start_date: selectedEvent.start_date ? selectedEvent.start_date.split('T')[0] : new Date().toISOString().split('T')[0],
-        end_date: selectedEvent.end_date ? selectedEvent.end_date.split('T')[0] : new Date().toISOString().split('T')[0],
-        image_url: selectedEvent.image_url || "",
-        event_type: selectedEvent.event_type || "",
-        program_type: selectedEvent.program_type || "",
-        program_name: selectedEvent.program_name || "",
-        program_url: selectedEvent.program_url || "",
-        payment_url: selectedEvent.payment_url || "",
-        ticket_types: currentTickets,
-      });
-    }
-  }, [selectedEvent, isEditDialogOpen, editForm]);
-
-  useEffect(() => {
-    // Update the main form's ticket_types field when ticketTypes state changes
-    if (isAddDialogOpen) {
-      form.setValue('ticket_types', ticketTypes);
-    } else if (isEditDialogOpen) {
-      editForm.setValue('ticket_types', ticketTypes);
-    }
-  }, [ticketTypes, isAddDialogOpen, isEditDialogOpen, form, editForm]);
-
   const fetchEvents = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const data = await getEvents();
       setEvents(data);
     } catch (error) {
+      console.error('Error fetching events:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to fetch events',
         variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load events.',
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleAddEvent = async (data: EventFormValues) => {
+  const handleCreateEvent = async () => {
     try {
-      // Create an event object that matches the required structure
-      const newEvent: Omit<Event, 'id' | 'created_at' | 'updated_at'> = {
-        title: data.title,
-        description: data.description,
-        location: data.location,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        price: data.price,
-        ticket_types: data.ticket_types,
-        image_url: data.image_url,
-        event_type: data.event_type,
-        program_type: data.program_type,
-        program_name: data.program_name,
-        program_url: data.program_url,
-        payment_url: data.payment_url
-      };
-      
       await addEvent(newEvent);
       toast({
         title: 'Success',
-        description: 'Event added successfully',
+        description: 'Event created successfully.',
       });
-      setIsAddDialogOpen(false);
-      setTicketTypes([]);
-      form.reset();
+      setIsCreateDialogOpen(false);
+      setNewEvent({
+        title: '',
+        description: '',
+        location: '',
+        start_date: '',
+        end_date: '',
+        price: 0,
+        image_url: '',
+        event_type: '',
+        program_type: '',
+        program_name: '',
+      });
       fetchEvents();
     } catch (error) {
+      console.error('Error creating event:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to add event',
         variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to create event.',
       });
     }
   };
 
-  const handleEditEvent = (event: Event) => {
-    setSelectedEvent(event);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSaveEvent = async (data: EventFormValues) => {
+  const handleEditEvent = async () => {
     if (!selectedEvent) return;
     
     try {
-      // Create an updates object that matches the required structure
-      const updates: Partial<EventInput> = {
-        title: data.title,
-        description: data.description,
-        location: data.location,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        price: data.price,
-        ticket_types: data.ticket_types,
-        image_url: data.image_url,
-        event_type: data.event_type,
-        program_type: data.program_type,
-        program_name: data.program_name,
-        program_url: data.program_url,
-        payment_url: data.payment_url
-      };
-      
-      await updateEvent(selectedEvent.id, updates);
+      await updateEvent(selectedEvent.id, selectedEvent);
       toast({
         title: 'Success',
-        description: 'Event updated successfully',
+        description: 'Event updated successfully.',
       });
       setIsEditDialogOpen(false);
-      setTicketTypes([]);
+      setSelectedEvent(null);
       fetchEvents();
     } catch (error) {
       console.error('Error updating event:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update event',
         variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to update event.',
       });
     }
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    setIsDeleting(true);
+  const handleDeleteEvent = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    
     try {
-      await deleteEvent(eventId);
+      await deleteEvent(id);
       toast({
         title: 'Success',
-        description: 'Event deleted successfully',
+        description: 'Event deleted successfully.',
       });
       fetchEvents();
     } catch (error) {
+      console.error('Error deleting event:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete event',
         variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete event.',
       });
-    } finally {
-      setIsDeleting(false);
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    try {
-      return format(new Date(dateString), 'MMM dd, yyyy');
-    } catch (error) {
-      return 'Invalid date';
-    }
-  };
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'all' || event.event_type === filterType;
+    return matchesSearch && matchesType;
+  });
 
-  const handleAddTicketType = () => {
-    const result = ticketForm.handleSubmit((data) => {
-      if (editingTicketIndex !== null) {
-        // Update existing ticket
-        const updatedTickets = [...ticketTypes];
-        updatedTickets[editingTicketIndex] = data;
-        setTicketTypes(updatedTickets);
-        setEditingTicketIndex(null);
-      } else {
-        // Add new ticket
-        setTicketTypes([...ticketTypes, data]);
-      }
-      
-      ticketForm.reset({
-        name: "",
-        price: 0,
-        quantity: 0,
-        description: "",
-      });
-      
-      setAddingTicket(false);
-      setCurrentTicket(null);
-    })();
-  };
+  const eventTypes = ['all', 'festival', 'conference', 'workshop', 'concert', 'cultural'];
 
-  const handleEditTicket = (ticket: TicketType, index: number) => {
-    setCurrentTicket(ticket);
-    setEditingTicketIndex(index);
-    setAddingTicket(true);
-    
-    ticketForm.reset({
-      name: ticket.name,
-      price: ticket.price,
-      quantity: ticket.quantity,
-      description: ticket.description || "",
-    });
-  };
+  const getEventStatus = (event: Event) => {
+    const now = new Date();
+    const startDate = event.start_date ? new Date(event.start_date) : null;
+    const endDate = event.end_date ? new Date(event.end_date) : null;
 
-  const handleRemoveTicket = (index: number) => {
-    const newTicketTypes = ticketTypes.filter((_, i) => i !== index);
-    setTicketTypes(newTicketTypes);
-  };
-
-  const formFields = [
-    { name: 'title', label: 'Title', type: 'text', required: true, gridSpan: false },
-    { name: 'location', label: 'Location', type: 'text', gridSpan: false },
-    { name: 'description', label: 'Description', type: 'textarea', gridSpan: true },
-    { name: 'price', label: 'Base Price', type: 'number', gridSpan: false },
-    { name: 'start_date', label: 'Start Date', type: 'date', gridSpan: false },
-    { name: 'end_date', label: 'End Date', type: 'date', gridSpan: false },
-    { name: 'image_url', label: 'Image URL', type: 'text', gridSpan: true },
-    { name: 'event_type', label: 'Event Type', type: 'text', gridSpan: false },
-    { name: 'program_type', label: 'Program Type', type: 'text', gridSpan: false },
-    { name: 'program_name', label: 'Program Name', type: 'text', gridSpan: false },
-    { name: 'program_url', label: 'Program URL', type: 'text', gridSpan: false },
-    { name: 'payment_url', label: 'Payment URL', type: 'text', gridSpan: true },
-  ];
-
-  const renderFormField = (field: any, formInstance: any) => {
-    return (
-      <FormField
-        key={field.name}
-        control={formInstance.control}
-        name={field.name}
-        render={({ field: fieldProps }) => (
-          <FormItem className={field.gridSpan ? "col-span-2" : ""}>
-            <FormLabel>{field.label}{field.required && ' *'}</FormLabel>
-            <FormControl>
-              {field.type === 'textarea' ? (
-                <Textarea 
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                  {...fieldProps}
-                  className={field.name === 'description' ? "min-h-[100px]" : ""}
-                />
-              ) : (
-                <Input 
-                  placeholder={`Enter ${field.label.toLowerCase()}`} 
-                  type={field.type}
-                  step={field.type === 'number' ? "0.01" : undefined}
-                  {...fieldProps} 
-                />
-              )}
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
+    if (!startDate) return { status: 'draft', color: 'bg-gray-500' };
+    if (now < startDate) return { status: 'upcoming', color: 'bg-blue-500' };
+    if (endDate && now > endDate) return { status: 'completed', color: 'bg-green-500' };
+    return { status: 'ongoing', color: 'bg-orange-500' };
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <Card className="shadow-lg">
-        <CardHeader className="bg-gray-50 border-b flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl">Event Management</CardTitle>
-            <CardDescription>Add, edit, and remove events</CardDescription>
+    <div className="space-y-6">
+      {/* Header Actions */}
+      <Card className="border-0 shadow-md bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                Events Management
+              </CardTitle>
+              <CardDescription className="text-orange-700 dark:text-orange-300">
+                Manage events, festivals, and activities
+              </CardDescription>
+            </div>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Event
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create New Event</DialogTitle>
+                  <DialogDescription>
+                    Fill in the details to create a new event.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={newEvent.title}
+                        onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                        placeholder="Event title"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        value={newEvent.location}
+                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                        placeholder="Event location"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={newEvent.description}
+                      onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                      placeholder="Event description"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="start_date">Start Date</Label>
+                      <Input
+                        id="start_date"
+                        type="datetime-local"
+                        value={newEvent.start_date}
+                        onChange={(e) => setNewEvent({...newEvent, start_date: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="end_date">End Date</Label>
+                      <Input
+                        id="end_date"
+                        type="datetime-local"
+                        value={newEvent.end_date}
+                        onChange={(e) => setNewEvent({...newEvent, end_date: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="price">Price (USD)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        value={newEvent.price}
+                        onChange={(e) => setNewEvent({...newEvent, price: Number(e.target.value)})}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="event_type">Event Type</Label>
+                      <Select
+                        value={newEvent.event_type}
+                        onValueChange={(value) => setNewEvent({...newEvent, event_type: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="festival">Festival</SelectItem>
+                          <SelectItem value="conference">Conference</SelectItem>
+                          <SelectItem value="workshop">Workshop</SelectItem>
+                          <SelectItem value="concert">Concert</SelectItem>
+                          <SelectItem value="cultural">Cultural</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="image_url">Image URL</Label>
+                    <Input
+                      id="image_url"
+                      value={newEvent.image_url}
+                      onChange={(e) => setNewEvent({...newEvent, image_url: e.target.value})}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateEvent} className="bg-gradient-to-r from-orange-600 to-amber-600">
+                    Create Event
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
-          <Button onClick={() => setIsAddDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Event
-          </Button>
         </CardHeader>
+      </Card>
+
+      {/* Search and Filter */}
+      <Card className="border-0 shadow-md">
         <CardContent className="p-6">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Input
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-slate-400" />
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {eventTypes.map(type => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Events Table */}
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="py-12 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+              <p className="mt-2 text-slate-600">Loading events...</p>
+            </div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="py-12 text-center">
+              <Calendar className="mx-auto h-12 w-12 text-slate-400" />
+              <p className="mt-2 text-slate-600">No events found.</p>
             </div>
           ) : (
-            <div className="border rounded-md overflow-x-auto">
+            <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-gray-50">
-                  <TableRow>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader>
+                  <TableRow className="border-b border-slate-200 dark:border-slate-800">
+                    <TableHead className="font-semibold">Event</TableHead>
+                    <TableHead className="font-semibold">Date & Time</TableHead>
+                    <TableHead className="font-semibold">Location</TableHead>
+                    <TableHead className="font-semibold">Price</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {events.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                        No events found. Click "Add Event" to create one.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    events.map((event) => (
-                      <TableRow key={event.id} className="hover:bg-gray-50">
+                  {filteredEvents.map((event) => {
+                    const eventStatus = getEventStatus(event);
+                    return (
+                      <motion.tr
+                        key={event.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      >
                         <TableCell>
-                          <div className="h-12 w-12 rounded bg-gray-100 flex items-center justify-center overflow-hidden">
-                            {event.image_url ? (
-                              <img 
-                                src={event.image_url} 
+                          <div className="flex items-center space-x-3">
+                            {event.image_url && (
+                              <img
+                                src={event.image_url}
                                 alt={event.title}
-                                className="h-full w-full object-cover"
+                                className="h-12 w-12 rounded-lg object-cover shadow-md"
                               />
-                            ) : (
-                              <span className="text-gray-400 text-xs">No image</span>
+                            )}
+                            <div>
+                              <div className="font-medium text-slate-900 dark:text-white">
+                                {event.title}
+                              </div>
+                              {event.event_type && (
+                                <Badge variant="secondary" className="text-xs mt-1">
+                                  {event.event_type}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {event.start_date && (
+                              <div className="flex items-center text-slate-600 dark:text-slate-300 text-sm">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {format(new Date(event.start_date), 'MMM dd, yyyy')}
+                              </div>
+                            )}
+                            {event.start_date && (
+                              <div className="flex items-center text-slate-500 dark:text-slate-400 text-xs">
+                                <Clock className="h-3 w-3 mr-1" />
+                                {format(new Date(event.start_date), 'HH:mm')}
+                              </div>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">{event.title}</TableCell>
-                        <TableCell>{event.location || 'N/A'}</TableCell>
                         <TableCell>
-                          {formatDate(event.start_date)}
-                          {event.end_date ? ` - ${formatDate(event.end_date)}` : ''}
+                          <div className="flex items-center text-slate-600 dark:text-slate-300">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            {event.location || 'TBD'}
+                          </div>
                         </TableCell>
-                        <TableCell>{event.price ? `$${event.price.toFixed(2)}` : 'N/A'}</TableCell>
                         <TableCell>
-                          <div className="flex space-x-2 justify-end">
-                            <Button 
+                          <div className="flex items-center text-orange-600 font-semibold">
+                            <DollarSign className="h-4 w-4 mr-1" />
+                            {event.price || 'Free'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${eventStatus.color} text-white`}>
+                            {eventStatus.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Button
                               variant="outline"
                               size="icon"
-                              className="hover:bg-gray-100"
-                              onClick={() => handleEditEvent(event)}
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setSelectedEvent(event);
+                                setIsEditDialogOpen(true);
+                              }}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
+                            <Button
                               variant="outline"
                               size="icon"
-                              className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                               onClick={() => handleDeleteEvent(event.id)}
-                              disabled={isDeleting}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                      </motion.tr>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -466,361 +460,103 @@ const EventsManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Add Event Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Event</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new event.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleAddEvent)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {formFields.map(field => renderFormField(field, form))}
-                </div>
-                
-                <div className="border p-4 rounded-md bg-gray-50">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Ticket Types</h3>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center"
-                      onClick={() => {
-                        setAddingTicket(true);
-                        setCurrentTicket(null);
-                        setEditingTicketIndex(null);
-                        ticketForm.reset();
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Add Ticket
-                    </Button>
-                  </div>
-                  
-                  {addingTicket ? (
-                    <div className="border rounded-md p-4 mb-4 bg-white">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <FormField
-                          control={ticketForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Ticket Name *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g. General Admission" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={ticketForm.control}
-                          name="price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Price *</FormLabel>
-                              <FormControl>
-                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={ticketForm.control}
-                          name="quantity"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Available Quantity *</FormLabel>
-                              <FormControl>
-                                <Input type="number" placeholder="0" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={ticketForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ticket description" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => {
-                            setAddingTicket(false);
-                            setCurrentTicket(null);
-                            setEditingTicketIndex(null);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="button" 
-                          onClick={handleAddTicketType}
-                        >
-                          {editingTicketIndex !== null ? 'Update Ticket' : 'Add Ticket'}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                  
-                  {ticketTypes.length > 0 ? (
-                    <div className="border rounded-md overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-100">
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Quantity</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {ticketTypes.map((ticket, index) => (
-                            <TableRow key={index} className="bg-white">
-                              <TableCell className="font-medium">{ticket.name}</TableCell>
-                              <TableCell>${ticket.price.toFixed(2)}</TableCell>
-                              <TableCell>{ticket.quantity}</TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2 justify-end">
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => handleEditTicket(ticket, index)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => handleRemoveTicket(index)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500 bg-white rounded-md border">
-                      No ticket types added. Click "Add Ticket" to create one.
-                    </div>
-                  )}
-                </div>
-                
-                <DialogFooter>
-                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Event
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Event Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Event</DialogTitle>
             <DialogDescription>
-              Update the event details.
+              Update the event information.
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="mt-4">
-            <Form {...editForm}>
-              <form onSubmit={editForm.handleSubmit(handleSaveEvent)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {formFields.map(field => renderFormField(field, editForm))}
+          {selectedEvent && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-title">Title</Label>
+                  <Input
+                    id="edit-title"
+                    value={selectedEvent.title}
+                    onChange={(e) => setSelectedEvent({...selectedEvent, title: e.target.value})}
+                  />
                 </div>
-                
-                <div className="border p-4 rounded-md bg-gray-50">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Ticket Types</h3>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="flex items-center"
-                      onClick={() => {
-                        setAddingTicket(true);
-                        setCurrentTicket(null);
-                        setEditingTicketIndex(null);
-                        ticketForm.reset();
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Add Ticket
-                    </Button>
-                  </div>
-                  
-                  {addingTicket ? (
-                    <div className="border rounded-md p-4 mb-4 bg-white">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <FormField
-                          control={ticketForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Ticket Name *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g. General Admission" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={ticketForm.control}
-                          name="price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Price *</FormLabel>
-                              <FormControl>
-                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={ticketForm.control}
-                          name="quantity"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Quantity *</FormLabel>
-                              <FormControl>
-                                <Input type="number" placeholder="0" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={ticketForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ticket description" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => {
-                            setAddingTicket(false);
-                            setCurrentTicket(null);
-                            setEditingTicketIndex(null);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="button" 
-                          onClick={handleAddTicketType}
-                        >
-                          {editingTicketIndex !== null ? 'Update Ticket' : 'Add Ticket'}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                  
-                  {ticketTypes.length > 0 ? (
-                    <div className="border rounded-md overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-100">
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Quantity</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {ticketTypes.map((ticket, index) => (
-                            <TableRow key={index} className="bg-white">
-                              <TableCell className="font-medium">{ticket.name}</TableCell>
-                              <TableCell>${ticket.price.toFixed(2)}</TableCell>
-                              <TableCell>{ticket.quantity}</TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2 justify-end">
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => handleEditTicket(ticket, index)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => handleRemoveTicket(index)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500 bg-white rounded-md border">
-                      No ticket types added. Click "Add Ticket" to create one.
-                    </div>
-                  )}
+                <div>
+                  <Label htmlFor="edit-location">Location</Label>
+                  <Input
+                    id="edit-location"
+                    value={selectedEvent.location || ''}
+                    onChange={(e) => setSelectedEvent({...selectedEvent, location: e.target.value})}
+                  />
                 </div>
-                
-                <DialogFooter>
-                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={selectedEvent.description || ''}
+                  onChange={(e) => setSelectedEvent({...selectedEvent, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-start">Start Date</Label>
+                  <Input
+                    id="edit-start"
+                    type="datetime-local"
+                    value={selectedEvent.start_date ? selectedEvent.start_date.slice(0, 16) : ''}
+                    onChange={(e) => setSelectedEvent({...selectedEvent, start_date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-end">End Date</Label>
+                  <Input
+                    id="edit-end"
+                    type="datetime-local"
+                    value={selectedEvent.end_date ? selectedEvent.end_date.slice(0, 16) : ''}
+                    onChange={(e) => setSelectedEvent({...selectedEvent, end_date: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-price">Price (USD)</Label>
+                  <Input
+                    id="edit-price"
+                    type="number"
+                    value={selectedEvent.price || 0}
+                    onChange={(e) => setSelectedEvent({...selectedEvent, price: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-type">Event Type</Label>
+                  <Select
+                    value={selectedEvent.event_type || ''}
+                    onValueChange={(value) => setSelectedEvent({...selectedEvent, event_type: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="festival">Festival</SelectItem>
+                      <SelectItem value="conference">Conference</SelectItem>
+                      <SelectItem value="workshop">Workshop</SelectItem>
+                      <SelectItem value="concert">Concert</SelectItem>
+                      <SelectItem value="cultural">Cultural</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditEvent} className="bg-gradient-to-r from-orange-600 to-amber-600">
+              Save Changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

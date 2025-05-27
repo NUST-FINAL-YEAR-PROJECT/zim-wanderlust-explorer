@@ -18,15 +18,15 @@ import {
   Settings, 
   Home,
   Shield,
-  Menu
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/models/Auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const AdminDashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('analytics');
@@ -36,11 +36,41 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const adminNavItems = [
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, description: 'View system analytics and metrics' },
-    { id: 'users', label: 'Users', icon: Users, description: 'Manage user accounts and permissions' },
-    { id: 'destinations', label: 'Destinations', icon: MapPin, description: 'Manage travel destinations' },
-    { id: 'events', label: 'Events', icon: Calendar, description: 'Manage events and activities' },
-    { id: 'bookings', label: 'Bookings', icon: BookOpen, description: 'View and manage bookings' },
+    { 
+      id: 'analytics', 
+      label: 'Dashboard', 
+      icon: BarChart3, 
+      description: 'Overview & Analytics',
+      color: 'from-blue-500 to-blue-600'
+    },
+    { 
+      id: 'users', 
+      label: 'Users', 
+      icon: Users, 
+      description: 'Manage Users',
+      color: 'from-purple-500 to-purple-600'
+    },
+    { 
+      id: 'destinations', 
+      label: 'Destinations', 
+      icon: MapPin, 
+      description: 'Manage Destinations',
+      color: 'from-green-500 to-green-600'
+    },
+    { 
+      id: 'events', 
+      label: 'Events', 
+      icon: Calendar, 
+      description: 'Manage Events',
+      color: 'from-orange-500 to-orange-600'
+    },
+    { 
+      id: 'bookings', 
+      label: 'Bookings', 
+      icon: BookOpen, 
+      description: 'Manage Bookings',
+      color: 'from-indigo-500 to-indigo-600'
+    },
   ];
 
   const handleSignOut = async () => {
@@ -89,144 +119,200 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
-      {/* Sidebar Header */}
-      <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
-            <Shield className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Admin Panel</h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Management Dashboard</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <div className="space-y-2">
-          {adminNavItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={cn(
-                "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200",
-                activeSection === item.id
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <div className="flex-1">
-                <div className="font-medium">{item.label}</div>
-                <div className={cn(
-                  "text-xs",
-                  activeSection === item.id 
-                    ? "text-blue-100" 
-                    : "text-slate-500 dark:text-slate-400"
-                )}>
-                  {item.description}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      {/* User Profile */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-        <div className="flex items-center space-x-3 mb-4">
-          <Avatar className="h-10 w-10 border-2 border-slate-200 dark:border-slate-700">
-            <AvatarImage src={profile?.avatar_url || undefined} />
-            <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <p className="font-medium text-slate-900 dark:text-white text-sm">{fullName}</p>
-            <p className="text-xs text-slate-600 dark:text-slate-400">Administrator</p>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Button variant="outline" size="sm" asChild className="w-full justify-start">
-            <Link to="/dashboard">
-              <Home className="h-4 w-4 mr-2" />
-              Dashboard
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" asChild className="w-full justify-start">
-            <Link to="/settings">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full justify-start">
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  const currentSection = adminNavItems.find(item => item.id === activeSection);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950 flex">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-80">
-        <SidebarContent />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 flex">
+      {/* Sidebar */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ x: -300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -300, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed lg:relative z-30 h-full"
+          >
+            <div className="w-80 h-screen bg-white/95 backdrop-blur-xl dark:bg-slate-900/95 border-r border-slate-200/50 dark:border-slate-800/50 shadow-xl flex flex-col">
+              {/* Sidebar Header */}
+              <div className="p-6 border-b border-slate-200/50 dark:border-slate-800/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-xl shadow-lg">
+                      <Shield className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Admin Panel
+                      </h1>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Management Dashboard</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSidebarOpen(false)}
+                    className="lg:hidden"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
 
-      {/* Mobile Sidebar */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="lg:hidden fixed top-4 left-4 z-50">
-            <Menu className="h-4 w-4" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-80 p-0">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
+              {/* Navigation */}
+              <nav className="flex-1 p-4 space-y-2">
+                {adminNavItems.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setActiveSection(item.id)}
+                    className={cn(
+                      "w-full flex items-center space-x-4 px-4 py-4 rounded-xl text-left transition-all duration-300 group",
+                      activeSection === item.id
+                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-${item.color.split('-')[1]}-500/25`
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:shadow-md"
+                    )}
+                  >
+                    <div className={cn(
+                      "p-2 rounded-lg transition-all duration-300",
+                      activeSection === item.id
+                        ? "bg-white/20"
+                        : "bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
+                    )}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">{item.label}</div>
+                      <div className={cn(
+                        "text-xs transition-all duration-300",
+                        activeSection === item.id 
+                          ? "text-white/80" 
+                          : "text-slate-500 dark:text-slate-400"
+                      )}>
+                        {item.description}
+                      </div>
+                    </div>
+                  </motion.button>
+                ))}
+              </nav>
+
+              {/* User Profile */}
+              <div className="p-4 border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/20">
+                <div className="flex items-center space-x-3 mb-4">
+                  <Avatar className="h-12 w-12 border-2 border-slate-200 dark:border-slate-700 shadow-md">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-900 dark:text-white">{fullName}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">System Administrator</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <Link to="/dashboard">
+                      <Home className="h-4 w-4 mr-2" />
+                      User Dashboard
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <Link to="/settings">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Link>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleSignOut} 
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Backdrop for mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {adminNavItems.find(item => item.id === activeSection)?.label || 'Admin Dashboard'}
-              </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                {adminNavItems.find(item => item.id === activeSection)?.description || 'Welcome to the admin dashboard'}
-              </p>
-            </div>
-            
-            <div className="hidden lg:flex items-center space-x-3">
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{fullName}</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Administrator</p>
+        <header className="bg-white/80 backdrop-blur-xl dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {!sidebarOpen && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSidebarOpen(true)}
+                    className="lg:hidden"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                )}
+                <div>
+                  <div className="flex items-center space-x-3">
+                    {currentSection && (
+                      <div className={cn(
+                        "p-2 rounded-lg bg-gradient-to-r",
+                        currentSection.color
+                      )}>
+                        <currentSection.icon className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div>
+                      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {currentSection?.label || 'Admin Dashboard'}
+                      </h1>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {currentSection?.description || 'Welcome to the admin dashboard'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <Avatar className="h-10 w-10 border-2 border-slate-200 dark:border-slate-700">
-                <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              
+              <div className="hidden lg:flex items-center space-x-3">
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{fullName}</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Administrator</p>
+                </div>
+                <Avatar className="h-10 w-10 border-2 border-slate-200 dark:border-slate-700 shadow-md">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="p-6 overflow-y-auto h-[calc(100vh-88px)]">
+        <main className="flex-1 p-6 overflow-y-auto">
           <motion.div
             key={activeSection}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
+            className="max-w-7xl mx-auto"
           >
             {renderContent()}
           </motion.div>

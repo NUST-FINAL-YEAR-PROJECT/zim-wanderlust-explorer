@@ -1,8 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -23,620 +27,477 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/components/ui/use-toast';
-import { getDestinations, updateDestination, deleteDestination, addDestination, Destination } from '@/models/Destination';
+import { Destination, getDestinations, addDestination, updateDestination, deleteDestination } from '@/models/Destination';
+import { Plus, Edit, Trash2, Eye, MapPin, DollarSign, Calendar, Star, Search, Filter } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const DestinationsManagement = () => {
+const DestinationsManagement: React.FC = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+  const [newDestination, setNewDestination] = useState({
     name: '',
-    location: '',
     description: '',
+    location: '',
     price: 0,
     image_url: '',
-    activities: [] as string[],
-    best_time_to_visit: '',
-    duration_recommended: '',
-    difficulty_level: 'moderate',
     categories: [] as string[],
-    amenities: [] as string[],
-    what_to_bring: [] as string[],
-    highlights: [] as string[],
-    additional_images: [] as string[],
-    weather_info: '',
-    getting_there: '',
-    payment_url: '',
-    latitude: null as number | null,
-    longitude: null as number | null
+    activities: [] as string[],
+    difficulty_level: '',
   });
-
-  // Available categories
-  const categories = [
-    'Wildlife',
-    'Nature',
-    'Adventure',
-    'Cultural',
-    'Historical',
-    'Luxury',
-    'Family-friendly',
-    'UNESCO',
-    'Safari',
-    'Water',
-    'City'
-  ];
-  
-  // Difficulty levels
-  const difficultyLevels = [
-    'easy',
-    'moderate',
-    'challenging',
-    'difficult',
-    'extreme'
-  ];
+  const { toast } = useToast();
 
   useEffect(() => {
-    loadDestinations();
+    fetchDestinations();
   }, []);
 
-  const loadDestinations = async () => {
-    setLoading(true);
+  const fetchDestinations = async () => {
+    setIsLoading(true);
     try {
       const data = await getDestinations();
       setDestinations(data);
     } catch (error) {
-      console.error('Error loading destinations:', error);
+      console.error('Error fetching destinations:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load destinations. Please try again.',
         variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load destinations.',
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      location: '',
-      description: '',
-      price: 0,
-      image_url: '',
-      activities: [],
-      best_time_to_visit: '',
-      duration_recommended: '',
-      difficulty_level: 'moderate',
-      categories: [],
-      amenities: [],
-      what_to_bring: [],
-      highlights: [],
-      additional_images: [],
-      weather_info: '',
-      getting_there: '',
-      payment_url: '',
-      latitude: null,
-      longitude: null
-    });
-    setEditId(null);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    
-    if (name === 'price') {
-      setFormData({ ...formData, [name]: parseFloat(value) || 0 });
-    } else if (name === 'latitude' || name === 'longitude') {
-      setFormData({ ...formData, [name]: parseFloat(value) || null });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
-
-  const handleActivityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const activities = value.split(',').map(item => item.trim());
-    setFormData({ ...formData, activities });
-  };
-
-  const handleCategoryToggle = (category: string) => {
-    let newCategories = [...formData.categories];
-    if (newCategories.includes(category)) {
-      newCategories = newCategories.filter(c => c !== category);
-    } else {
-      newCategories.push(category);
-    }
-    setFormData({ ...formData, categories: newCategories });
-  };
-  
-  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const images = value.split(',').map(url => url.trim());
-    setFormData({ ...formData, additional_images: images });
-  };
-
-  const handleAmenitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const amenities = value.split(',').map(item => item.trim());
-    setFormData({ ...formData, amenities });
-  };
-
-  const handleWhatToBringChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const items = value.split(',').map(item => item.trim());
-    setFormData({ ...formData, what_to_bring: items });
-  };
-
-  const handleHighlightsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const highlights = value.split(',').map(item => item.trim());
-    setFormData({ ...formData, highlights });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleCreateDestination = async () => {
     try {
-      // Include all necessary fields, including latitude and longitude
-      const destinationData = {
-        ...formData,
-        price: formData.price || 0,
-        latitude: formData.latitude,
-        longitude: formData.longitude
-      };
-
-      if (editId) {
-        await updateDestination(editId, destinationData);
-        toast({ description: 'Destination updated successfully!' });
-      } else {
-        await addDestination(destinationData);
-        toast({ description: 'Destination created successfully!' });
-      }
-      
-      setOpen(false);
-      resetForm();
-      loadDestinations();
-    } catch (error) {
-      console.error('Error saving destination:', error);
+      await addDestination(newDestination);
       toast({
-        title: 'Error',
-        description: 'Failed to save destination. Please try again.',
+        title: 'Success',
+        description: 'Destination created successfully.',
+      });
+      setIsCreateDialogOpen(false);
+      setNewDestination({
+        name: '',
+        description: '',
+        location: '',
+        price: 0,
+        image_url: '',
+        categories: [],
+        activities: [],
+        difficulty_level: '',
+      });
+      fetchDestinations();
+    } catch (error) {
+      console.error('Error creating destination:', error);
+      toast({
         variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to create destination.',
       });
     }
   };
 
-  const handleEdit = (destination: Destination) => {
-    setEditId(destination.id);
-    setFormData({
-      name: destination.name || '',
-      location: destination.location || '',
-      description: destination.description || '',
-      price: destination.price || 0,
-      image_url: destination.image_url || '',
-      activities: destination.activities || [],
-      best_time_to_visit: destination.best_time_to_visit || '',
-      duration_recommended: destination.duration_recommended || '',
-      difficulty_level: destination.difficulty_level || 'moderate',
-      categories: destination.categories || [],
-      amenities: destination.amenities || [],
-      what_to_bring: destination.what_to_bring || [],
-      highlights: destination.highlights || [],
-      additional_images: destination.additional_images || [],
-      weather_info: destination.weather_info || '',
-      getting_there: destination.getting_there || '',
-      payment_url: destination.payment_url || '',
-      latitude: destination.latitude || null,
-      longitude: destination.longitude || null
-    });
-    setOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this destination?')) {
-      try {
-        await deleteDestination(id);
-        toast({ description: 'Destination deleted successfully!' });
-        loadDestinations();
-      } catch (error) {
-        console.error('Error deleting destination:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to delete destination. Please try again.',
-          variant: 'destructive',
-        });
-      }
+  const handleEditDestination = async () => {
+    if (!selectedDestination) return;
+    
+    try {
+      await updateDestination(selectedDestination.id, selectedDestination);
+      toast({
+        title: 'Success',
+        description: 'Destination updated successfully.',
+      });
+      setIsEditDialogOpen(false);
+      setSelectedDestination(null);
+      fetchDestinations();
+    } catch (error) {
+      console.error('Error updating destination:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to update destination.',
+      });
     }
   };
+
+  const handleDeleteDestination = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this destination?')) return;
+    
+    try {
+      await deleteDestination(id);
+      toast({
+        title: 'Success',
+        description: 'Destination deleted successfully.',
+      });
+      fetchDestinations();
+    } catch (error) {
+      console.error('Error deleting destination:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete destination.',
+      });
+    }
+  };
+
+  const filteredDestinations = destinations.filter(destination => {
+    const matchesSearch = destination.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         destination.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || 
+                           destination.categories?.includes(filterCategory);
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = ['all', 'nature', 'adventure', 'cultural', 'wildlife', 'historical'];
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Destinations Management</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={resetForm}
-              className="bg-indigo-600 hover:bg-indigo-700"
-            >
-              Add New Destination
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editId ? 'Edit Destination' : 'Add New Destination'}
-              </DialogTitle>
-              <DialogDescription>
-                {editId
-                  ? 'Update the destination details below.'
-                  : 'Fill in the details to create a new destination.'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="block text-sm font-medium">
-                    Name
-                  </label>
+      {/* Header Actions */}
+      <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle className="text-2xl font-bold text-green-900 dark:text-green-100">
+                Destinations Management
+              </CardTitle>
+              <CardDescription className="text-green-700 dark:text-green-300">
+                Manage travel destinations and their information
+              </CardDescription>
+            </div>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Destination
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create New Destination</DialogTitle>
+                  <DialogDescription>
+                    Fill in the details to create a new destination.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        value={newDestination.name}
+                        onChange={(e) => setNewDestination({...newDestination, name: e.target.value})}
+                        placeholder="Destination name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        value={newDestination.location}
+                        onChange={(e) => setNewDestination({...newDestination, location: e.target.value})}
+                        placeholder="City, Province"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={newDestination.description}
+                      onChange={(e) => setNewDestination({...newDestination, description: e.target.value})}
+                      placeholder="Destination description"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="price">Price (USD)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        value={newDestination.price}
+                        onChange={(e) => setNewDestination({...newDestination, price: Number(e.target.value)})}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="difficulty">Difficulty Level</Label>
+                      <Select
+                        value={newDestination.difficulty_level}
+                        onValueChange={(value) => setNewDestination({...newDestination, difficulty_level: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Moderate">Moderate</SelectItem>
+                          <SelectItem value="Challenging">Challenging</SelectItem>
+                          <SelectItem value="Extreme">Extreme</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="image_url">Image URL</Label>
+                    <Input
+                      id="image_url"
+                      value={newDestination.image_url}
+                      onChange={(e) => setNewDestination({...newDestination, image_url: e.target.value})}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateDestination} className="bg-gradient-to-r from-green-600 to-emerald-600">
+                    Create Destination
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Search and Filter */}
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Input
+                placeholder="Search destinations..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-slate-400" />
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Destinations Table */}
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="py-12 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <p className="mt-2 text-slate-600">Loading destinations...</p>
+            </div>
+          ) : filteredDestinations.length === 0 ? (
+            <div className="py-12 text-center">
+              <MapPin className="mx-auto h-12 w-12 text-slate-400" />
+              <p className="mt-2 text-slate-600">No destinations found.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-slate-200 dark:border-slate-800">
+                    <TableHead className="font-semibold">Destination</TableHead>
+                    <TableHead className="font-semibold">Location</TableHead>
+                    <TableHead className="font-semibold">Price</TableHead>
+                    <TableHead className="font-semibold">Categories</TableHead>
+                    <TableHead className="font-semibold">Featured</TableHead>
+                    <TableHead className="font-semibold text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDestinations.map((destination) => (
+                    <motion.tr
+                      key={destination.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                    >
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          {destination.image_url && (
+                            <img
+                              src={destination.image_url}
+                              alt={destination.name}
+                              className="h-12 w-12 rounded-lg object-cover shadow-md"
+                            />
+                          )}
+                          <div>
+                            <div className="font-medium text-slate-900 dark:text-white">
+                              {destination.name}
+                            </div>
+                            <div className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
+                              {destination.description}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-slate-600 dark:text-slate-300">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {destination.location}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-green-600 font-semibold">
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          {destination.price}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {destination.categories?.slice(0, 2).map((category, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {category}
+                            </Badge>
+                          ))}
+                          {destination.categories && destination.categories.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{destination.categories.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {destination.is_featured && (
+                          <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                            <Star className="h-3 w-3 mr-1" />
+                            Featured
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setSelectedDestination(destination);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteDestination(destination.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Destination</DialogTitle>
+            <DialogDescription>
+              Update the destination information.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedDestination && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-name">Name</Label>
                   <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
+                    id="edit-name"
+                    value={selectedDestination.name}
+                    onChange={(e) => setSelectedDestination({...selectedDestination, name: e.target.value})}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="location" className="block text-sm font-medium">
-                    Location
-                  </label>
+                <div>
+                  <Label htmlFor="edit-location">Location</Label>
                   <Input
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    required
+                    id="edit-location"
+                    value={selectedDestination.location}
+                    onChange={(e) => setSelectedDestination({...selectedDestination, location: e.target.value})}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="price" className="block text-sm font-medium">
-                    Price ($)
-                  </label>
+              </div>
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={selectedDestination.description || ''}
+                  onChange={(e) => setSelectedDestination({...selectedDestination, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-price">Price (USD)</Label>
                   <Input
-                    id="price"
-                    name="price"
+                    id="edit-price"
                     type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    required
+                    value={selectedDestination.price}
+                    onChange={(e) => setSelectedDestination({...selectedDestination, price: Number(e.target.value)})}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="difficulty_level" className="block text-sm font-medium">
-                    Difficulty Level
-                  </label>
+                <div>
+                  <Label htmlFor="edit-difficulty">Difficulty Level</Label>
                   <Select
-                    value={formData.difficulty_level}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, difficulty_level: value })
-                    }
+                    value={selectedDestination.difficulty_level || ''}
+                    onValueChange={(value) => setSelectedDestination({...selectedDestination, difficulty_level: value})}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select difficulty level" />
+                      <SelectValue placeholder="Select difficulty" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectGroup>
-                        {difficultyLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level.charAt(0).toUpperCase() + level.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Moderate">Moderate</SelectItem>
+                      <SelectItem value="Challenging">Challenging</SelectItem>
+                      <SelectItem value="Extreme">Extreme</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <label htmlFor="description" className="block text-sm font-medium">
-                  Description
-                </label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="image_url" className="block text-sm font-medium">
-                    Primary Image URL
-                  </label>
-                  <Input
-                    id="image_url"
-                    name="image_url"
-                    value={formData.image_url}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="best_time_to_visit" className="block text-sm font-medium">
-                    Best Time to Visit
-                  </label>
-                  <Input
-                    id="best_time_to_visit"
-                    name="best_time_to_visit"
-                    value={formData.best_time_to_visit}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="latitude" className="block text-sm font-medium">
-                    Latitude
-                  </label>
-                  <Input
-                    id="latitude"
-                    name="latitude"
-                    type="number"
-                    step="any"
-                    value={formData.latitude ?? ''}
-                    onChange={handleInputChange}
-                    placeholder="e.g. -17.9244"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="longitude" className="block text-sm font-medium">
-                    Longitude
-                  </label>
-                  <Input
-                    id="longitude"
-                    name="longitude"
-                    type="number"
-                    step="any"
-                    value={formData.longitude ?? ''}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 25.8573"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="activities" className="block text-sm font-medium">
-                  Activities (comma-separated)
-                </label>
-                <Input
-                  id="activities"
-                  name="activities"
-                  value={formData.activities.join(', ')}
-                  onChange={handleActivityChange}
-                  placeholder="e.g. Hiking, Swimming, Sightseeing"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="additional_images" className="block text-sm font-medium">
-                  Additional Images (comma-separated URLs)
-                </label>
-                <Input
-                  id="additional_images"
-                  name="additional_images"
-                  value={formData.additional_images.join(', ')}
-                  onChange={handleAdditionalImagesChange}
-                  placeholder="e.g. https://example.com/image1.jpg, https://example.com/image2.jpg"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="amenities" className="block text-sm font-medium">
-                  Amenities (comma-separated)
-                </label>
-                <Input
-                  id="amenities"
-                  name="amenities"
-                  value={formData.amenities.join(', ')}
-                  onChange={handleAmenitiesChange}
-                  placeholder="e.g. Parking, WiFi, Restaurant"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="what_to_bring" className="block text-sm font-medium">
-                  What to Bring (comma-separated)
-                </label>
-                <Input
-                  id="what_to_bring"
-                  name="what_to_bring"
-                  value={formData.what_to_bring.join(', ')}
-                  onChange={handleWhatToBringChange}
-                  placeholder="e.g. Sunscreen, Hat, Water bottle"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="highlights" className="block text-sm font-medium">
-                  Highlights (comma-separated)
-                </label>
-                <Input
-                  id="highlights"
-                  name="highlights"
-                  value={formData.highlights.join(', ')}
-                  onChange={handleHighlightsChange}
-                  placeholder="e.g. Amazing views, Unique wildlife, Cultural experience"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium mb-2">Categories</label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {categories.map((category) => (
-                    <div key={category} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`category-${category}`}
-                        checked={formData.categories.includes(category)}
-                        onCheckedChange={() => handleCategoryToggle(category)}
-                      />
-                      <label
-                        htmlFor={`category-${category}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {category}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="duration_recommended" className="block text-sm font-medium">
-                  Recommended Duration
-                </label>
-                <Input
-                  id="duration_recommended"
-                  name="duration_recommended"
-                  value={formData.duration_recommended}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 2-3 days"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="weather_info" className="block text-sm font-medium">
-                  Weather Information
-                </label>
-                <Textarea
-                  id="weather_info"
-                  name="weather_info"
-                  value={formData.weather_info || ''}
-                  onChange={handleInputChange}
-                  rows={3}
-                  placeholder="Weather details and tips"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="getting_there" className="block text-sm font-medium">
-                  Getting There
-                </label>
-                <Textarea
-                  id="getting_there"
-                  name="getting_there"
-                  value={formData.getting_there || ''}
-                  onChange={handleInputChange}
-                  rows={3}
-                  placeholder="Transportation and directions information"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="payment_url" className="block text-sm font-medium">
-                  Payment URL
-                </label>
-                <Input
-                  id="payment_url"
-                  name="payment_url"
-                  value={formData.payment_url || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://payment-gateway.com/xyz"
-                />
-              </div>
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Save</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-10">Loading destinations...</div>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Categories</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {destinations.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    No destinations found. Create one to get started.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                destinations.map((destination) => (
-                  <TableRow key={destination.id}>
-                    <TableCell className="font-medium">{destination.name}</TableCell>
-                    <TableCell>{destination.location}</TableCell>
-                    <TableCell>${destination.price}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {destination.categories?.slice(0, 3).map((category) => (
-                          <span
-                            key={category}
-                            className="bg-indigo-100 text-indigo-800 text-xs rounded px-2 py-1"
-                          >
-                            {category}
-                          </span>
-                        ))}
-                        {destination.categories && destination.categories.length > 3 && (
-                          <span className="text-xs text-muted-foreground">
-                            +{destination.categories.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(destination)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(destination.id)}
-                      >
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditDestination} className="bg-gradient-to-r from-green-600 to-emerald-600">
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
