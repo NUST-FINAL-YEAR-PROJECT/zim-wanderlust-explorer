@@ -17,9 +17,24 @@ import { toast } from '@/components/ui/sonner';
 import BookingConfirmationDialog from './BookingConfirmationDialog';
 import { cn } from '@/lib/utils';
 
+interface AccommodationDetails {
+  id: string;
+  name: string;
+  description?: string;
+  location: string;
+  price_per_night: number;
+  image_url?: string;
+  rating?: number;
+  review_count?: number;
+  max_guests?: number;
+  amenities?: string[];
+  room_types?: any;
+  is_featured?: boolean;
+}
+
 interface AccommodationBookingFormProps {
   accommodationId: string;
-  accommodationDetails: any;
+  accommodationDetails: AccommodationDetails;
 }
 
 const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: AccommodationBookingFormProps) => {
@@ -44,11 +59,50 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
   const roomTypeMultiplier = selectedRoomType === 'deluxe' ? 1.5 : selectedRoomType === 'suite' ? 2 : 1;
   const totalPrice = numberOfNights * basePrice * roomTypeMultiplier;
 
-  const roomTypes = accommodationDetails?.room_types || [
-    { id: 'standard', name: 'Standard Room', multiplier: 1 },
-    { id: 'deluxe', name: 'Deluxe Room', multiplier: 1.5 },
-    { id: 'suite', name: 'Suite', multiplier: 2 }
-  ];
+  // Safely parse room types from database
+  const getRoomTypes = () => {
+    if (!accommodationDetails?.room_types) {
+      return [
+        { id: 'standard', name: 'Standard Room', multiplier: 1 },
+        { id: 'deluxe', name: 'Deluxe Room', multiplier: 1.5 },
+        { id: 'suite', name: 'Suite', multiplier: 2 }
+      ];
+    }
+
+    let roomTypes = accommodationDetails.room_types;
+    
+    // If room_types is a string, try to parse it as JSON
+    if (typeof roomTypes === 'string') {
+      try {
+        roomTypes = JSON.parse(roomTypes);
+      } catch (error) {
+        console.error('Error parsing room_types:', error);
+        return [
+          { id: 'standard', name: 'Standard Room', multiplier: 1 },
+          { id: 'deluxe', name: 'Deluxe Room', multiplier: 1.5 },
+          { id: 'suite', name: 'Suite', multiplier: 2 }
+        ];
+      }
+    }
+
+    // If it's not an array, return default
+    if (!Array.isArray(roomTypes)) {
+      return [
+        { id: 'standard', name: 'Standard Room', multiplier: 1 },
+        { id: 'deluxe', name: 'Deluxe Room', multiplier: 1.5 },
+        { id: 'suite', name: 'Suite', multiplier: 2 }
+      ];
+    }
+
+    // Validate each room type object
+    return roomTypes.map((room: any, index: number) => ({
+      id: room?.id || room?.name?.toLowerCase() || `room-${index}`,
+      name: room?.name || `Room Type ${index + 1}`,
+      multiplier: room?.multiplier || 1
+    }));
+  };
+
+  const roomTypes = getRoomTypes();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,7 +357,7 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
                     className="w-full px-3 py-2 border border-input bg-background rounded-md"
                   >
                     {roomTypes.map((room: any) => (
-                      <option key={room.id || room.name} value={room.id || room.name.toLowerCase()}>
+                      <option key={room.id} value={room.id}>
                         {room.name} (+{Math.round((room.multiplier - 1) * 100)}%)
                       </option>
                     ))}

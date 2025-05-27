@@ -13,6 +13,26 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface AccommodationType {
+  id: string;
+  name: string;
+  description?: string;
+  location: string;
+  price_per_night: number;
+  image_url?: string;
+  rating?: number;
+  review_count?: number;
+  max_guests?: number;
+  amenities?: string[];
+  room_types?: any[];
+  is_featured?: boolean;
+  additional_images?: string[];
+  created_at?: string;
+  updated_at?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 const Accommodations = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSplash, setShowSplash] = useState(true);
@@ -40,7 +60,31 @@ const Accommodations = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      
+      // Transform the data to match our expected type
+      return (data || []).map((accommodation: any): AccommodationType => ({
+        id: accommodation.id,
+        name: accommodation.name,
+        description: accommodation.description,
+        location: accommodation.location,
+        price_per_night: accommodation.price_per_night,
+        image_url: accommodation.image_url,
+        rating: accommodation.rating,
+        review_count: accommodation.review_count,
+        max_guests: accommodation.max_guests,
+        amenities: accommodation.amenities || [],
+        room_types: Array.isArray(accommodation.room_types) 
+          ? accommodation.room_types 
+          : accommodation.room_types 
+            ? [accommodation.room_types] 
+            : [],
+        is_featured: accommodation.is_featured,
+        additional_images: accommodation.additional_images || [],
+        created_at: accommodation.created_at,
+        updated_at: accommodation.updated_at,
+        latitude: accommodation.latitude,
+        longitude: accommodation.longitude,
+      }));
     },
   });
 
