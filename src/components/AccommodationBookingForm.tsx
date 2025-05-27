@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +14,7 @@ import { CalendarIcon, MapPin, Users, Bed, Star } from 'lucide-react';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { toast } from '@/components/ui/sonner';
 import BookingConfirmationDialog from './BookingConfirmationDialog';
+import BookingSuccessDialog from './BookingSuccessDialog';
 import { cn } from '@/lib/utils';
 
 interface AccommodationDetails {
@@ -42,6 +42,7 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [bookingData, setBookingData] = useState<any>(null);
   
   // Form state
@@ -178,18 +179,16 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
         payment_id: payment.id
       });
 
-      // Set booking data for confirmation dialog
+      // Set booking data for success dialog
       setBookingData({
-        type: 'destination',
+        type: 'accommodation',
         name: accommodationDetails?.name || 'Accommodation',
-        date: format(checkInDate, 'PPP') + ' - ' + format(checkOutDate, 'PPP'),
-        location: accommodationDetails?.location || 'Location not specified',
-        guests: numberOfGuests,
-        totalPrice: totalPrice,
-        bookingId: booking.id
+        bookingId: booking.id,
+        totalAmount: totalPrice,
+        currency: '$'
       });
 
-      setShowConfirmation(true);
+      setShowSuccessDialog(true);
       toast.success('Booking created successfully!');
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -197,6 +196,18 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleProceedToPayment = () => {
+    setShowSuccessDialog(false);
+    if (bookingData) {
+      navigate(`/payment/${bookingData.bookingId}`);
+    }
+  };
+
+  const handleViewBooking = () => {
+    setShowSuccessDialog(false);
+    navigate('/bookings');
   };
 
   return (
@@ -446,6 +457,17 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
           </Button>
         </CardFooter>
       </Card>
+
+      {/* Booking Success Dialog */}
+      {showSuccessDialog && bookingData && (
+        <BookingSuccessDialog
+          isOpen={showSuccessDialog}
+          onClose={() => setShowSuccessDialog(false)}
+          bookingDetails={bookingData}
+          onProceedToPayment={handleProceedToPayment}
+          onViewBooking={handleViewBooking}
+        />
+      )}
 
       {/* Booking Confirmation Dialog */}
       {showConfirmation && bookingData && (

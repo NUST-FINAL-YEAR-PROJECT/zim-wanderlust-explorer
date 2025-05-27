@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +9,7 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import BookingSplash from '@/components/BookingSplash';
 import BookingConfirmationDialog from '@/components/BookingConfirmationDialog';
+import BookingSuccessDialog from '../BookingSuccessDialog';
 
 // Import sub-components
 import EventSummary from './EventSummary';
@@ -29,6 +29,7 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showBookingSplash, setShowBookingSplash] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<any>(null);
   
   const [numberOfPeople, setNumberOfPeople] = useState(1);
@@ -153,10 +154,10 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
 
       setCreatedBooking(booking);
       
-      // Wait for splash screen to complete, then show confirmation
+      // Wait for splash screen to complete, then show success dialog
       setTimeout(() => {
         setShowBookingSplash(false);
-        setShowConfirmationDialog(true);
+        setShowSuccessDialog(true);
       }, 2500);
 
     } catch (error) {
@@ -172,8 +173,15 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
     }
   };
 
+  const handleProceedToPayment = () => {
+    setShowSuccessDialog(false);
+    if (createdBooking) {
+      navigate(`/payment/${createdBooking.id}`);
+    }
+  };
+
   const handleViewBooking = () => {
-    setShowConfirmationDialog(false);
+    setShowSuccessDialog(false);
     navigate('/bookings');
   };
 
@@ -192,6 +200,22 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
           bookingType="event"
           itemName={eventDetails?.title || 'this event'}
           onComplete={() => setShowBookingSplash(false)}
+        />
+      )}
+
+      {showSuccessDialog && createdBooking && (
+        <BookingSuccessDialog
+          isOpen={showSuccessDialog}
+          onClose={() => setShowSuccessDialog(false)}
+          bookingDetails={{
+            type: 'event',
+            name: eventDetails?.title || 'Event',
+            bookingId: createdBooking.id,
+            totalAmount: totalPrice,
+            currency: '$'
+          }}
+          onProceedToPayment={handleProceedToPayment}
+          onViewBooking={handleViewBooking}
         />
       )}
 
