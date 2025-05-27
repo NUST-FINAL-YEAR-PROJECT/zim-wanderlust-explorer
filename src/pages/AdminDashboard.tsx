@@ -1,324 +1,282 @@
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import UsersManagement from '@/components/admin/UsersManagement';
-import DestinationsManagement from '@/components/admin/DestinationsManagement';
-import EventsManagement from '@/components/admin/EventsManagement';
-import BookingsManagement from '@/components/admin/BookingsManagement';
-import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import { 
   Users, 
   MapPin, 
   Calendar, 
-  BarChart3, 
   BookOpen, 
-  LogOut, 
-  Settings, 
-  Home,
-  Shield,
-  Menu,
-  X
+  TrendingUp, 
+  Activity,
+  Settings,
+  ChevronRight,
+  Bed
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { signOut } from '@/models/Auth';
-import { useNavigate, Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import DashboardLayout from '@/components/DashboardLayout';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
+import UsersManagement from '@/components/admin/UsersManagement';
+import DestinationsManagement from '@/components/admin/DestinationsManagement';
+import EventsManagement from '@/components/admin/EventsManagement';
+import AccommodationsManagement from '@/components/admin/AccommodationsManagement';
+import BookingsManagement from '@/components/admin/BookingsManagement';
 
-const AdminDashboard: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('analytics');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { toast } = useToast();
-  const { profile, user } = useAuth();
+const AdminDashboard = () => {
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const adminNavItems = [
-    { 
-      id: 'analytics', 
-      label: 'Dashboard', 
-      icon: BarChart3, 
-      description: 'Overview & Analytics',
-      color: 'from-blue-500 to-blue-600'
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    if (!isAdmin) {
+      navigate('/dashboard');
+      return;
+    }
+  }, [user, isAdmin, navigate]);
+
+  if (!user || !isAdmin) {
+    return null;
+  }
+
+  const quickStats = [
+    {
+      title: 'Total Users',
+      value: '1,234',
+      change: '+12%',
+      icon: Users,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
     },
-    { 
-      id: 'users', 
-      label: 'Users', 
-      icon: Users, 
-      description: 'Manage Users',
-      color: 'from-purple-500 to-purple-600'
+    {
+      title: 'Destinations',
+      value: '89',
+      change: '+5%',
+      icon: MapPin,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
     },
-    { 
-      id: 'destinations', 
-      label: 'Destinations', 
-      icon: MapPin, 
-      description: 'Manage Destinations',
-      color: 'from-green-500 to-green-600'
+    {
+      title: 'Accommodations',
+      value: '156',
+      change: '+8%',
+      icon: Bed,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
     },
-    { 
-      id: 'events', 
-      label: 'Events', 
-      icon: Calendar, 
-      description: 'Manage Events',
-      color: 'from-orange-500 to-orange-600'
+    {
+      title: 'Events',
+      value: '45',
+      change: '+18%',
+      icon: Calendar,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
     },
-    { 
-      id: 'bookings', 
-      label: 'Bookings', 
-      icon: BookOpen, 
-      description: 'Manage Bookings',
-      color: 'from-indigo-500 to-indigo-600'
+    {
+      title: 'Bookings',
+      value: '2,156',
+      change: '+23%',
+      icon: BookOpen,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+    },
+    {
+      title: 'Revenue',
+      value: '$45,678',
+      change: '+15%',
+      icon: TrendingUp,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
     },
   ];
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: 'Signed out',
-        description: 'You have been successfully signed out.',
-      });
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to sign out. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const fullName = profile?.first_name && profile?.last_name 
-    ? `${profile.first_name} ${profile.last_name}` 
-    : profile?.username || user?.email?.split('@')[0] || 'Admin';
-
-  const initials = profile?.first_name && profile?.last_name
-    ? `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase()
-    : profile?.username 
-      ? profile.username.substring(0, 2).toUpperCase()
-      : user?.email 
-        ? user.email.substring(0, 2).toUpperCase() 
-        : 'AD';
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'analytics':
-        return <AdminAnalytics />;
-      case 'users':
-        return <UsersManagement />;
-      case 'destinations':
-        return <DestinationsManagement />;
-      case 'events':
-        return <EventsManagement />;
-      case 'bookings':
-        return <BookingsManagement />;
-      default:
-        return <AdminAnalytics />;
-    }
-  };
-
-  const currentSection = adminNavItems.find(item => item.id === activeSection);
+  const quickActions = [
+    {
+      title: 'Add New Destination',
+      description: 'Create a new travel destination',
+      action: () => setActiveTab('destinations'),
+      icon: MapPin,
+      color: 'from-blue-600 to-cyan-600',
+    },
+    {
+      title: 'Add Accommodation',
+      description: 'Add a new accommodation option',
+      action: () => setActiveTab('accommodations'),
+      icon: Bed,
+      color: 'from-amber-600 to-orange-600',
+    },
+    {
+      title: 'Create Event',
+      description: 'Schedule a new event',
+      action: () => setActiveTab('events'),
+      icon: Calendar,
+      color: 'from-purple-600 to-pink-600',
+    },
+    {
+      title: 'Review Bookings',
+      description: 'Manage user bookings',
+      action: () => setActiveTab('bookings'),
+      icon: BookOpen,
+      color: 'from-green-600 to-emerald-600',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 flex">
-      {/* Sidebar */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ x: -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -300, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed lg:relative z-30 h-full"
-          >
-            <div className="w-80 h-screen bg-white/95 backdrop-blur-xl dark:bg-slate-900/95 border-r border-slate-200/50 dark:border-slate-800/50 shadow-xl flex flex-col">
-              {/* Sidebar Header */}
-              <div className="p-6 border-b border-slate-200/50 dark:border-slate-800/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-xl shadow-lg">
-                      <Shield className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        Admin Panel
-                      </h1>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Management Dashboard</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSidebarOpen(false)}
-                    className="lg:hidden"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Navigation */}
-              <nav className="flex-1 p-4 space-y-2">
-                {adminNavItems.map((item) => (
-                  <motion.button
-                    key={item.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setActiveSection(item.id)}
-                    className={cn(
-                      "w-full flex items-center space-x-4 px-4 py-4 rounded-xl text-left transition-all duration-300 group",
-                      activeSection === item.id
-                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-${item.color.split('-')[1]}-500/25`
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:shadow-md"
-                    )}
-                  >
-                    <div className={cn(
-                      "p-2 rounded-lg transition-all duration-300",
-                      activeSection === item.id
-                        ? "bg-white/20"
-                        : "bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
-                    )}>
-                      <item.icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold">{item.label}</div>
-                      <div className={cn(
-                        "text-xs transition-all duration-300",
-                        activeSection === item.id 
-                          ? "text-white/80" 
-                          : "text-slate-500 dark:text-slate-400"
-                      )}>
-                        {item.description}
-                      </div>
-                    </div>
-                  </motion.button>
-                ))}
-              </nav>
-
-              {/* User Profile */}
-              <div className="p-4 border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/20">
-                <div className="flex items-center space-x-3 mb-4">
-                  <Avatar className="h-12 w-12 border-2 border-slate-200 dark:border-slate-700 shadow-md">
-                    <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-900 dark:text-white">{fullName}</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">System Administrator</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Button variant="outline" size="sm" asChild className="w-full justify-start hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <Link to="/dashboard">
-                      <Home className="h-4 w-4 mr-2" />
-                      User Dashboard
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild className="w-full justify-start hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <Link to="/settings">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Settings
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleSignOut} 
-                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Backdrop for mobile */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-20 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+    <DashboardLayout>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-xl dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                {!sidebarOpen && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSidebarOpen(true)}
-                    className="lg:hidden"
-                  >
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                )}
-                <div>
-                  <div className="flex items-center space-x-3">
-                    {currentSection && (
-                      <div className={cn(
-                        "p-2 rounded-lg bg-gradient-to-r",
-                        currentSection.color
-                      )}>
-                        <currentSection.icon className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <div>
-                      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                        {currentSection?.label || 'Admin Dashboard'}
-                      </h1>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {currentSection?.description || 'Welcome to the admin dashboard'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="hidden lg:flex items-center space-x-3">
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{fullName}</p>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">Administrator</p>
-                </div>
-                <Avatar className="h-10 w-10 border-2 border-slate-200 dark:border-slate-700 shadow-md">
-                  <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+              <p className="text-indigo-100">Manage your ExploreZim platform</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Activity className="h-6 w-6" />
+              <Badge variant="secondary" className="bg-white/20 text-white">
+                System Active
+              </Badge>
             </div>
           </div>
-        </header>
+        </div>
 
-        {/* Content Area */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-7xl mx-auto"
-          >
-            {renderContent()}
-          </motion.div>
-        </main>
-      </div>
-    </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-7 bg-white dark:bg-gray-800 shadow-sm border">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="destinations" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+              Destinations
+            </TabsTrigger>
+            <TabsTrigger value="accommodations" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white">
+              Accommodations
+            </TabsTrigger>
+            <TabsTrigger value="events" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Events
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white">
+              Bookings
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-rose-600 data-[state=active]:text-white">
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {quickStats.map((stat, index) => (
+                <motion.div
+                  key={stat.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="hover:shadow-lg transition-shadow duration-300">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600">
+                        {stat.title}
+                      </CardTitle>
+                      <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                        <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stat.value}</div>
+                      <p className="text-xs text-green-600 font-medium">
+                        {stat.change} from last month
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>
+                  Common administrative tasks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {quickActions.map((action, index) => (
+                    <motion.div
+                      key={action.title}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Button
+                        variant="outline"
+                        onClick={action.action}
+                        className="w-full h-auto p-4 justify-start hover:shadow-md transition-all duration-300"
+                      >
+                        <div className={`p-2 rounded-lg bg-gradient-to-r ${action.color} mr-4`}>
+                          <action.icon className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="text-left flex-1">
+                          <div className="font-medium">{action.title}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {action.description}
+                          </div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <UsersManagement />
+          </TabsContent>
+
+          <TabsContent value="destinations">
+            <DestinationsManagement />
+          </TabsContent>
+
+          <TabsContent value="accommodations">
+            <AccommodationsManagement />
+          </TabsContent>
+
+          <TabsContent value="events">
+            <EventsManagement />
+          </TabsContent>
+
+          <TabsContent value="bookings">
+            <BookingsManagement />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AdminAnalytics />
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+    </DashboardLayout>
   );
 };
 

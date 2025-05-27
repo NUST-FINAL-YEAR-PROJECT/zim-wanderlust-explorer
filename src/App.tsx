@@ -17,6 +17,8 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Events from "./pages/Events";
 import Destinations from "./pages/Destinations";
+import Accommodations from "./pages/Accommodations";
+import AccommodationBookingPage from "./pages/AccommodationBookingPage";
 import DestinationDetails from "./pages/DestinationDetails";
 import PublicDestinationDetails from "./pages/PublicDestinationDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -86,7 +88,7 @@ function App() {
                       }
                     />
                     
-                    {/* Admin Routes - Single route definition */}
+                    {/* Admin Routes */}
                     <Route
                       path="/admin"
                       element={
@@ -109,6 +111,22 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <Destinations />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/accommodations"
+                      element={
+                        <ProtectedRoute>
+                          <Accommodations />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/accommodation-booking/:id"
+                      element={
+                        <ProtectedRoute>
+                          <AccommodationBookingPage />
                         </ProtectedRoute>
                       }
                     />

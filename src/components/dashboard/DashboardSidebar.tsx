@@ -10,7 +10,8 @@ import {
   Heart,
   HelpCircle,
   ChevronRight,
-  Shield
+  Shield,
+  Bed
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -58,6 +59,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       path: '/destinations', 
       icon: MapPin, 
       description: 'Explore travel destinations' 
+    },
+    { 
+      title: 'Accommodations', 
+      path: '/accommodations', 
+      icon: Bed, 
+      description: 'Find places to stay' 
     },
     { 
       title: 'Events', 
