@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import { createBooking, updateBooking, BookingStatus, PaymentStatus, sendBookingConfirmationEmail } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { format } from 'date-fns';
-import { toast } from '@/components/ui/sonner';
+import { useToast } from '@/hooks/use-toast';
+import BookingSplash from '@/components/BookingSplash';
+import BookingConfirmationDialog from '@/components/BookingConfirmationDialog';
 
 // Import sub-components
 import EventSummary from './EventSummary';
@@ -21,7 +24,13 @@ interface EventBookingFormProps {
 const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showBookingSplash, setShowBookingSplash] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState<any>(null);
+  
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [contactName, setContactName] = useState(user?.user_metadata?.name || '');
   const [contactEmail, setContactEmail] = useState(user?.email || '');
@@ -49,17 +58,26 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
     e.preventDefault();
     
     if (!user) {
-      toast.error('You must be logged in to book an event.');
+      toast({
+        title: 'Login Required',
+        description: 'You must be logged in to book an event.',
+        variant: 'destructive',
+      });
       navigate('/auth', { state: { redirectTo: `/events` } });
       return;
     }
 
     if (!contactName || !contactEmail || !contactPhone) {
-      toast.error('Please fill in all contact information.');
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all contact information.',
+        variant: 'destructive',
+      });
       return;
     }
 
     setIsSubmitting(true);
+    setShowBookingSplash(true);
 
     try {
       // Create booking record
@@ -133,69 +151,118 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
           console.error('Error sending booking confirmation email:', err);
         });
 
-      toast.success('Booking created successfully!');
+      setCreatedBooking(booking);
       
-      // Redirect to payment page
-      navigate(`/payment/${booking.id}`);
+      // Wait for splash screen to complete, then show confirmation
+      setTimeout(() => {
+        setShowBookingSplash(false);
+        setShowConfirmationDialog(true);
+      }, 2500);
+
     } catch (error) {
       console.error('Error creating booking:', error);
-      toast.error('Failed to create booking. Please try again.');
+      toast({
+        title: 'Booking Failed',
+        description: 'Failed to create booking. Please try again.',
+        variant: 'destructive',
+      });
+      setShowBookingSplash(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
-      <CardHeader className="bg-card border-b border-border/50">
-        <CardTitle className="text-2xl font-display">Book Event</CardTitle>
-        <CardDescription>Complete the form below to book {eventDetails?.title || 'this event'}</CardDescription>
-      </CardHeader>
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <EventSummary eventDetails={eventDetails} />
+  const handleViewBooking = () => {
+    setShowConfirmationDialog(false);
+    navigate('/bookings');
+  };
 
-          <BookingDetailsForm
-            selectedTicketType={selectedTicketType}
-            setSelectedTicketType={setSelectedTicketType}
-            numberOfPeople={numberOfPeople}
-            setNumberOfPeople={setNumberOfPeople}
-            preferredDate={preferredDate}
-            setPreferredDate={setPreferredDate}
-            contactName={contactName}
-            setContactName={setContactName}
-            contactEmail={contactEmail}
-            setContactEmail={setContactEmail}
-            contactPhone={contactPhone}
-            setContactPhone={setContactPhone}
-            ticketTypes={ticketTypes}
-          />
-          
-          <PriceSummary 
-            ticketPrice={getTicketPrice()} 
-            numberOfPeople={numberOfPeople}
-            totalPrice={totalPrice} 
-          />
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-end gap-4 border-t border-border/50 p-6">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/events')}
-          className="transition-all duration-300"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          variant="gradient"
-          className="transition-all duration-300"
-        >
-          {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
-        </Button>
-      </CardFooter>
-    </Card>
+  const handlePayNow = () => {
+    setShowConfirmationDialog(false);
+    if (createdBooking) {
+      navigate(`/payment/${createdBooking.id}`);
+    }
+  };
+
+  return (
+    <>
+      {showBookingSplash && (
+        <BookingSplash
+          duration={2500}
+          bookingType="event"
+          itemName={eventDetails?.title || 'this event'}
+          onComplete={() => setShowBookingSplash(false)}
+        />
+      )}
+
+      {showConfirmationDialog && createdBooking && (
+        <BookingConfirmationDialog
+          isOpen={showConfirmationDialog}
+          onClose={() => setShowConfirmationDialog(false)}
+          bookingDetails={{
+            type: 'event',
+            name: eventDetails?.title || 'Event',
+            date: format(new Date(preferredDate), 'PPP'),
+            location: eventDetails?.location || 'Location not specified',
+            guests: numberOfPeople,
+            totalPrice: totalPrice,
+            bookingId: createdBooking.id
+          }}
+          onViewBooking={handleViewBooking}
+          onPayNow={handlePayNow}
+        />
+      )}
+
+      <Card className="w-full max-w-4xl mx-auto shadow-md hover:shadow-lg transition-all duration-300">
+        <CardHeader className="bg-card border-b border-border/50">
+          <CardTitle className="text-2xl font-display">Book Event</CardTitle>
+          <CardDescription>Complete the form below to book {eventDetails?.title || 'this event'}</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <EventSummary eventDetails={eventDetails} />
+
+            <BookingDetailsForm
+              selectedTicketType={selectedTicketType}
+              setSelectedTicketType={setSelectedTicketType}
+              numberOfPeople={numberOfPeople}
+              setNumberOfPeople={setNumberOfPeople}
+              preferredDate={preferredDate}
+              setPreferredDate={setPreferredDate}
+              contactName={contactName}
+              setContactName={setContactName}
+              contactEmail={contactEmail}
+              setContactEmail={setContactEmail}
+              contactPhone={contactPhone}
+              setContactPhone={setContactPhone}
+              ticketTypes={ticketTypes}
+            />
+            
+            <PriceSummary 
+              ticketPrice={getTicketPrice()} 
+              numberOfPeople={numberOfPeople}
+              totalPrice={totalPrice} 
+            />
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-end gap-4 border-t border-border/50 p-6">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/events')}
+            className="transition-all duration-300"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300"
+          >
+            {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
+          </Button>
+        </CardFooter>
+      </Card>
+    </>
   );
 };
 
