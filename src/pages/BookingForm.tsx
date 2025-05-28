@@ -20,6 +20,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import LoadingDialog from '@/components/ui/loading-dialog';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog';
+import BookingSplash from '@/components/BookingSplash';
+import BookingSuccessDialog from '@/components/BookingSuccessDialog';
 import { useProcessDialog } from '@/hooks/useProcessDialog';
 import { toast } from 'sonner';
 
@@ -41,19 +43,11 @@ const BookingForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showBookingSplash, setShowBookingSplash] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState<any>(null);
   const processDialog = useProcessDialog();
-
-  const form = useForm<z.infer<typeof bookingSchema>>({
-    resolver: zodResolver(bookingSchema),
-    defaultValues: {
-      contactName: '',
-      contactEmail: user?.email || '',
-      contactPhone: '',
-      numberOfPeople: '1'
-    },
-  });
 
   // Fetch destination details
   const { data: destination, isLoading, error } = useQuery({
@@ -197,19 +191,36 @@ const BookingForm = () => {
       processDialog.updateProgress(4);
       
       processDialog.completeProcess();
+      setCreatedBooking(booking);
       
-      toast.success("Booking created successfully!");
-      
+      // Show splash screen after process completion
       setTimeout(() => {
-        console.log("Navigating to payment page:", `/payment/${booking.id}`);
-        navigate(`/payment/${booking.id}`);
-      }, 1500);
+        setShowBookingSplash(true);
+      }, 1000);
+      
+      // Show success dialog after splash
+      setTimeout(() => {
+        setShowBookingSplash(false);
+        setShowSuccessDialog(true);
+      }, 3500);
       
     } catch (error) {
       processDialog.closeProcess();
       console.error("Error creating booking:", error);
       toast.error("Failed to create booking. Please try again.");
     }
+  };
+
+  const handleProceedToPayment = () => {
+    setShowSuccessDialog(false);
+    if (createdBooking) {
+      navigate(`/payment/${createdBooking.id}`);
+    }
+  };
+
+  const handleViewBooking = () => {
+    setShowSuccessDialog(false);
+    navigate('/bookings');
   };
 
   const handleCancelBooking = () => {
@@ -238,6 +249,31 @@ const BookingForm = () => {
         cancelText="Continue Booking"
         variant="destructive"
       />
+
+      {showBookingSplash && (
+        <BookingSplash
+          duration={2500}
+          bookingType="destination"
+          itemName={destination?.name || 'this destination'}
+          onComplete={() => setShowBookingSplash(false)}
+        />
+      )}
+
+      {showSuccessDialog && createdBooking && (
+        <BookingSuccessDialog
+          isOpen={showSuccessDialog}
+          onClose={() => setShowSuccessDialog(false)}
+          bookingDetails={{
+            type: 'destination',
+            name: destination?.name || 'Destination',
+            bookingId: createdBooking.id,
+            totalAmount: createdBooking.total_price,
+            currency: '$'
+          }}
+          onProceedToPayment={handleProceedToPayment}
+          onViewBooking={handleViewBooking}
+        />
+      )}
 
       <div className="space-y-6">
         <div>

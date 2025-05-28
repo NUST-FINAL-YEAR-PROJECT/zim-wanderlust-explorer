@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { addToWishlist, removeFromWishlist, isInWishlist } from '@/models/Wishlist';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface WishlistButtonProps {
   destinationId: string;
@@ -25,7 +25,6 @@ export function WishlistButton({
 }: WishlistButtonProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,11 +48,7 @@ export function WishlistButton({
     e.stopPropagation();
     
     if (!user) {
-      toast({
-        title: "Login required",
-        description: "Please log in to add items to your wishlist",
-        variant: "destructive",
-      });
+      toast.error("Please log in to add items to your wishlist");
       navigate('/auth');
       return;
     }
@@ -65,10 +60,7 @@ export function WishlistButton({
         const success = await removeFromWishlist(user.id, destinationId);
         if (success) {
           setIsWishlisted(false);
-          toast({
-            title: "Removed from wishlist",
-            description: "Destination removed from your wishlist",
-          });
+          toast.success("Removed from wishlist");
           if (onRemove) {
             onRemove();
           }
@@ -77,19 +69,12 @@ export function WishlistButton({
         const added = await addToWishlist(user.id, destinationId);
         if (added) {
           setIsWishlisted(true);
-          toast({
-            title: "Added to wishlist",
-            description: "Destination added to your wishlist",
-          });
+          toast.success("Added to wishlist");
         }
       }
     } catch (error) {
       console.error('Error toggling wishlist:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }

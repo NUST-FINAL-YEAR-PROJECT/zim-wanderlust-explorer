@@ -13,7 +13,7 @@ import { ReviewSection } from "@/components/ReviewSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WishlistButton } from "@/components/WishlistButton";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import ItineraryDialog from "@/components/itinerary/ItineraryDialog";
 
 export default function DestinationDetails() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +21,7 @@ export default function DestinationDetails() {
   const { user } = useAuth();
   const [destination, setDestination] = useState<Destination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showItineraryDialog, setShowItineraryDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -73,9 +74,8 @@ export default function DestinationDetails() {
     navigate(`/booking/${id}`);
   };
 
-  // Add to Itinerary handler
   const handleAddToItinerary = () => {
-    navigate("/itineraries/create", { state: { selectedDestination: destination } });
+    setShowItineraryDialog(true);
   };
 
   // Helper function to check if capacity exists in additional_costs
@@ -83,13 +83,18 @@ export default function DestinationDetails() {
     if (!destination.additional_costs) return false;
     if (Array.isArray(destination.additional_costs)) return false;
     
-    // Check if it's an object with capacity property
     return typeof destination.additional_costs === 'object' && 
            'capacity' in destination.additional_costs;
   };
 
   return (
     <DashboardLayout>
+      <ItineraryDialog
+        isOpen={showItineraryDialog}
+        onClose={() => setShowItineraryDialog(false)}
+        selectedDestination={destination}
+      />
+
       <div className="container mx-auto py-6">
         <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-start md:space-y-0">
           <div>
@@ -133,10 +138,8 @@ export default function DestinationDetails() {
               <div className="space-y-4">
                 <p className="text-muted-foreground">{destination.description}</p>
                 
-                {/* Rating display - If needed, you can add real rating logic later */}
                 <div className="flex items-center">
                   <Badge className="mr-2">
-                    {/* Use a placeholder for now */}
                     4.5
                   </Badge>
                   <span>
@@ -144,13 +147,11 @@ export default function DestinationDetails() {
                   </span>
                 </div>
                 
-                {/* Opening hours - placeholder */}
                 <div className="flex items-center text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-2" />
                   Open Daily
                 </div>
                 
-                {/* Hours - placeholder */}
                 <div className="flex items-center text-muted-foreground">
                   <Clock className="h-4 w-4 mr-2" />
                   <span>
@@ -158,7 +159,6 @@ export default function DestinationDetails() {
                   </span>
                 </div>
                 
-                {/* Only show if capacity exists in additional_costs */}
                 {hasCapacity() && (
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-2" />
