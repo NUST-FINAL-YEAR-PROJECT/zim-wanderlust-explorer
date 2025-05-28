@@ -99,6 +99,7 @@ const AccommodationBookingDialog = ({
 
       const booking = await createBooking({
         user_id: user?.id || null,
+        destination_id: accommodation.id, // Map accommodation to destination_id for database compatibility
         booking_date: new Date().toISOString(),
         number_of_people: numberOfGuests,
         total_price: totalPrice,
@@ -109,6 +110,8 @@ const AccommodationBookingDialog = ({
         status: 'pending',
         payment_status: 'pending',
         booking_details: {
+          type: 'accommodation',
+          accommodation_id: accommodation.id,
           accommodation_name: accommodation.name,
           accommodation_location: accommodation.location,
           room_type: data.roomType,

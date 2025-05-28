@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, MapPin, Calendar, Users } from 'lucide-react';
+import { CheckCircle, MapPin, Calendar, Users, Bed } from 'lucide-react';
 
 interface BookingSplashProps {
   duration?: number;
@@ -34,7 +34,7 @@ const BookingSplash = ({
       case 'event':
         return <Calendar className="h-16 w-16" />;
       case 'accommodation':
-        return <Users className="h-16 w-16" />;
+        return <Bed className="h-16 w-16" />;
       case 'itinerary':
         return <MapPin className="h-16 w-16" />;
       default:

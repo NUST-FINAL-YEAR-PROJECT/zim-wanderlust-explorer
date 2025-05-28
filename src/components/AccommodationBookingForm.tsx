@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,13 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { createBooking, updateBooking, BookingStatus, PaymentStatus } from '@/models/Booking';
+import { createBooking, updateBooking, BookingStatus, PaymentStatus, sendBookingConfirmationEmail } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { CalendarIcon, MapPin, Users, Bed, Star } from 'lucide-react';
 import { format, addDays, differenceInDays } from 'date-fns';
-import { toast } from '@/components/ui/sonner';
-import BookingConfirmationDialog from './BookingConfirmationDialog';
+import { toast } from 'sonner';
+import BookingSplash from './BookingSplash';
 import BookingSuccessDialog from './BookingSuccessDialog';
+import LoadingDialog from './ui/loading-dialog';
+import { useProcessDialog } from '@/hooks/useProcessDialog';
 import { cn } from '@/lib/utils';
 
 interface AccommodationDetails {
@@ -40,10 +43,10 @@ interface AccommodationBookingFormProps {
 const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: AccommodationBookingFormProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showBookingSplash, setShowBookingSplash] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [bookingData, setBookingData] = useState<any>(null);
+  const processDialog = useProcessDialog();
   
   // Form state
   const [checkInDate, setCheckInDate] = useState<Date>(addDays(new Date(), 1));
@@ -124,18 +127,38 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
       return;
     }
 
-    setIsSubmitting(true);
+    const steps = [
+      'Validating accommodation details',
+      'Creating booking record',
+      'Setting up payment',
+      'Sending confirmation email',
+      'Finalizing reservation'
+    ];
+
+    processDialog.startProcess(
+      'Booking Your Stay',
+      steps,
+      `Booking ${accommodationDetails?.name} for ${numberOfGuests} ${numberOfGuests === 1 ? 'guest' : 'guests'}`
+    );
 
     try {
-      // Create booking record
+      // Step 1: Validation
+      processDialog.updateProgress(0);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 2: Create booking record
+      processDialog.updateProgress(1);
+      
       const booking = await createBooking({
         user_id: user.id,
-        destination_id: accommodationId,
+        destination_id: accommodationId, // Map accommodation to destination_id for database compatibility
         booking_date: new Date().toISOString(),
         number_of_people: numberOfGuests,
         total_price: totalPrice,
         preferred_date: checkInDate.toISOString(),
         booking_details: {
+          type: 'accommodation',
+          accommodation_id: accommodationId,
           accommodation_name: accommodationDetails?.name || 'Accommodation',
           accommodation_location: accommodationDetails?.location || 'Location not specified',
           check_in_date: checkInDate.toISOString(),
@@ -156,7 +179,9 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
         throw new Error('Failed to create booking.');
       }
 
-      // Create associated payment record
+      // Step 3: Create associated payment record
+      processDialog.updateProgress(2);
+      
       const payment = await createPayment({
         booking_id: booking.id,
         amount: totalPrice,
@@ -179,6 +204,26 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
         payment_id: payment.id
       });
 
+      // Step 4: Send confirmation email
+      processDialog.updateProgress(3);
+      
+      sendBookingConfirmationEmail(booking.id)
+        .then(success => {
+          if (success) {
+            console.log('Booking confirmation email sent successfully');
+          } else {
+            console.warn('Failed to send booking confirmation email');
+          }
+        })
+        .catch(err => {
+          console.error('Error sending booking confirmation email:', err);
+        });
+
+      // Step 5: Finalize
+      processDialog.updateProgress(4);
+      
+      processDialog.completeProcess();
+
       // Set booking data for success dialog
       setBookingData({
         type: 'accommodation',
@@ -188,13 +233,21 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
         currency: '$'
       });
 
-      setShowSuccessDialog(true);
-      toast.success('Booking created successfully!');
+      // Show splash screen after process completion
+      setTimeout(() => {
+        setShowBookingSplash(true);
+      }, 1000);
+      
+      // Show success dialog after splash
+      setTimeout(() => {
+        setShowBookingSplash(false);
+        setShowSuccessDialog(true);
+      }, 3500);
+
     } catch (error) {
+      processDialog.closeProcess();
       console.error('Error creating booking:', error);
       toast.error('Failed to create booking. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -212,6 +265,34 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
 
   return (
     <>
+      <LoadingDialog
+        isOpen={processDialog.isOpen}
+        title={processDialog.title}
+        description={processDialog.description}
+        progress={processDialog.progress}
+        steps={processDialog.steps}
+        currentStep={processDialog.currentStep}
+      />
+
+      {showBookingSplash && (
+        <BookingSplash
+          duration={2500}
+          bookingType="accommodation"
+          itemName={accommodationDetails?.name || 'this accommodation'}
+          onComplete={() => setShowBookingSplash(false)}
+        />
+      )}
+
+      {showSuccessDialog && bookingData && (
+        <BookingSuccessDialog
+          isOpen={showSuccessDialog}
+          onClose={() => setShowSuccessDialog(false)}
+          bookingDetails={bookingData}
+          onProceedToPayment={handleProceedToPayment}
+          onViewBooking={handleViewBooking}
+        />
+      )}
+
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">Book Your Stay</CardTitle>
@@ -450,35 +531,13 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={processDialog.isOpen}
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
-            {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
+            {processDialog.isOpen ? 'Processing...' : 'Proceed to Payment'}
           </Button>
         </CardFooter>
       </Card>
-
-      {/* Booking Success Dialog */}
-      {showSuccessDialog && bookingData && (
-        <BookingSuccessDialog
-          isOpen={showSuccessDialog}
-          onClose={() => setShowSuccessDialog(false)}
-          bookingDetails={bookingData}
-          onProceedToPayment={handleProceedToPayment}
-          onViewBooking={handleViewBooking}
-        />
-      )}
-
-      {/* Booking Confirmation Dialog */}
-      {showConfirmation && bookingData && (
-        <BookingConfirmationDialog
-          isOpen={showConfirmation}
-          onClose={() => setShowConfirmation(false)}
-          bookingDetails={bookingData}
-          onViewBooking={() => navigate('/bookings')}
-          onPayNow={() => navigate(`/payment/${bookingData.bookingId}`)}
-        />
-      )}
     </>
   );
 };
