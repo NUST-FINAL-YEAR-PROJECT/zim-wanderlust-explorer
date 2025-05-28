@@ -165,9 +165,8 @@ const AccommodationCard = ({ accommodation }: AccommodationCardProps) => {
 
       {showBookingSplash && (
         <BookingSplash
-          duration={2500}
           onComplete={handleBookingComplete}
-          bookingType="destination"
+          bookingType="accommodation"
           itemName={accommodation.name}
         />
       )}

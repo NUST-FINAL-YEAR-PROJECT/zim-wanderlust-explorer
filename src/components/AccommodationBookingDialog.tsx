@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -211,7 +210,6 @@ const AccommodationBookingDialog = ({
 
       {showBookingSplash && (
         <BookingSplash
-          duration={2500}
           bookingType="accommodation"
           itemName={accommodation?.name || 'this accommodation'}
           onComplete={() => setShowBookingSplash(false)}

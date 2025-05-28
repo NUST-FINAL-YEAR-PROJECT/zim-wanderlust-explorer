@@ -250,7 +250,6 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
 
       {showBookingSplash && (
         <BookingSplash
-          duration={2500}
           bookingType="event"
           itemName={eventDetails?.title || 'this event'}
           onComplete={() => setShowBookingSplash(false)}

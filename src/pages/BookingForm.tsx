@@ -339,9 +339,9 @@ const BookingForm = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
+                    <CardTitle>Contact Information</CardTitle>
                     <CardDescription>
-                      Please provide your contact details
+                      Let us know how to reach you about your booking
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -358,7 +358,7 @@ const BookingForm = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="contactEmail"
@@ -372,7 +372,7 @@ const BookingForm = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="contactPhone"
@@ -388,12 +388,12 @@ const BookingForm = () => {
                     />
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Trip Details</CardTitle>
                     <CardDescription>
-                      Select your preferred date and number of travelers
+                      Choose your preferred dates and group size
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -402,7 +402,7 @@ const BookingForm = () => {
                       name="preferredDate"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Preferred Date</FormLabel>
+                          <FormLabel>Preferred Start Date</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -432,13 +432,13 @@ const BookingForm = () => {
                             </PopoverContent>
                           </Popover>
                           <FormDescription>
-                            Select your preferred travel date
+                            Select your preferred departure date
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="numberOfPeople"
@@ -449,102 +449,94 @@ const BookingForm = () => {
                             <Input 
                               type="number" 
                               min="1" 
-                              placeholder="Enter number of travelers" 
+                              placeholder="Enter number of people" 
                               {...field} 
                             />
                           </FormControl>
                           <FormDescription>
-                            Total cost will be calculated based on the number of travelers
+                            How many people will be traveling?
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </CardContent>
+                  <CardFooter className="flex gap-4">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowCancelDialog(true)}
+                      className="flex-1"
+                      disabled={processDialog.isOpen}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1"
+                      disabled={processDialog.isOpen}
+                    >
+                      {processDialog.isOpen ? "Creating Booking..." : "Create Booking"}
+                    </Button>
+                  </CardFooter>
                 </Card>
-                
-                <div className="flex gap-4">
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowCancelDialog(true)}
-                    className="flex-1"
-                    disabled={processDialog.isOpen}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
-                    disabled={processDialog.isOpen}
-                  >
-                    {processDialog.isOpen ? "Processing..." : "Continue to Payment"}
-                  </Button>
-                </div>
               </form>
             </Form>
           </div>
-          
+
           <div>
             <Card className="sticky top-6">
               <CardHeader>
                 <CardTitle>Booking Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 rounded-md overflow-hidden">
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="aspect-video rounded-lg bg-gradient-to-br from-blue-100 to-green-100 overflow-hidden">
+                    {destination.image_url ? (
                       <img 
-                        src={destination.image_url || '/placeholder.svg'} 
+                        src={destination.image_url} 
                         alt={destination.name}
-                        className="h-full w-full object-cover" 
+                        className="w-full h-full object-cover"
                       />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-muted-foreground">No image available</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-bold text-lg">{destination.name}</h3>
+                    <p className="text-muted-foreground">{destination.location}</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Price per person:</span>
+                      <span className="font-medium">${destination.price.toLocaleString()}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span>Number of people:</span>
+                      <span className="font-medium">{form.watch('numberOfPeople') || 1}</span>
+                    </div>
+                    <div className="border-t pt-2">
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Total:</span>
+                        <span className="text-green-700">
+                          ${((destination.price || 0) * parseInt(form.watch('numberOfPeople') || '1')).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {destination.description && (
                     <div>
-                      <h3 className="font-medium">{destination.name}</h3>
-                      <p className="text-sm text-muted-foreground">{destination.location}</p>
+                      <h4 className="font-medium mb-2">About this destination:</h4>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {destination.description}
+                      </p>
                     </div>
-                  </div>
-                </div>
-                
-                <div className="border-t pt-4">
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Base price</span>
-                    <span>${destination.price.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Number of travelers</span>
-                    <span>
-                      {form.watch('numberOfPeople') ? parseInt(form.watch('numberOfPeople')) : 1}
-                    </span>
-                  </div>
-                  
-                  {destination.additional_costs && Object.keys(destination.additional_costs).length > 0 && (
-                    <>
-                      {Object.entries(destination.additional_costs).map(([key, value]) => (
-                        <div key={key} className="flex justify-between py-1">
-                          <span className="text-muted-foreground">{key}</span>
-                          <span>${parseFloat(value as string).toFixed(2)}</span>
-                        </div>
-                      ))}
-                    </>
                   )}
-                  
-                  <div className="flex justify-between py-3 border-t border-b font-medium mt-2">
-                    <span>Total</span>
-                    <span className="text-lg">
-                      ${(destination.price * (form.watch('numberOfPeople') ? parseInt(form.watch('numberOfPeople')) : 1)).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="bg-muted p-3 rounded-md text-sm">
-                  <p className="font-medium">Booking Notes:</p>
-                  <ul className="list-disc list-inside space-y-1 mt-2">
-                    <li>Prices are per person</li>
-                    <li>Cancelation available up to 48 hours before trip</li>
-                    <li>Weather conditions may affect availability</li>
-                  </ul>
                 </div>
               </CardContent>
             </Card>

@@ -1,22 +1,23 @@
 
 import { motion } from "framer-motion";
-import { CheckCircle, MapPin, Calendar, Home } from "lucide-react";
+import { CheckCircle, MapPin, Calendar, Home, Route } from "lucide-react";
 import { useEffect } from "react";
 
 interface BookingSplashProps {
-  bookingType: 'destination' | 'event' | 'accommodation';
+  bookingType: 'destination' | 'event' | 'accommodation' | 'itinerary';
   itemName: string;
   onComplete: () => void;
+  duration?: number;
 }
 
-const BookingSplash = ({ bookingType, itemName, onComplete }: BookingSplashProps) => {
+const BookingSplash = ({ bookingType, itemName, onComplete, duration = 2500 }: BookingSplashProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete();
-    }, 2500);
+    }, duration);
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [onComplete, duration]);
 
   const getIcon = () => {
     switch (bookingType) {
@@ -26,6 +27,8 @@ const BookingSplash = ({ bookingType, itemName, onComplete }: BookingSplashProps
         return <Calendar className="h-16 w-16 text-white" />;
       case 'accommodation':
         return <Home className="h-16 w-16 text-white" />;
+      case 'itinerary':
+        return <Route className="h-16 w-16 text-white" />;
       default:
         return <CheckCircle className="h-16 w-16 text-white" />;
     }
@@ -39,6 +42,8 @@ const BookingSplash = ({ bookingType, itemName, onComplete }: BookingSplashProps
         return `Your spot at ${itemName} has been reserved!`;
       case 'accommodation':
         return `Your stay at ${itemName} has been confirmed!`;
+      case 'itinerary':
+        return `Your itinerary "${itemName}" has been created!`;
       default:
         return `Your booking for ${itemName} is confirmed!`;
     }
@@ -67,7 +72,7 @@ const BookingSplash = ({ bookingType, itemName, onComplete }: BookingSplashProps
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Booking Confirmed!
+          {bookingType === 'itinerary' ? 'Itinerary Created!' : 'Booking Confirmed!'}
         </motion.h1>
         
         <motion.p
@@ -87,7 +92,9 @@ const BookingSplash = ({ bookingType, itemName, onComplete }: BookingSplashProps
         >
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3">
             <CheckCircle className="h-5 w-5" />
-            <span>Redirecting you to payment...</span>
+            <span>
+              {bookingType === 'itinerary' ? 'Redirecting to your itinerary...' : 'Redirecting you to payment...'}
+            </span>
           </div>
         </motion.div>
       </div>

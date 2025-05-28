@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -148,7 +147,6 @@ const ItineraryDialog = ({
 
       {showSplash && (
         <BookingSplash
-          duration={2500}
           bookingType="itinerary"
           itemName={form.watch('title') || 'your itinerary'}
           onComplete={() => setShowSplash(false)}
