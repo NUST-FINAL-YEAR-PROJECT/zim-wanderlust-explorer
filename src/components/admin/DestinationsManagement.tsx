@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -16,24 +14,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Destination, getDestinations, addDestination, updateDestination, deleteDestination } from '@/models/Destination';
-import { Plus, Edit, Trash2, Eye, MapPin, DollarSign, Calendar, Star, Search, Filter } from 'lucide-react';
+import { Destination, getDestinations, addDestination, updateDestination, deleteDestination, DestinationInput } from '@/models/Destination';
+import { Plus, Edit, Trash2, MapPin, DollarSign, Star, Search, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
+import DestinationFormDialog from './DestinationFormDialog';
 
 const DestinationsManagement: React.FC = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -43,16 +33,6 @@ const DestinationsManagement: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
-  const [newDestination, setNewDestination] = useState({
-    name: '',
-    description: '',
-    location: '',
-    price: 0,
-    image_url: '',
-    categories: [] as string[],
-    activities: [] as string[],
-    difficulty_level: '',
-  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -76,23 +56,12 @@ const DestinationsManagement: React.FC = () => {
     }
   };
 
-  const handleCreateDestination = async () => {
+  const handleCreateDestination = async (data: DestinationInput) => {
     try {
-      await addDestination(newDestination);
+      await addDestination(data);
       toast({
         title: 'Success',
         description: 'Destination created successfully.',
-      });
-      setIsCreateDialogOpen(false);
-      setNewDestination({
-        name: '',
-        description: '',
-        location: '',
-        price: 0,
-        image_url: '',
-        categories: [],
-        activities: [],
-        difficulty_level: '',
       });
       fetchDestinations();
     } catch (error) {
@@ -105,16 +74,15 @@ const DestinationsManagement: React.FC = () => {
     }
   };
 
-  const handleEditDestination = async () => {
+  const handleEditDestination = async (data: DestinationInput) => {
     if (!selectedDestination) return;
     
     try {
-      await updateDestination(selectedDestination.id, selectedDestination);
+      await updateDestination(selectedDestination.id, data);
       toast({
         title: 'Success',
         description: 'Destination updated successfully.',
       });
-      setIsEditDialogOpen(false);
       setSelectedDestination(null);
       fetchDestinations();
     } catch (error) {
@@ -171,100 +139,13 @@ const DestinationsManagement: React.FC = () => {
                 Manage travel destinations and their information
               </CardDescription>
             </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Destination
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Create New Destination</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details to create a new destination.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        value={newDestination.name}
-                        onChange={(e) => setNewDestination({...newDestination, name: e.target.value})}
-                        placeholder="Destination name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={newDestination.location}
-                        onChange={(e) => setNewDestination({...newDestination, location: e.target.value})}
-                        placeholder="City, Province"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newDestination.description}
-                      onChange={(e) => setNewDestination({...newDestination, description: e.target.value})}
-                      placeholder="Destination description"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price">Price (USD)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        value={newDestination.price}
-                        onChange={(e) => setNewDestination({...newDestination, price: Number(e.target.value)})}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="difficulty">Difficulty Level</Label>
-                      <Select
-                        value={newDestination.difficulty_level}
-                        onValueChange={(value) => setNewDestination({...newDestination, difficulty_level: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select difficulty" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Moderate">Moderate</SelectItem>
-                          <SelectItem value="Challenging">Challenging</SelectItem>
-                          <SelectItem value="Extreme">Extreme</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="image_url">Image URL</Label>
-                    <Input
-                      id="image_url"
-                      value={newDestination.image_url}
-                      onChange={(e) => setNewDestination({...newDestination, image_url: e.target.value})}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateDestination} className="bg-gradient-to-r from-green-600 to-emerald-600">
-                    Create Destination
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Destination
+            </Button>
           </div>
         </CardHeader>
       </Card>
@@ -420,84 +301,26 @@ const DestinationsManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Destination</DialogTitle>
-            <DialogDescription>
-              Update the destination information.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedDestination && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-name">Name</Label>
-                  <Input
-                    id="edit-name"
-                    value={selectedDestination.name}
-                    onChange={(e) => setSelectedDestination({...selectedDestination, name: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-location">Location</Label>
-                  <Input
-                    id="edit-location"
-                    value={selectedDestination.location}
-                    onChange={(e) => setSelectedDestination({...selectedDestination, location: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea
-                  id="edit-description"
-                  value={selectedDestination.description || ''}
-                  onChange={(e) => setSelectedDestination({...selectedDestination, description: e.target.value})}
-                  rows={3}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-price">Price (USD)</Label>
-                  <Input
-                    id="edit-price"
-                    type="number"
-                    value={selectedDestination.price}
-                    onChange={(e) => setSelectedDestination({...selectedDestination, price: Number(e.target.value)})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-difficulty">Difficulty Level</Label>
-                  <Select
-                    value={selectedDestination.difficulty_level || ''}
-                    onValueChange={(value) => setSelectedDestination({...selectedDestination, difficulty_level: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select difficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Moderate">Moderate</SelectItem>
-                      <SelectItem value="Challenging">Challenging</SelectItem>
-                      <SelectItem value="Extreme">Extreme</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditDestination} className="bg-gradient-to-r from-green-600 to-emerald-600">
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Form Dialogs */}
+      <DestinationFormDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSubmit={handleCreateDestination}
+        title="Create New Destination"
+        description="Fill in the details to create a new destination."
+      />
+
+      <DestinationFormDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setSelectedDestination(null);
+        }}
+        onSubmit={handleEditDestination}
+        destination={selectedDestination}
+        title="Edit Destination"
+        description="Update the destination information."
+      />
     </div>
   );
 };

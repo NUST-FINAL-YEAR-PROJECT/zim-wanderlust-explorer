@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -16,25 +14,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Event, getEvents, addEvent, updateEvent, deleteEvent } from '@/models/Event';
+import { Event, getEvents, addEvent, updateEvent, deleteEvent, EventInput } from '@/models/Event';
 import { Plus, Edit, Trash2, Calendar, MapPin, DollarSign, Clock, Search, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import EventFormDialog from './EventFormDialog';
 
 const EventsManagement: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -44,18 +34,6 @@ const EventsManagement: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [newEvent, setNewEvent] = useState({
-    title: '',
-    description: '',
-    location: '',
-    start_date: '',
-    end_date: '',
-    price: 0,
-    image_url: '',
-    event_type: '',
-    program_type: '',
-    program_name: '',
-  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -79,25 +57,12 @@ const EventsManagement: React.FC = () => {
     }
   };
 
-  const handleCreateEvent = async () => {
+  const handleCreateEvent = async (data: EventInput) => {
     try {
-      await addEvent(newEvent);
+      await addEvent(data);
       toast({
         title: 'Success',
         description: 'Event created successfully.',
-      });
-      setIsCreateDialogOpen(false);
-      setNewEvent({
-        title: '',
-        description: '',
-        location: '',
-        start_date: '',
-        end_date: '',
-        price: 0,
-        image_url: '',
-        event_type: '',
-        program_type: '',
-        program_name: '',
       });
       fetchEvents();
     } catch (error) {
@@ -110,16 +75,15 @@ const EventsManagement: React.FC = () => {
     }
   };
 
-  const handleEditEvent = async () => {
+  const handleEditEvent = async (data: EventInput) => {
     if (!selectedEvent) return;
     
     try {
-      await updateEvent(selectedEvent.id, selectedEvent);
+      await updateEvent(selectedEvent.id, data);
       toast({
         title: 'Success',
         description: 'Event updated successfully.',
       });
-      setIsEditDialogOpen(false);
       setSelectedEvent(null);
       fetchEvents();
     } catch (error) {
@@ -159,7 +123,7 @@ const EventsManagement: React.FC = () => {
     return matchesSearch && matchesType;
   });
 
-  const eventTypes = ['all', 'festival', 'conference', 'workshop', 'concert', 'cultural'];
+  const eventTypes = ['all', 'festival', 'conference', 'workshop', 'concert', 'cultural', 'sports', 'exhibition', 'trade-show'];
 
   const getEventStatus = (event: Event) => {
     const now = new Date();
@@ -186,121 +150,13 @@ const EventsManagement: React.FC = () => {
                 Manage events, festivals, and activities
               </CardDescription>
             </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Event
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Create New Event</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details to create a new event.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        value={newEvent.title}
-                        onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-                        placeholder="Event title"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={newEvent.location}
-                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
-                        placeholder="Event location"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newEvent.description}
-                      onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                      placeholder="Event description"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="start_date">Start Date</Label>
-                      <Input
-                        id="start_date"
-                        type="datetime-local"
-                        value={newEvent.start_date}
-                        onChange={(e) => setNewEvent({...newEvent, start_date: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="end_date">End Date</Label>
-                      <Input
-                        id="end_date"
-                        type="datetime-local"
-                        value={newEvent.end_date}
-                        onChange={(e) => setNewEvent({...newEvent, end_date: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price">Price (USD)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        value={newEvent.price}
-                        onChange={(e) => setNewEvent({...newEvent, price: Number(e.target.value)})}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="event_type">Event Type</Label>
-                      <Select
-                        value={newEvent.event_type}
-                        onValueChange={(value) => setNewEvent({...newEvent, event_type: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="festival">Festival</SelectItem>
-                          <SelectItem value="conference">Conference</SelectItem>
-                          <SelectItem value="workshop">Workshop</SelectItem>
-                          <SelectItem value="concert">Concert</SelectItem>
-                          <SelectItem value="cultural">Cultural</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="image_url">Image URL</Label>
-                    <Input
-                      id="image_url"
-                      value={newEvent.image_url}
-                      onChange={(e) => setNewEvent({...newEvent, image_url: e.target.value})}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateEvent} className="bg-gradient-to-r from-orange-600 to-amber-600">
-                    Create Event
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Event
+            </Button>
           </div>
         </CardHeader>
       </Card>
@@ -460,105 +316,26 @@ const EventsManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Event</DialogTitle>
-            <DialogDescription>
-              Update the event information.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedEvent && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-title">Title</Label>
-                  <Input
-                    id="edit-title"
-                    value={selectedEvent.title}
-                    onChange={(e) => setSelectedEvent({...selectedEvent, title: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-location">Location</Label>
-                  <Input
-                    id="edit-location"
-                    value={selectedEvent.location || ''}
-                    onChange={(e) => setSelectedEvent({...selectedEvent, location: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea
-                  id="edit-description"
-                  value={selectedEvent.description || ''}
-                  onChange={(e) => setSelectedEvent({...selectedEvent, description: e.target.value})}
-                  rows={3}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-start">Start Date</Label>
-                  <Input
-                    id="edit-start"
-                    type="datetime-local"
-                    value={selectedEvent.start_date ? selectedEvent.start_date.slice(0, 16) : ''}
-                    onChange={(e) => setSelectedEvent({...selectedEvent, start_date: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-end">End Date</Label>
-                  <Input
-                    id="edit-end"
-                    type="datetime-local"
-                    value={selectedEvent.end_date ? selectedEvent.end_date.slice(0, 16) : ''}
-                    onChange={(e) => setSelectedEvent({...selectedEvent, end_date: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-price">Price (USD)</Label>
-                  <Input
-                    id="edit-price"
-                    type="number"
-                    value={selectedEvent.price || 0}
-                    onChange={(e) => setSelectedEvent({...selectedEvent, price: Number(e.target.value)})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-type">Event Type</Label>
-                  <Select
-                    value={selectedEvent.event_type || ''}
-                    onValueChange={(value) => setSelectedEvent({...selectedEvent, event_type: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="festival">Festival</SelectItem>
-                      <SelectItem value="conference">Conference</SelectItem>
-                      <SelectItem value="workshop">Workshop</SelectItem>
-                      <SelectItem value="concert">Concert</SelectItem>
-                      <SelectItem value="cultural">Cultural</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditEvent} className="bg-gradient-to-r from-orange-600 to-amber-600">
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Form Dialogs */}
+      <EventFormDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSubmit={handleCreateEvent}
+        title="Create New Event"
+        description="Fill in the details to create a new event."
+      />
+
+      <EventFormDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setSelectedEvent(null);
+        }}
+        onSubmit={handleEditEvent}
+        event={selectedEvent}
+        title="Edit Event"
+        description="Update the event information."
+      />
     </div>
   );
 };
