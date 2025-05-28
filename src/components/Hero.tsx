@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import EnhancedSearchBar from "./EnhancedSearchBar";
@@ -94,11 +95,6 @@ const Hero = () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    navigate(`/browse?search=${encodeURIComponent(query)}`);
-  };
 
   const handleSignIn = () => {
     setIsLoading(true);
@@ -205,7 +201,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative h-[800px] overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden">
       {/* Background slideshow */}
       <div className="absolute inset-0">
         {images.length > 0 ? (
@@ -296,8 +292,8 @@ const Hero = () => {
         </div>
       )}
       
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-        <div className="max-w-5xl w-full">
+      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-20">
+        <div className="max-w-6xl w-full space-y-8">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -322,7 +318,7 @@ const Hero = () => {
             initial="hidden"
             animate="visible"
             variants={searchBarVariants}
-            className="w-full mb-10"
+            className="w-full mb-16"
           >
             <EnhancedSearchBar />
           </motion.div>
@@ -331,7 +327,7 @@ const Hero = () => {
             initial="hidden"
             animate="visible"
             variants={buttonVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-4 justify-center pb-20"
           >
             <motion.div
               whileHover="hover"

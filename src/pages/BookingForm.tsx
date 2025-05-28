@@ -268,7 +268,7 @@ const BookingForm = () => {
 
       {showBookingSplash && (
         <BookingSplash
-          bookingType="destination"
+          bookingType="accommodation"
           itemName={destination?.name || 'Unknown Destination'}
           onComplete={handleSplashComplete}
           duration={2500}
@@ -280,7 +280,7 @@ const BookingForm = () => {
           isOpen={showSuccessDialog}
           onClose={() => setShowSuccessDialog(false)}
           bookingDetails={{
-            type: 'destination',
+            type: 'accommodation',
             name: destination?.name || 'Destination',
             bookingId: createdBooking.id,
             totalAmount: createdBooking.total_price,

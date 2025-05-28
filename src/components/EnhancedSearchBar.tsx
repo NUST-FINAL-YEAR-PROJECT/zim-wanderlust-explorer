@@ -174,38 +174,38 @@ const EnhancedSearchBar = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto" ref={searchRef}>
+    <div className="w-full max-w-6xl mx-auto relative" ref={searchRef}>
       <motion.div 
-        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl"
+        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Tab Navigation */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
-          <TabsList className="w-full bg-white/20 backdrop-blur-sm">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+          <TabsList className="w-full bg-white/20 backdrop-blur-sm h-14">
             <TabsTrigger 
               value="destinations" 
-              className="flex-1 py-3 data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              className="flex-1 py-4 px-6 text-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
             >
-              <MapPin className="mr-2 h-4 w-4" />
+              <MapPin className="mr-3 h-5 w-5" />
               Destinations
             </TabsTrigger>
             <TabsTrigger 
               value="events" 
-              className="flex-1 py-3 data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              className="flex-1 py-4 px-6 text-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
             >
-              <Calendar className="mr-2 h-4 w-4" />
+              <Calendar className="mr-3 h-5 w-5" />
               Experiences
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         {/* Search Input with Filters */}
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
             <div className="relative flex items-center">
-              <Search className="absolute left-4 h-5 w-5 text-white/70" />
+              <Search className="absolute left-5 h-6 w-6 text-white/70" />
               <Input
                 type="text"
                 placeholder={activeTab === "destinations" 
@@ -220,18 +220,18 @@ const EnhancedSearchBar = () => {
                   }
                 }}
                 onKeyDown={handleKeyDown}
-                className="pl-12 pr-10 py-4 text-white placeholder:text-white/70 bg-white/10 border-white/20 focus:border-white/40 rounded-xl text-lg"
+                className="pl-14 pr-12 py-6 text-white placeholder:text-white/70 bg-white/10 border-white/20 focus:border-white/40 rounded-xl text-xl"
               />
               {searchTerm && (
                 <button 
-                  className="absolute right-3" 
+                  className="absolute right-4" 
                   onClick={() => {
                     setSearchTerm('');
                     setSearchResults([]);
                     setShowResults(false);
                   }}
                 >
-                  <X size={18} className="text-white/70 hover:text-white" />
+                  <X size={20} className="text-white/70 hover:text-white" />
                 </button>
               )}
             </div>
@@ -241,7 +241,7 @@ const EnhancedSearchBar = () => {
             <PopoverTrigger asChild>
               <Button 
                 variant="outline" 
-                className="bg-white/10 border-white/20 hover:bg-white/20 text-white rounded-xl px-4 py-4"
+                className="bg-white/10 border-white/20 hover:bg-white/20 text-white rounded-xl px-6 py-6"
               >
                 <Filter className="h-5 w-5" />
                 {selectedCategories.length > 0 && (
@@ -293,20 +293,20 @@ const EnhancedSearchBar = () => {
           
           <Button 
             onClick={handleSearch}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 py-4 text-lg shadow-lg"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-10 py-6 text-xl shadow-lg"
           >
             Search
           </Button>
         </div>
 
         {/* Popular Searches */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          <span className="text-white/70 text-sm mr-2">Popular:</span>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <span className="text-white/70 text-lg mr-3">Popular:</span>
           {popularSearches.map((term) => (
             <Badge
               key={term}
               variant="secondary"
-              className="bg-white/20 hover:bg-white/30 cursor-pointer text-white border-white/10 transition-all duration-200"
+              className="bg-white/20 hover:bg-white/30 cursor-pointer text-white border-white/10 transition-all duration-200 text-sm px-3 py-1"
               onClick={() => handlePopularSearchClick(term)}
             >
               <TrendingUp className="h-3 w-3 mr-1" />
@@ -316,7 +316,7 @@ const EnhancedSearchBar = () => {
         </div>
       </motion.div>
 
-      {/* Search Results */}
+      {/* Search Results with expanded space */}
       <AnimatePresence>
         {showResults && (
           <motion.div 
@@ -324,30 +324,30 @@ const EnhancedSearchBar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="mt-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 max-h-96 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-4 bg-white/98 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 max-h-[600px] overflow-y-auto z-50"
           >
             {isLoading ? (
-              <div className="p-6 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                <p className="text-indigo-900">Searching...</p>
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-indigo-900 text-lg">Searching...</p>
               </div>
             ) : searchResults.length > 0 ? (
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-indigo-900">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-semibold text-indigo-900 text-xl">
                     {searchResults.length} {activeTab} found
                   </h3>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleSearch}
-                    className="text-indigo-600 hover:text-indigo-800"
+                    className="text-indigo-600 hover:text-indigo-800 text-lg"
                   >
-                    View All
+                    View All Results
                   </Button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {searchResults.map((result, index) => (
                     <motion.div
                       key={`${result.id}-${index}`}
@@ -356,22 +356,22 @@ const EnhancedSearchBar = () => {
                       transition={{ delay: index * 0.1 }}
                     >
                       <Card 
-                        className="cursor-pointer hover:shadow-lg transition-all duration-200 border-indigo-100 hover:border-indigo-300"
+                        className="cursor-pointer hover:shadow-xl transition-all duration-300 border-indigo-100 hover:border-indigo-300 hover:scale-105"
                         onClick={() => handleResultClick(result)}
                       >
-                        <CardHeader className="pb-2">
+                        <CardHeader className="pb-3">
                           <div className="flex items-start justify-between">
-                            <div>
-                              <CardTitle className="text-lg text-indigo-900">
+                            <div className="flex-1">
+                              <CardTitle className="text-xl text-indigo-900 mb-2">
                                 {result.name || result.title}
                               </CardTitle>
-                              <CardDescription className="flex items-center mt-1">
-                                <MapPin className="h-3 w-3 mr-1" />
+                              <CardDescription className="flex items-center text-base">
+                                <MapPin className="h-4 w-4 mr-2" />
                                 {result.location}
                               </CardDescription>
                             </div>
                             {result.price && (
-                              <Badge className="bg-emerald-100 text-emerald-800">
+                              <Badge className="bg-emerald-100 text-emerald-800 text-sm px-3 py-1">
                                 ${result.price}
                               </Badge>
                             )}
@@ -379,7 +379,7 @@ const EnhancedSearchBar = () => {
                         </CardHeader>
                         {result.description && (
                           <CardContent className="pt-0">
-                            <p className="text-sm text-gray-600 line-clamp-2">
+                            <p className="text-gray-600 line-clamp-2 text-base">
                               {result.description}
                             </p>
                           </CardContent>
@@ -390,32 +390,32 @@ const EnhancedSearchBar = () => {
                 </div>
               </div>
             ) : searchTerm.trim() ? (
-              <div className="p-6 text-center">
-                <p className="text-gray-500 mb-2">No results found for "{searchTerm}"</p>
-                <p className="text-sm text-gray-400 mb-4">Try adjusting your search terms or filters</p>
+              <div className="p-8 text-center">
+                <p className="text-gray-500 mb-3 text-lg">No results found for "{searchTerm}"</p>
+                <p className="text-gray-400 mb-6">Try adjusting your search terms or filters</p>
                 <Button
                   variant="outline"
                   onClick={handleSearch}
-                  className="text-indigo-600 border-indigo-200"
+                  className="text-indigo-600 border-indigo-200 text-lg px-6 py-3"
                 >
                   Search Anyway
                 </Button>
               </div>
             ) : recentSearches.length > 0 ? (
-              <div className="p-4">
-                <h3 className="font-semibold text-indigo-900 mb-3 flex items-center">
-                  <Clock className="h-4 w-4 mr-2" />
+              <div className="p-6">
+                <h3 className="font-semibold text-indigo-900 mb-4 flex items-center text-xl">
+                  <Clock className="h-5 w-5 mr-3" />
                   Recent Searches
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {recentSearches.map((term, index) => (
                     <div
                       key={`recent-${index}`}
-                      className="flex items-center hover:bg-indigo-50 rounded-lg p-2 cursor-pointer transition-colors"
+                      className="flex items-center hover:bg-indigo-50 rounded-lg p-3 cursor-pointer transition-colors"
                       onClick={() => handlePopularSearchClick(term)}
                     >
-                      <Search size={14} className="text-gray-400 mr-3" />
-                      <span className="text-gray-800">{term}</span>
+                      <Search size={16} className="text-gray-400 mr-4" />
+                      <span className="text-gray-800 text-lg">{term}</span>
                     </div>
                   ))}
                 </div>
