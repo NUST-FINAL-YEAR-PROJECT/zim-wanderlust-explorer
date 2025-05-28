@@ -1,120 +1,97 @@
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, MapPin, Calendar, Building, Route } from 'lucide-react';
+import { motion } from "framer-motion";
+import { CheckCircle, MapPin, Calendar, Home } from "lucide-react";
+import { useEffect } from "react";
 
 interface BookingSplashProps {
-  duration?: number;
-  bookingType: 'event' | 'destination' | 'accommodation' | 'itinerary';
-  itemName?: string;
-  onComplete?: () => void;
+  bookingType: 'destination' | 'event' | 'accommodation';
+  itemName: string;
+  onComplete: () => void;
 }
 
-const BookingSplash = ({ 
-  duration = 3000, 
-  bookingType, 
-  itemName = 'item',
-  onComplete 
-}: BookingSplashProps) => {
-  const [isVisible, setIsVisible] = useState(true);
-
+const BookingSplash = ({ bookingType, itemName, onComplete }: BookingSplashProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsVisible(false);
-      if (onComplete) {
-        setTimeout(onComplete, 500); // Allow exit animation to complete
-      }
-    }, duration);
+      onComplete();
+    }, 2500);
 
     return () => clearTimeout(timer);
-  }, [duration, onComplete]);
+  }, [onComplete]);
 
   const getIcon = () => {
     switch (bookingType) {
-      case 'event':
-        return Calendar;
       case 'destination':
-        return MapPin;
+        return <MapPin className="h-16 w-16 text-white" />;
+      case 'event':
+        return <Calendar className="h-16 w-16 text-white" />;
       case 'accommodation':
-        return Building;
-      case 'itinerary':
-        return Route;
+        return <Home className="h-16 w-16 text-white" />;
       default:
-        return CheckCircle;
+        return <CheckCircle className="h-16 w-16 text-white" />;
     }
   };
 
-  const Icon = getIcon();
-
-  const getTitle = () => {
+  const getMessage = () => {
     switch (bookingType) {
-      case 'event':
-        return 'Event Booking Started!';
       case 'destination':
-        return 'Destination Booking Started!';
+        return `Your trip to ${itemName} has been booked!`;
+      case 'event':
+        return `Your spot at ${itemName} has been reserved!`;
       case 'accommodation':
-        return 'Accommodation Booking Started!';
-      case 'itinerary':
-        return 'Itinerary Created!';
+        return `Your stay at ${itemName} has been confirmed!`;
       default:
-        return 'Booking Started!';
+        return `Your booking for ${itemName} is confirmed!`;
     }
   };
-
-  if (!isVisible) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-      >
+    <motion.div
+      className="fixed inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center z-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="text-center text-white">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          className="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          className="mb-8"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mb-6"
-          >
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <Icon className="w-8 h-8 text-green-600" />
-            </div>
-          </motion.div>
-          
-          <motion.h2
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-2xl font-bold text-gray-800 mb-2"
-          >
-            {getTitle()}
-          </motion.h2>
-          
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-gray-600"
-          >
-            Setting up your booking for {itemName}...
-          </motion.p>
-
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ delay: 0.5, duration: duration / 1000 - 0.5 }}
-            className="h-1 bg-green-500 rounded-full mt-6"
-          />
+          {getIcon()}
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        
+        <motion.h1
+          className="text-4xl md:text-6xl font-bold mb-4"
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Booking Confirmed!
+        </motion.h1>
+        
+        <motion.p
+          className="text-xl md:text-2xl text-white/90"
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          {getMessage()}
+        </motion.p>
+        
+        <motion.div
+          className="mt-8"
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.9 }}
+        >
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3">
+            <CheckCircle className="h-5 w-5" />
+            <span>Redirecting you to payment...</span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 };
 

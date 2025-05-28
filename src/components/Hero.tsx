@@ -13,6 +13,51 @@ const Hero = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Fetch public images for slideshow
+  useEffect(() => {
+    const fetchPublicImages = async () => {
+      try {
+        const { data, error } = await supabase.storage
+          .from('public')
+          .list('', { limit: 100 });
+
+        if (error) {
+          console.error('Error fetching images:', error);
+          return;
+        }
+
+        if (data) {
+          const imageUrls = data
+            .filter(file => file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+            .map(file => {
+              const { data: urlData } = supabase.storage
+                .from('public')
+                .getPublicUrl(file.name);
+              return urlData.publicUrl;
+            });
+          
+          setImages(imageUrls);
+        }
+      } catch (error) {
+        console.error('Error fetching public images:', error);
+      }
+    };
+
+    fetchPublicImages();
+  }, []);
+
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (images.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [images.length]);
 
   useEffect(() => {
     // Check if user is logged in
@@ -95,17 +140,15 @@ const Hero = () => {
 
   const handleExploreDestinations = () => {
     navigate("/browse?tab=destinations");
-    // Add analytics tracking
     console.log("User clicked Explore Destinations");
   };
 
   const handleUpcomingEvents = () => {
     navigate("/browse?tab=events");
-    // Add analytics tracking
     console.log("User clicked Upcoming Events");
   };
 
-  // Text animation variants
+  // Animation variants
   const titleVariants = {
     hidden: { opacity: 0, x: -50 },
     visible: { 
@@ -165,7 +208,25 @@ const Hero = () => {
 
   return (
     <div className="relative h-[700px] overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center bg-no-repeat">
+      {/* Background slideshow */}
+      <div className="absolute inset-0">
+        {images.length > 0 ? (
+          images.map((imageUrl, index) => (
+            <motion.div
+              key={index}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${imageUrl})` }}
+              initial={{ opacity: 0 }}
+              animate={{ 
+                opacity: currentImageIndex === index ? 1 : 0,
+                scale: currentImageIndex === index ? 1 : 1.05
+              }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+            />
+          ))
+        ) : (
+          <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center bg-no-repeat" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
       </div>
       
@@ -219,6 +280,23 @@ const Hero = () => {
           </Button>
         )}
       </motion.div>
+      
+      {/* Slideshow indicators */}
+      {images.length > 1 && (
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentImageIndex === index 
+                  ? 'bg-white scale-125' 
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
+            />
+          ))}
+        </div>
+      )}
       
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
         <div className="max-w-4xl">
