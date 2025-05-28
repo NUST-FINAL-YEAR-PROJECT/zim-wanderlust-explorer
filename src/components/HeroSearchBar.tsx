@@ -122,10 +122,11 @@ const HeroSearchBar = () => {
     }
     
     navigate(`/browse?${searchParams.toString()}`);
+    setShowResults(false);
   };
 
   const handleResultClick = (result: any) => {
-    saveRecentSearch(result.name);
+    saveRecentSearch(result.name || result.title);
     
     if (activeTab === "destinations") {
       navigate(`/destination/${result.id}/details`);
@@ -138,12 +139,22 @@ const HeroSearchBar = () => {
 
   const handleRecentSearchClick = (term: string) => {
     setSearchTerm(term);
-    performSearch();
+    setShowResults(false);
+    
+    // Navigate immediately for recent searches
+    const searchParams = new URLSearchParams();
+    searchParams.set('search', term);
+    searchParams.set('tab', activeTab);
+    
+    navigate(`/browse?${searchParams.toString()}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+    if (e.key === 'Escape') {
+      setShowResults(false);
     }
   };
 
@@ -191,6 +202,8 @@ const HeroSearchBar = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={() => {
                   if (searchTerm.trim() && searchResults.length > 0) {
+                    setShowResults(true);
+                  } else if (recentSearches.length > 0 && !searchTerm.trim()) {
                     setShowResults(true);
                   }
                 }}
@@ -251,7 +264,7 @@ const HeroSearchBar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-indigo-100 max-h-80 overflow-y-auto z-50"
+            className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-lg rounded-xl shadow-xl border border-indigo-100 max-h-80 overflow-y-auto z-50"
           >
             {isLoading ? (
               <div className="p-4 text-center">
@@ -269,9 +282,9 @@ const HeroSearchBar = () => {
                     className="hover:bg-indigo-50 rounded-lg p-2 cursor-pointer transition-colors"
                     onClick={() => handleResultClick(result)}
                   >
-                    <p className="font-medium text-indigo-900">{result.name}</p>
+                    <p className="font-medium text-indigo-900">{result.name || result.title}</p>
                     <p className="text-sm text-gray-600 truncate">
-                      {activeTab === "destinations" ? result.location : result.date}
+                      {activeTab === "destinations" ? result.location : result.location || 'Event'}
                     </p>
                   </div>
                 ))}
@@ -290,6 +303,13 @@ const HeroSearchBar = () => {
               <div className="p-4 text-center">
                 <p className="text-gray-500">No results found</p>
                 <p className="text-sm text-gray-400">Try a different search term</p>
+                <Button
+                  variant="ghost"
+                  className="mt-2 text-indigo-700 hover:text-indigo-900"
+                  onClick={handleSearch}
+                >
+                  Search anyway
+                </Button>
               </div>
             ) : recentSearches.length > 0 ? (
               <div className="p-2">
@@ -326,10 +346,14 @@ const HeroSearchBar = () => {
           <Badge
             key={term}
             variant="secondary"
-            className="bg-white/20 hover:bg-white/30 cursor-pointer text-white border-white/10"
+            className="bg-white/20 hover:bg-white/30 cursor-pointer text-white border-white/10 transition-all duration-200"
             onClick={() => {
               setSearchTerm(term);
-              performSearch();
+              saveRecentSearch(term);
+              const searchParams = new URLSearchParams();
+              searchParams.set('search', term);
+              searchParams.set('tab', activeTab);
+              navigate(`/browse?${searchParams.toString()}`);
             }}
           >
             {term}

@@ -83,24 +83,7 @@ const HomepageSearchBar = ({ onSearch }: { onSearch?: (query: string) => void })
       params.append('categories', selectedCategories.join(','));
     }
     
-    // Quick check if there are actual results before navigating
-    try {
-      const results = activeTab === "stay" 
-        ? await searchDestinations(searchText)
-        : await searchEvents(searchText);
-        
-      if (results.length === 0) {
-        toast({
-          title: "No results found",
-          description: `No ${activeTab === "stay" ? "destinations" : "events"} match your search.`,
-          variant: "default",
-        });
-        // Still navigate to show the empty state
-      }
-    } catch (error) {
-      console.error("Error searching:", error);
-    }
-    
+    // Navigate with search parameters
     navigate(`/browse?${params.toString()}`);
   };
 
@@ -109,6 +92,12 @@ const HomepageSearchBar = ({ onSearch }: { onSearch?: (query: string) => void })
       setSelectedCategories(selectedCategories.filter(c => c !== category));
     } else {
       setSelectedCategories([...selectedCategories, category]);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
     }
   };
   
@@ -145,7 +134,7 @@ const HomepageSearchBar = ({ onSearch }: { onSearch?: (query: string) => void })
               className="w-full py-4 px-4 outline-none text-gray-800 placeholder-gray-500 text-lg bg-transparent"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              onKeyDown={handleKeyDown}
               list="recent-searches"
             />
             {recentSearches.length > 0 && (
@@ -167,7 +156,7 @@ const HomepageSearchBar = ({ onSearch }: { onSearch?: (query: string) => void })
               <Filter className="h-5 w-5 text-indigo-700" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-6 rounded-xl shadow-lg border-indigo-100">
+          <PopoverContent className="w-80 p-6 rounded-xl shadow-lg border-indigo-100 bg-white">
             <div className="space-y-6">
               <div>
                 <h4 className="font-display font-medium mb-3 text-gray-800">Price Range</h4>
