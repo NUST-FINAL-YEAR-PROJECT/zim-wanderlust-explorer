@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { createBooking, updateBooking, BookingStatus, PaymentStatus, sendBookingConfirmationEmail } from '@/models/Booking';
+import { createBooking, updateBooking, BookingStatus, PaymentStatus, sendBookingConfirmationEmail, checkForDuplicateBooking } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -33,8 +33,10 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
   const [showBookingSplash, setShowBookingSplash] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<any>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [pendingBookingData, setPendingBookingData] = useState<any>(null);
   
   const processDialog = useProcessDialog();
 
@@ -61,9 +63,7 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
   // Calculate total price
   const totalPrice = numberOfPeople * getTicketPrice();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const createBookingProcess = async () => {
     if (!user) {
       toast({
         title: 'Login Required',
@@ -202,6 +202,41 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: 'Login Required',
+        description: 'You must be logged in to book an event.',
+        variant: 'destructive',
+      });
+      navigate('/auth', { state: { redirectTo: `/events` } });
+      return;
+    }
+
+    // Check for duplicate bookings
+    const hasDuplicate = await checkForDuplicateBooking(user.id, null, eventId);
+    
+    if (hasDuplicate) {
+      setShowDuplicateDialog(true);
+      return;
+    }
+    
+    // No duplicate found, proceed with booking
+    await createBookingProcess();
+  };
+
+  const handleConfirmDuplicateBooking = async () => {
+    setShowDuplicateDialog(false);
+    await createBookingProcess();
+  };
+
+  const handleCancelDuplicateBooking = () => {
+    setShowDuplicateDialog(false);
+    navigate('/bookings');
+  };
+
   const handleProceedToPayment = () => {
     setShowSuccessDialog(false);
     if (createdBooking) {
@@ -246,6 +281,17 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
         confirmText="Yes, Cancel"
         cancelText="Continue Booking"
         variant="destructive"
+      />
+
+      <ConfirmationDialog
+        isOpen={showDuplicateDialog}
+        onClose={() => setShowDuplicateDialog(false)}
+        onConfirm={handleConfirmDuplicateBooking}
+        title="Duplicate Booking Detected"
+        description={`You already have an unpaid booking for ${eventDetails?.title}. Creating another booking will result in multiple pending payments. Do you want to proceed or go to your existing bookings?`}
+        confirmText="Proceed Anyway"
+        cancelText="View Existing Bookings"
+        variant="default"
       />
 
       {showBookingSplash && (

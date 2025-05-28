@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -8,7 +7,7 @@ import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, CalendarIcon } from 'lucide-react';
 import { getDestination } from '@/models/Destination';
-import { createBooking, updateBooking, sendBookingConfirmationEmail } from '@/models/Booking';
+import { createBooking, updateBooking, sendBookingConfirmationEmail, checkForDuplicateBooking } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -45,9 +44,11 @@ const BookingForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [showBookingSplash, setShowBookingSplash] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<any>(null);
+  const [pendingBookingData, setPendingBookingData] = useState<any>(null);
   const processDialog = useProcessDialog();
 
   // Initialize the form
@@ -101,7 +102,7 @@ const BookingForm = () => {
     );
   }
 
-  const onSubmit = async (data: z.infer<typeof bookingSchema>) => {
+  const createBookingProcess = async (bookingData: any) => {
     const steps = [
       'Validating trip details',
       'Creating booking record',
@@ -113,21 +114,17 @@ const BookingForm = () => {
     processDialog.startProcess(
       'Creating Your Booking',
       steps,
-      `Booking ${destination!.name} for ${data.numberOfPeople} ${parseInt(data.numberOfPeople) === 1 ? 'person' : 'people'}`
+      `Booking ${destination!.name} for ${bookingData.numberOfPeople} ${parseInt(bookingData.numberOfPeople) === 1 ? 'person' : 'people'}`
     );
 
     try {
-      console.log("Form submitted with data:", data);
-      
       // Step 1: Validation
       processDialog.updateProgress(0);
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Calculate total price based on number of people
-      const numberOfPeople = parseInt(data.numberOfPeople);
+      const numberOfPeople = parseInt(bookingData.numberOfPeople);
       const totalPrice = destination!.price * numberOfPeople;
-      
-      console.log("Creating booking with total price:", totalPrice);
       
       // Step 2: Create booking
       processDialog.updateProgress(1);
@@ -138,10 +135,10 @@ const BookingForm = () => {
         booking_date: new Date().toISOString(),
         number_of_people: numberOfPeople,
         total_price: totalPrice,
-        preferred_date: data.preferredDate.toISOString(),
-        contact_name: data.contactName,
-        contact_email: data.contactEmail,
-        contact_phone: data.contactPhone,
+        preferred_date: bookingData.preferredDate.toISOString(),
+        contact_name: bookingData.contactName,
+        contact_email: bookingData.contactEmail,
+        contact_phone: bookingData.contactPhone,
         status: 'pending',
         payment_status: 'pending',
         booking_details: {
@@ -151,8 +148,6 @@ const BookingForm = () => {
           payment_url: destination!.payment_url || null
         }
       });
-      
-      console.log("Booking created:", booking);
       
       if (!booking) {
         throw new Error('Failed to create booking');
@@ -172,8 +167,6 @@ const BookingForm = () => {
           number_of_people: numberOfPeople
         }
       });
-      
-      console.log("Payment created:", payment);
       
       if (!payment) {
         throw new Error('Failed to create payment record');
@@ -221,6 +214,42 @@ const BookingForm = () => {
       console.error("Error creating booking:", error);
       toast.error("Failed to create booking. Please try again.");
     }
+  };
+
+  const onSubmit = async (data: z.infer<typeof bookingSchema>) => {
+    if (!user) {
+      toast.error('You must be logged in to make a booking.');
+      navigate('/auth');
+      return;
+    }
+
+    console.log("Form submitted with data:", data);
+    
+    // Check for duplicate bookings
+    const hasDuplicate = await checkForDuplicateBooking(user.id, destination!.id, null);
+    
+    if (hasDuplicate) {
+      setPendingBookingData(data);
+      setShowDuplicateDialog(true);
+      return;
+    }
+    
+    // No duplicate found, proceed with booking
+    await createBookingProcess(data);
+  };
+
+  const handleConfirmDuplicateBooking = async () => {
+    setShowDuplicateDialog(false);
+    if (pendingBookingData) {
+      await createBookingProcess(pendingBookingData);
+      setPendingBookingData(null);
+    }
+  };
+
+  const handleCancelDuplicateBooking = () => {
+    setShowDuplicateDialog(false);
+    setPendingBookingData(null);
+    navigate('/bookings');
   };
 
   const handleProceedToPayment = () => {
@@ -293,6 +322,17 @@ const BookingForm = () => {
         confirmText="Yes, Leave"
         cancelText="Continue Booking"
         variant="destructive"
+      />
+
+      <ConfirmationDialog
+        isOpen={showDuplicateDialog}
+        onClose={() => setShowDuplicateDialog(false)}
+        onConfirm={handleConfirmDuplicateBooking}
+        title="Duplicate Booking Detected"
+        description={`You already have an unpaid booking for ${destination?.name}. Creating another booking will result in multiple pending payments. Do you want to proceed or go to your existing bookings?`}
+        confirmText="Proceed Anyway"
+        cancelText="View Existing Bookings"
+        variant="default"
       />
 
       {showBookingSplash && (
