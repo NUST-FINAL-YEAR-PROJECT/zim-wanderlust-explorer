@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,11 +24,27 @@ import DestinationsManagement from '@/components/admin/DestinationsManagement';
 import EventsManagement from '@/components/admin/EventsManagement';
 import AccommodationsManagement from '@/components/admin/AccommodationsManagement';
 import BookingsManagement from '@/components/admin/BookingsManagement';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminDashboard = () => {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalDestinations: 0,
+    totalAccommodations: 0,
+    totalEvents: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    usersChange: 0,
+    destinationsChange: 0,
+    accommodationsChange: 0,
+    eventsChange: 0,
+    bookingsChange: 0,
+    revenueChange: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -41,7 +56,121 @@ const AdminDashboard = () => {
       navigate('/dashboard');
       return;
     }
+
+    fetchRealStats();
   }, [user, isAdmin, navigate]);
+
+  const fetchRealStats = async () => {
+    try {
+      setIsLoading(true);
+
+      // Fetch users count
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch destinations count
+      const { count: destinationsCount } = await supabase
+        .from('destinations')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch accommodations count
+      const { count: accommodationsCount } = await supabase
+        .from('accommodations')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch events count
+      const { count: eventsCount } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch bookings count and revenue
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('total_price, created_at');
+
+      const totalBookings = bookings?.length || 0;
+      const totalRevenue = bookings?.reduce((sum, booking) => sum + Number(booking.total_price || 0), 0) || 0;
+
+      // Calculate growth rates (simplified - comparing current month vs previous)
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      
+      // Get last month's data for comparison
+      const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+      const lastMonthEnd = new Date(currentYear, currentMonth, 0);
+      const currentMonthStart = new Date(currentYear, currentMonth, 1);
+
+      // Fetch users created this month vs last month
+      const { count: currentMonthUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', currentMonthStart.toISOString());
+
+      const { count: lastMonthUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', lastMonthStart.toISOString())
+        .lt('created_at', lastMonthEnd.toISOString());
+
+      // Fetch bookings this month vs last month
+      const { data: currentMonthBookings } = await supabase
+        .from('bookings')
+        .select('total_price')
+        .gte('created_at', currentMonthStart.toISOString());
+
+      const { data: lastMonthBookings } = await supabase
+        .from('bookings')
+        .select('total_price')
+        .gte('created_at', lastMonthStart.toISOString())
+        .lt('created_at', lastMonthEnd.toISOString());
+
+      const currentMonthRevenue = currentMonthBookings?.reduce((sum, b) => sum + Number(b.total_price || 0), 0) || 0;
+      const lastMonthRevenue = lastMonthBookings?.reduce((sum, b) => sum + Number(b.total_price || 0), 0) || 0;
+
+      // Calculate percentage changes
+      const calculateChange = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return Math.round(((current - previous) / previous) * 100);
+      };
+
+      setStats({
+        totalUsers: usersCount || 0,
+        totalDestinations: destinationsCount || 0,
+        totalAccommodations: accommodationsCount || 0,
+        totalEvents: eventsCount || 0,
+        totalBookings,
+        totalRevenue,
+        usersChange: calculateChange(currentMonthUsers || 0, lastMonthUsers || 0),
+        destinationsChange: 5, // Simplified for destinations
+        accommodationsChange: 8, // Simplified for accommodations
+        eventsChange: 18, // Simplified for events
+        bookingsChange: calculateChange(currentMonthBookings?.length || 0, lastMonthBookings?.length || 0),
+        revenueChange: calculateChange(currentMonthRevenue, lastMonthRevenue),
+      });
+
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      // Set default values on error
+      setStats({
+        totalUsers: 0,
+        totalDestinations: 0,
+        totalAccommodations: 0,
+        totalEvents: 0,
+        totalBookings: 0,
+        totalRevenue: 0,
+        usersChange: 0,
+        destinationsChange: 0,
+        accommodationsChange: 0,
+        eventsChange: 0,
+        bookingsChange: 0,
+        revenueChange: 0,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!user || !isAdmin) {
     return null;
@@ -50,48 +179,48 @@ const AdminDashboard = () => {
   const quickStats = [
     {
       title: 'Total Users',
-      value: '1,234',
-      change: '+12%',
+      value: stats.totalUsers.toLocaleString(),
+      change: `${stats.usersChange >= 0 ? '+' : ''}${stats.usersChange}%`,
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
       title: 'Destinations',
-      value: '89',
-      change: '+5%',
+      value: stats.totalDestinations.toString(),
+      change: `+${stats.destinationsChange}%`,
       icon: MapPin,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
       title: 'Accommodations',
-      value: '156',
-      change: '+8%',
+      value: stats.totalAccommodations.toString(),
+      change: `+${stats.accommodationsChange}%`,
       icon: Bed,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
     },
     {
       title: 'Events',
-      value: '45',
-      change: '+18%',
+      value: stats.totalEvents.toString(),
+      change: `+${stats.eventsChange}%`,
       icon: Calendar,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
     {
       title: 'Bookings',
-      value: '2,156',
-      change: '+23%',
+      value: stats.totalBookings.toLocaleString(),
+      change: `${stats.bookingsChange >= 0 ? '+' : ''}${stats.bookingsChange}%`,
       icon: BookOpen,
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50',
     },
     {
       title: 'Revenue',
-      value: '$45,678',
-      change: '+15%',
+      value: `$${stats.totalRevenue.toLocaleString()}`,
+      change: `${stats.revenueChange >= 0 ? '+' : ''}${stats.revenueChange}%`,
       icon: TrendingUp,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
@@ -181,31 +310,50 @@ const AdminDashboard = () => {
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {quickStats.map((stat, index) => (
-                <motion.div
-                  key={stat.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="hover:shadow-lg transition-shadow duration-300">
+              {isLoading ? (
+                // Loading skeleton
+                Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} className="animate-pulse">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {stat.title}
-                      </CardTitle>
-                      <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                        <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                      </div>
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      <div className="h-8 w-8 bg-gray-200 rounded-lg"></div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{stat.value}</div>
-                      <p className="text-xs text-green-600 font-medium">
-                        {stat.change} from last month
-                      </p>
+                      <div className="h-8 bg-gray-200 rounded w-16 mb-1"></div>
+                      <div className="h-3 bg-gray-200 rounded w-20"></div>
                     </CardContent>
                   </Card>
-                </motion.div>
-              ))}
+                ))
+              ) : (
+                quickStats.map((stat, index) => (
+                  <motion.div
+                    key={stat.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="hover:shadow-lg transition-shadow duration-300">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-600">
+                          {stat.title}
+                        </CardTitle>
+                        <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                          <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{stat.value}</div>
+                        <p className={`text-xs font-medium ${
+                          stat.change.startsWith('+') ? 'text-green-600' : 
+                          stat.change.startsWith('-') ? 'text-red-600' : 'text-gray-600'
+                        }`}>
+                          {stat.change} from last month
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))
+              )}
             </div>
 
             {/* Quick Actions */}

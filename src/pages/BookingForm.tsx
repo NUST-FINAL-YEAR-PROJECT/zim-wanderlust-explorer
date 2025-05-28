@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -240,6 +239,15 @@ const BookingForm = () => {
     navigate('/destinations');
   };
 
+  const handleBookingSuccess = () => {
+    setShowBookingSplash(true);
+  };
+
+  const handleSplashComplete = () => {
+    setShowBookingSplash(false);
+    navigate('/bookings');
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -297,10 +305,9 @@ const BookingForm = () => {
 
       {showBookingSplash && (
         <BookingSplash
-          duration={2500}
           bookingType="destination"
-          itemName={destination?.name || 'this destination'}
-          onComplete={() => setShowBookingSplash(false)}
+          itemName={destination?.name || 'Unknown Destination'}
+          onComplete={handleSplashComplete}
         />
       )}
 
