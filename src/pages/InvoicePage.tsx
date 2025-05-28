@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking } from '@/models/Booking';
-import { getPayment } from '@/models/Payment';
+import { getPaymentByBookingId } from '@/models/Payment';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -21,30 +21,37 @@ const InvoicePage = () => {
   const [downloadingImage, setDownloadingImage] = useState(false);
   
   // Fetch booking details
-  const { data: booking, isLoading: bookingLoading } = useQuery({
+  const { data: booking, isLoading: bookingLoading, error: bookingError } = useQuery({
     queryKey: ['booking', id],
     queryFn: () => getBooking(id as string),
     enabled: !!id
   });
 
-  // Fetch payment details when booking is loaded
-  const { data: payment, isLoading: paymentLoading } = useQuery({
-    queryKey: ['payment', booking?.payment_id],
-    queryFn: () => getPayment(booking?.payment_id as string),
-    enabled: !!booking?.payment_id
+  // Fetch payment details using booking ID instead of payment_id
+  const { data: payment, isLoading: paymentLoading, error: paymentError } = useQuery({
+    queryKey: ['payment-by-booking', id],
+    queryFn: () => getPaymentByBookingId(id as string),
+    enabled: !!id
   });
 
   const isLoading = bookingLoading || paymentLoading;
 
   useEffect(() => {
     // Show console logs to debug
+    console.log('Booking ID from params:', id);
     if (booking) {
       console.log('Booking data:', booking);
     }
     if (payment) {
       console.log('Payment data:', payment);
     }
-  }, [booking, payment]);
+    if (bookingError) {
+      console.error('Booking error:', bookingError);
+    }
+    if (paymentError) {
+      console.error('Payment error:', paymentError);
+    }
+  }, [id, booking, payment, bookingError, paymentError]);
 
   const downloadAsPDF = async () => {
     if (!invoiceRef.current) {
@@ -135,13 +142,20 @@ const InvoicePage = () => {
     );
   }
 
-  if (!booking || !payment) {
+  if (!booking) {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center py-12">
           <AlertCircle size={48} className="text-red-500 mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Booking or Payment Not Found</h2>
-          <p className="text-muted-foreground mb-6">The booking you're looking for doesn't exist or has been removed.</p>
+          <h2 className="text-2xl font-bold mb-2">Booking Not Found</h2>
+          <p className="text-muted-foreground mb-6">
+            The booking you're looking for doesn't exist or has been removed.
+            {bookingError && (
+              <span className="block text-sm mt-2 text-red-600">
+                Error: {bookingError.message || 'Failed to load booking'}
+              </span>
+            )}
+          </p>
           <Button onClick={() => navigate('/bookings')}>
             Back to My Bookings
           </Button>
@@ -149,6 +163,16 @@ const InvoicePage = () => {
       </DashboardLayout>
     );
   }
+
+  // Create a default payment object if payment is not found
+  const defaultPayment = {
+    id: 'pending',
+    status: 'pending',
+    payment_method: 'Online Payment',
+    updated_at: booking.created_at
+  };
+
+  const paymentData = payment || defaultPayment;
 
   const bookingDate = booking.preferred_date 
     ? new Date(booking.preferred_date).toLocaleDateString() 
@@ -158,9 +182,37 @@ const InvoicePage = () => {
     ? new Date(booking.created_at).toLocaleDateString()
     : new Date().toLocaleDateString();
 
-  const paymentDate = payment.updated_at 
-    ? new Date(payment.updated_at).toLocaleDateString() 
+  const paymentDate = paymentData.updated_at 
+    ? new Date(paymentData.updated_at).toLocaleDateString() 
     : 'Pending';
+
+  // Helper function to get destination/event name
+  const getBookingName = () => {
+    if (booking.booking_details?.destination_name) {
+      return booking.booking_details.destination_name;
+    }
+    if (booking.booking_details?.event_name) {
+      return booking.booking_details.event_name;
+    }
+    if (booking.destination_id) {
+      return "Destination Booking";
+    }
+    if (booking.event_id) {
+      return "Event Booking";
+    }
+    return "Travel Booking";
+  };
+
+  // Helper function to get location
+  const getBookingLocation = () => {
+    if (booking.booking_details?.destination_location) {
+      return booking.booking_details.destination_location;
+    }
+    if (booking.booking_details?.event_location) {
+      return booking.booking_details.event_location;
+    }
+    return "";
+  };
 
   return (
     <DashboardLayout>
@@ -202,7 +254,7 @@ const InvoicePage = () => {
                 </div>
                 <div className="text-right">
                   <h3 className="text-xl font-bold">INVOICE</h3>
-                  <p className="text-muted-foreground">#{booking.id ? booking.id.slice(0, 8) : 'N/A'}</p>
+                  <p className="text-muted-foreground">#{booking.id.slice(0, 8)}</p>
                   <p className="text-muted-foreground">Date: {createdDate}</p>
                 </div>
               </div>
@@ -211,26 +263,28 @@ const InvoicePage = () => {
                 <div className="flex justify-between mb-4">
                   <div>
                     <h3 className="font-bold">Bill To:</h3>
-                    <p>{booking.contact_name || 'N/A'}</p>
-                    <p>{booking.contact_email || 'N/A'}</p>
-                    <p>{booking.contact_phone || 'N/A'}</p>
+                    <p>{booking.contact_name}</p>
+                    <p>{booking.contact_email}</p>
+                    <p>{booking.contact_phone}</p>
                   </div>
                   <div className="text-right">
                     <h3 className="font-bold">Payment Status:</h3>
                     <p className={`uppercase font-medium ${
-                      payment.status === 'completed' ? 'text-green-600' : 
-                      payment.status === 'processing' ? 'text-amber-600' : 
+                      paymentData.status === 'completed' ? 'text-green-600' : 
+                      paymentData.status === 'processing' ? 'text-amber-600' : 
                       'text-blue-600'
                     }`}>
-                      {payment.status || 'pending'}
+                      {paymentData.status}
                     </p>
                     <p>Payment Date: {paymentDate}</p>
                   </div>
                 </div>
 
-                <h3 className="font-bold mb-2">Destination:</h3>
-                <p>{booking.booking_details?.destination_name || "Not specified"}</p>
-                <p className="text-muted-foreground">{booking.booking_details?.destination_location || ""}</p>
+                <h3 className="font-bold mb-2">Booking Details:</h3>
+                <p>{getBookingName()}</p>
+                {getBookingLocation() && (
+                  <p className="text-muted-foreground">{getBookingLocation()}</p>
+                )}
               </div>
 
               <table className="w-full mb-6">
@@ -245,25 +299,23 @@ const InvoicePage = () => {
                 <tbody>
                   <tr className="border-b">
                     <td className="py-2">
-                      {booking.booking_details?.destination_name || "Destination Booking"}
+                      {getBookingName()}
                       <div className="text-sm text-muted-foreground">
                         Travel Date: {bookingDate}
                       </div>
                     </td>
-                    <td className="text-right py-2">{booking.number_of_people || 1}</td>
+                    <td className="text-right py-2">{booking.number_of_people}</td>
                     <td className="text-right py-2">
                       $
                       {booking.booking_details?.price_per_person || 
-                        ((booking.total_price && booking.number_of_people) 
-                          ? (booking.total_price / booking.number_of_people).toFixed(2) 
-                          : '0.00')}
+                        (booking.total_price / booking.number_of_people).toFixed(2)}
                     </td>
-                    <td className="text-right py-2">${booking.total_price ? booking.total_price.toFixed(2) : '0.00'}</td>
+                    <td className="text-right py-2">${booking.total_price.toFixed(2)}</td>
                   </tr>
                   
                   <tr className="font-bold">
                     <td colSpan={3} className="text-right py-4">Total</td>
-                    <td className="text-right py-4">${booking.total_price ? booking.total_price.toFixed(2) : '0.00'}</td>
+                    <td className="text-right py-4">${booking.total_price.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -271,8 +323,8 @@ const InvoicePage = () => {
               <div className="border-t pt-6 space-y-4">
                 <div>
                   <h3 className="font-bold mb-2">Payment Information:</h3>
-                  <p>Payment Method: {payment.payment_method || "Online Payment"}</p>
-                  <p>Payment ID: {payment.id ? payment.id.slice(0, 8) : 'N/A'}</p>
+                  <p>Payment Method: {paymentData.payment_method}</p>
+                  <p>Payment ID: {paymentData.id === 'pending' ? 'Pending' : paymentData.id.slice(0, 8)}</p>
                 </div>
                 
                 <div>
