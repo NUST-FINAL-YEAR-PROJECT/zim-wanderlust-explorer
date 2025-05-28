@@ -30,7 +30,7 @@ const LoadingDialog = ({
 }: LoadingDialogProps) => {
   return (
     <Dialog open={isOpen}>
-      <DialogContent className="sm:max-w-md" hideCloseButton>
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader className="text-center">
           <motion.div
             animate={{ rotate: 360 }}

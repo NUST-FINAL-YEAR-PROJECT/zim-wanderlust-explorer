@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { AlertCircle, CalendarIcon } from 'lucide-react';
 import { getDestination } from '@/models/Destination';
 import { createBooking, updateBooking, sendBookingConfirmationEmail } from '@/models/Booking';
 import { createPayment } from '@/models/Payment';
@@ -12,11 +14,14 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import LoadingDialog from '@/components/ui/loading-dialog';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 import { useProcessDialog } from '@/hooks/useProcessDialog';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 // Form schema using zod
 const bookingSchema = z.object({
