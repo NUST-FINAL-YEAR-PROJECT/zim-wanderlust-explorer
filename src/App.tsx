@@ -31,6 +31,7 @@ import ItinerariesPage from "./pages/ItinerariesPage";
 import ItineraryCreatePage from "./pages/ItineraryCreatePage";
 import ItineraryDetailsPage from "./pages/ItineraryDetailsPage";
 import PaymentPage from "./pages/PaymentPage";
+import InvoicePage from "./pages/InvoicePage";
 import Settings from "./pages/Settings";
 import EventBookingPage from "./pages/EventBookingPage";
 import NotFound from "./pages/NotFound";
@@ -199,6 +200,14 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <PaymentPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/invoice/:id"
+                      element={
+                        <ProtectedRoute>
+                          <InvoicePage />
                         </ProtectedRoute>
                       }
                     />
