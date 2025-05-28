@@ -108,8 +108,20 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   };
 
   const handleSubmit = async (data: z.infer<typeof eventSchema>) => {
+    // Ensure required fields are present
     const eventData: EventInput = {
-      ...data,
+      title: data.title,
+      description: data.description,
+      location: data.location,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      price: data.price,
+      image_url: data.image_url,
+      event_type: data.event_type,
+      program_type: data.program_type,
+      program_name: data.program_name,
+      program_url: data.program_url,
+      payment_url: data.payment_url,
       ticket_types: ticketTypes.length > 0 ? ticketTypes : null,
     };
     

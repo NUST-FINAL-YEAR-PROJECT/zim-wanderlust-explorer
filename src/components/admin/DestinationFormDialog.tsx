@@ -18,6 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -113,8 +114,22 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
   };
 
   const handleSubmit = async (data: z.infer<typeof destinationSchema>) => {
+    // Ensure all required fields are present
     const destinationData: DestinationInput = {
-      ...data,
+      name: data.name,
+      location: data.location,
+      price: data.price,
+      description: data.description,
+      image_url: data.image_url,
+      difficulty_level: data.difficulty_level,
+      best_time_to_visit: data.best_time_to_visit,
+      duration_recommended: data.duration_recommended,
+      weather_info: data.weather_info,
+      getting_there: data.getting_there,
+      is_featured: data.is_featured,
+      payment_url: data.payment_url,
+      latitude: data.latitude,
+      longitude: data.longitude,
       activities,
       amenities,
       highlights,
