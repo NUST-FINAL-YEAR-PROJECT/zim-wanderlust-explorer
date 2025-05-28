@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import HomepageSearchBar from "./HomepageSearchBar";
+import EnhancedSearchBar from "./EnhancedSearchBar";
 import { LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +11,6 @@ const Hero = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -175,12 +173,12 @@ const Hero = () => {
   };
 
   const searchBarVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     visible: { 
       opacity: 1, 
       y: 0, 
       transition: { 
-        duration: 0.6, 
+        duration: 0.8, 
         delay: 0.6 
       }
     }
@@ -193,7 +191,7 @@ const Hero = () => {
       y: 0,
       transition: { 
         duration: 0.6, 
-        delay: 0.8 
+        delay: 0.9 
       }
     },
     hover: {
@@ -207,7 +205,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative h-[700px] overflow-hidden">
+    <div className="relative h-[800px] overflow-hidden">
       {/* Background slideshow */}
       <div className="absolute inset-0">
         {images.length > 0 ? (
@@ -299,7 +297,7 @@ const Hero = () => {
       )}
       
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-        <div className="max-w-4xl">
+        <div className="max-w-5xl w-full">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -315,7 +313,7 @@ const Hero = () => {
             animate="visible"
             variants={subtitleVariants}
           >
-            <p className="text-xl md:text-2xl text-white/90 mb-10 font-light max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-white/90 mb-12 font-light max-w-3xl mx-auto">
               Explore breathtaking landscapes, vibrant culture, and unforgettable experiences
             </p>
           </motion.div>
@@ -324,9 +322,9 @@ const Hero = () => {
             initial="hidden"
             animate="visible"
             variants={searchBarVariants}
-            className="w-full max-w-3xl mx-auto mb-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20"
+            className="w-full mb-10"
           >
-            <HomepageSearchBar onSearch={handleSearch} />
+            <EnhancedSearchBar />
           </motion.div>
           
           <motion.div 
@@ -343,7 +341,7 @@ const Hero = () => {
               <Button 
                 variant="default"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all duration-300"
-                onClick={handleExploreDestinations}
+                onClick={() => navigate("/browse?tab=destinations")}
               >
                 Explore Destinations
               </Button>
@@ -357,7 +355,7 @@ const Hero = () => {
               <Button 
                 variant="outline" 
                 className="bg-transparent border-white text-white hover:bg-white/20 hover:text-white px-8 py-6 text-lg rounded-xl transition-all duration-300"
-                onClick={handleUpcomingEvents}
+                onClick={() => navigate("/browse?tab=events")}
               >
                 Upcoming Events
               </Button>
