@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -81,6 +80,7 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
   const [newCategory, setNewCategory] = React.useState('');
   const [newWhatToBring, setNewWhatToBring] = React.useState('');
   const [newImage, setNewImage] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof destinationSchema>>({
     resolver: zodResolver(destinationSchema),
@@ -114,32 +114,39 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
   };
 
   const handleSubmit = async (data: z.infer<typeof destinationSchema>) => {
-    // Ensure all required fields are present
-    const destinationData: DestinationInput = {
-      name: data.name,
-      location: data.location,
-      price: data.price,
-      description: data.description,
-      image_url: data.image_url,
-      difficulty_level: data.difficulty_level,
-      best_time_to_visit: data.best_time_to_visit,
-      duration_recommended: data.duration_recommended,
-      weather_info: data.weather_info,
-      getting_there: data.getting_there,
-      is_featured: data.is_featured,
-      payment_url: data.payment_url,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      activities,
-      amenities,
-      highlights,
-      categories,
-      what_to_bring: whatToBring,
-      additional_images: additionalImages,
-    };
-    
-    await onSubmit(destinationData);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      // Ensure all required fields are present
+      const destinationData: DestinationInput = {
+        name: data.name,
+        location: data.location,
+        price: data.price,
+        description: data.description,
+        image_url: data.image_url,
+        difficulty_level: data.difficulty_level,
+        best_time_to_visit: data.best_time_to_visit,
+        duration_recommended: data.duration_recommended,
+        weather_info: data.weather_info,
+        getting_there: data.getting_there,
+        is_featured: data.is_featured,
+        payment_url: data.payment_url,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        activities,
+        amenities,
+        highlights,
+        categories,
+        what_to_bring: whatToBring,
+        additional_images: additionalImages,
+      };
+      
+      await onSubmit(destinationData);
+      onClose();
+    } catch (error) {
+      console.error('Error submitting destination:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderArrayField = (
@@ -491,11 +498,22 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
             />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-gradient-to-r from-green-600 to-emerald-600">
-                {destination ? 'Update' : 'Create'} Destination
+              <Button 
+                type="submit" 
+                className="bg-gradient-to-r from-orange-600 to-amber-600"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  `${destination ? 'Update' : 'Create'} Destination`
+                )}
               </Button>
             </DialogFooter>
           </form>

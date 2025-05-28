@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -71,6 +70,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   const [newTicketName, setNewTicketName] = React.useState('');
   const [newTicketPrice, setNewTicketPrice] = React.useState(0);
   const [newTicketDescription, setNewTicketDescription] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof eventSchema>>({
     resolver: zodResolver(eventSchema),
@@ -108,25 +108,32 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   };
 
   const handleSubmit = async (data: z.infer<typeof eventSchema>) => {
-    // Ensure required fields are present
-    const eventData: EventInput = {
-      title: data.title,
-      description: data.description,
-      location: data.location,
-      start_date: data.start_date,
-      end_date: data.end_date,
-      price: data.price,
-      image_url: data.image_url,
-      event_type: data.event_type,
-      program_type: data.program_type,
-      program_name: data.program_name,
-      program_url: data.program_url,
-      payment_url: data.payment_url,
-      ticket_types: ticketTypes.length > 0 ? ticketTypes : null,
-    };
-    
-    await onSubmit(eventData);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      // Ensure required fields are present
+      const eventData: EventInput = {
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        price: data.price,
+        image_url: data.image_url,
+        event_type: data.event_type,
+        program_type: data.program_type,
+        program_name: data.program_name,
+        program_url: data.program_url,
+        payment_url: data.payment_url,
+        ticket_types: ticketTypes.length > 0 ? ticketTypes : null,
+      };
+      
+      await onSubmit(eventData);
+      onClose();
+    } catch (error) {
+      console.error('Error submitting event:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -386,11 +393,22 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-gradient-to-r from-orange-600 to-amber-600">
-                {event ? 'Update' : 'Create'} Event
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-orange-600 to-amber-600"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  `${event ? 'Update' : 'Create'} Event`
+                )}
               </Button>
             </DialogFooter>
           </form>

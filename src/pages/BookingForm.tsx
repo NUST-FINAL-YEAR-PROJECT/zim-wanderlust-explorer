@@ -13,19 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useQuery } from '@tanstack/react-query';
-import { Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import LoadingDialog from '@/components/ui/loading-dialog';
+import ConfirmationDialog from '@/components/ui/confirmation-dialog';
+import { useProcessDialog } from '@/hooks/useProcessDialog';
 import { toast } from '@/components/ui/sonner';
 
 // Form schema using zod
@@ -47,6 +37,8 @@ const BookingForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const processDialog = useProcessDialog();
 
   const form = useForm<z.infer<typeof bookingSchema>>({
     resolver: zodResolver(bookingSchema),
@@ -99,9 +91,26 @@ const BookingForm = () => {
   }
 
   const onSubmit = async (data: z.infer<typeof bookingSchema>) => {
-    setIsSubmitting(true);
+    const steps = [
+      'Validating trip details',
+      'Creating booking record',
+      'Setting up payment gateway',
+      'Sending confirmation email',
+      'Finalizing reservation'
+    ];
+
+    processDialog.startProcess(
+      'Creating Your Booking',
+      steps,
+      `Booking ${destination!.name} for ${data.numberOfPeople} ${parseInt(data.numberOfPeople) === 1 ? 'person' : 'people'}`
+    );
+
     try {
       console.log("Form submitted with data:", data);
+      
+      // Step 1: Validation
+      processDialog.updateProgress(0);
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Calculate total price based on number of people
       const numberOfPeople = parseInt(data.numberOfPeople);
@@ -109,7 +118,9 @@ const BookingForm = () => {
       
       console.log("Creating booking with total price:", totalPrice);
       
-      // Create booking
+      // Step 2: Create booking
+      processDialog.updateProgress(1);
+      
       const booking = await createBooking({
         destination_id: destination!.id,
         user_id: user?.id || null,
@@ -136,7 +147,9 @@ const BookingForm = () => {
         throw new Error('Failed to create booking');
       }
       
-      // Create payment record
+      // Step 3: Create payment record
+      processDialog.updateProgress(2);
+      
       const payment = await createPayment({
         booking_id: booking.id,
         amount: totalPrice,
@@ -160,7 +173,9 @@ const BookingForm = () => {
         payment_id: payment.id
       });
       
-      // Send booking confirmation email
+      // Step 4: Send confirmation email
+      processDialog.updateProgress(3);
+      
       sendBookingConfirmationEmail(booking.id)
         .then(success => {
           if (success) {
@@ -173,20 +188,52 @@ const BookingForm = () => {
           console.error('Error sending booking confirmation email:', err);
         });
       
+      // Step 5: Finalize
+      processDialog.updateProgress(4);
+      
+      processDialog.completeProcess();
+      
       toast.success("Booking created successfully!");
-      // Navigate to payment page
-      console.log("Navigating to payment page:", `/payment/${booking.id}`);
-      navigate(`/payment/${booking.id}`);
+      
+      setTimeout(() => {
+        console.log("Navigating to payment page:", `/payment/${booking.id}`);
+        navigate(`/payment/${booking.id}`);
+      }, 1500);
+      
     } catch (error) {
+      processDialog.closeProcess();
       console.error("Error creating booking:", error);
       toast.error("Failed to create booking. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const handleCancelBooking = () => {
+    setShowCancelDialog(false);
+    navigate('/destinations');
   };
 
   return (
     <DashboardLayout>
+      <LoadingDialog
+        isOpen={processDialog.isOpen}
+        title={processDialog.title}
+        description={processDialog.description}
+        progress={processDialog.progress}
+        steps={processDialog.steps}
+        currentStep={processDialog.currentStep}
+      />
+
+      <ConfirmationDialog
+        isOpen={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        onConfirm={handleCancelBooking}
+        title="Cancel Booking"
+        description="Are you sure you want to leave? All entered information will be lost."
+        confirmText="Yes, Leave"
+        cancelText="Continue Booking"
+        variant="destructive"
+      />
+
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Book Your Trip to {destination.name}</h1>
@@ -323,13 +370,24 @@ const BookingForm = () => {
                   </CardContent>
                 </Card>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Processing..." : "Continue to Payment"}
-                </Button>
+                <div className="flex gap-4">
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCancelDialog(true)}
+                    className="flex-1"
+                    disabled={processDialog.isOpen}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                    disabled={processDialog.isOpen}
+                  >
+                    {processDialog.isOpen ? "Processing..." : "Continue to Payment"}
+                  </Button>
+                </div>
               </form>
             </Form>
           </div>

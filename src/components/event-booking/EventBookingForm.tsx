@@ -10,6 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import BookingSplash from '@/components/BookingSplash';
 import BookingConfirmationDialog from '@/components/BookingConfirmationDialog';
 import BookingSuccessDialog from '../BookingSuccessDialog';
+import LoadingDialog from '@/components/ui/loading-dialog';
+import ConfirmationDialog from '@/components/ui/confirmation-dialog';
+import { useProcessDialog } from '@/hooks/useProcessDialog';
 
 // Import sub-components
 import EventSummary from './EventSummary';
@@ -31,7 +34,10 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<any>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   
+  const processDialog = useProcessDialog();
+
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [contactName, setContactName] = useState(user?.user_metadata?.name || '');
   const [contactEmail, setContactEmail] = useState(user?.email || '');
@@ -77,11 +83,28 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
       return;
     }
 
-    setIsSubmitting(true);
-    setShowBookingSplash(true);
+    const steps = [
+      'Validating booking details',
+      'Creating booking record',
+      'Setting up payment',
+      'Sending confirmation email',
+      'Finalizing booking'
+    ];
+
+    processDialog.startProcess(
+      'Processing Your Booking', 
+      steps, 
+      `Booking ${eventDetails?.title || 'this event'} for ${numberOfPeople} ${numberOfPeople === 1 ? 'person' : 'people'}`
+    );
 
     try {
-      // Create booking record
+      // Step 1: Validation
+      processDialog.updateProgress(0);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 2: Create booking record
+      processDialog.updateProgress(1);
+      
       const bookingData = {
         user_id: user.id,
         event_id: eventId,
@@ -114,7 +137,9 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
         throw new Error('Failed to create booking.');
       }
 
-      // Create associated payment record
+      // Step 3: Create payment
+      processDialog.updateProgress(2);
+      
       const paymentData = {
         booking_id: booking.id,
         amount: totalPrice,
@@ -134,12 +159,14 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
         throw new Error('Failed to create payment record.');
       }
 
-      // Update booking with payment_id
+      // Step 4: Update booking with payment_id
       await updateBooking(booking.id, {
         payment_id: payment.id
       });
 
-      // Send booking confirmation email
+      // Step 5: Send confirmation email
+      processDialog.updateProgress(3);
+      
       sendBookingConfirmationEmail(booking.id)
         .then(success => {
           if (success) {
@@ -152,22 +179,24 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
           console.error('Error sending booking confirmation email:', err);
         });
 
+      processDialog.updateProgress(4);
       setCreatedBooking(booking);
       
-      // Wait for splash screen to complete, then show success dialog
+      // Complete process and show success
+      processDialog.completeProcess();
       setTimeout(() => {
         setShowBookingSplash(false);
         setShowSuccessDialog(true);
-      }, 2500);
+      }, 1500);
 
     } catch (error) {
+      processDialog.closeProcess();
       console.error('Error creating booking:', error);
       toast({
         title: 'Booking Failed',
         description: 'Failed to create booking. Please try again.',
         variant: 'destructive',
       });
-      setShowBookingSplash(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -192,8 +221,33 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
     }
   };
 
+  const handleCancelBooking = () => {
+    setShowCancelDialog(false);
+    navigate('/events');
+  };
+
   return (
     <>
+      <LoadingDialog
+        isOpen={processDialog.isOpen}
+        title={processDialog.title}
+        description={processDialog.description}
+        progress={processDialog.progress}
+        steps={processDialog.steps}
+        currentStep={processDialog.currentStep}
+      />
+
+      <ConfirmationDialog
+        isOpen={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        onConfirm={handleCancelBooking}
+        title="Cancel Booking"
+        description="Are you sure you want to cancel this booking? All entered information will be lost."
+        confirmText="Yes, Cancel"
+        cancelText="Continue Booking"
+        variant="destructive"
+      />
+
       {showBookingSplash && (
         <BookingSplash
           duration={2500}
@@ -272,17 +326,17 @@ const EventBookingForm = ({ eventId, eventDetails }: EventBookingFormProps) => {
         <CardFooter className="flex justify-end gap-4 border-t border-border/50 p-6">
           <Button 
             variant="outline" 
-            onClick={() => navigate('/events')}
+            onClick={() => setShowCancelDialog(true)}
             className="transition-all duration-300"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={processDialog.isOpen}
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 transition-all duration-300"
           >
-            {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
+            {processDialog.isOpen ? 'Processing...' : 'Proceed to Payment'}
           </Button>
         </CardFooter>
       </Card>
