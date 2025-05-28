@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -48,6 +49,17 @@ const BookingForm = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<any>(null);
   const processDialog = useProcessDialog();
+
+  // Initialize the form
+  const form = useForm<z.infer<typeof bookingSchema>>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      contactName: user?.user_metadata?.name || '',
+      contactEmail: user?.email || '',
+      contactPhone: '',
+      numberOfPeople: '1',
+    },
+  });
 
   // Fetch destination details
   const { data: destination, isLoading, error } = useQuery({
@@ -227,6 +239,39 @@ const BookingForm = () => {
     setShowCancelDialog(false);
     navigate('/destinations');
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-3/4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Skeleton className="h-[200px]" />
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-10 w-1/2" />
+            </div>
+            <Skeleton className="h-[400px]" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error || !destination) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center py-12">
+          <AlertCircle size={48} className="text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Destination Not Found</h2>
+          <p className="text-muted-foreground mb-6">The destination you're trying to book doesn't exist or has been removed.</p>
+          <Button onClick={() => navigate('/destinations')}>
+            Back to Destinations
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

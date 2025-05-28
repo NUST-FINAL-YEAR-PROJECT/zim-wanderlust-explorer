@@ -1,60 +1,76 @@
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, MapPin, Users } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, MapPin, Calendar, Users } from 'lucide-react';
 
 interface BookingSplashProps {
   duration?: number;
-  onComplete?: () => void;
-  bookingType?: 'destination' | 'event';
-  itemName?: string;
+  bookingType: 'destination' | 'event' | 'accommodation' | 'itinerary';
+  itemName: string;
+  onComplete: () => void;
 }
 
 const BookingSplash = ({ 
-  duration = 2500, 
-  onComplete, 
-  bookingType = 'destination',
-  itemName = 'your selection'
+  duration = 3000, 
+  bookingType, 
+  itemName, 
+  onComplete 
 }: BookingSplashProps) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
-
-  const steps = [
-    'Preparing booking form',
-    'Loading availability',
-    'Setting up payment',
-    'Almost ready!'
-  ];
 
   useEffect(() => {
-    // Progress animation
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev + (100 / (duration / 100));
-        return newProgress >= 100 ? 100 : newProgress;
-      });
-    }, 100);
-
-    // Step animation
-    const stepInterval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length);
-    }, duration / steps.length);
-
     const timer = setTimeout(() => {
       setIsVisible(false);
-      if (onComplete) onComplete();
+      setTimeout(onComplete, 500); // Allow fade out animation
     }, duration);
 
-    return () => {
-      clearTimeout(timer);
-      clearInterval(progressInterval);
-      clearInterval(stepInterval);
-    };
-  }, [duration, onComplete, steps.length]);
+    return () => clearTimeout(timer);
+  }, [duration, onComplete]);
 
-  const Icon = bookingType === 'event' ? Calendar : MapPin;
+  const getIcon = () => {
+    switch (bookingType) {
+      case 'destination':
+        return <MapPin className="h-16 w-16" />;
+      case 'event':
+        return <Calendar className="h-16 w-16" />;
+      case 'accommodation':
+        return <Users className="h-16 w-16" />;
+      case 'itinerary':
+        return <MapPin className="h-16 w-16" />;
+      default:
+        return <CheckCircle className="h-16 w-16" />;
+    }
+  };
+
+  const getTitle = () => {
+    switch (bookingType) {
+      case 'destination':
+        return 'Trip Booked!';
+      case 'event':
+        return 'Event Booked!';
+      case 'accommodation':
+        return 'Stay Booked!';
+      case 'itinerary':
+        return 'Itinerary Created!';
+      default:
+        return 'Booking Confirmed!';
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (bookingType) {
+      case 'destination':
+        return `Your adventure to ${itemName} is confirmed`;
+      case 'event':
+        return `Your spot at ${itemName} is secured`;
+      case 'accommodation':
+        return `Your stay at ${itemName} is confirmed`;
+      case 'itinerary':
+        return `${itemName} has been created successfully`;
+      default:
+        return `${itemName} booking confirmed`;
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -63,69 +79,44 @@ const BookingSplash = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-600 dark:from-green-600 dark:to-blue-800"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center"
         >
-          <motion.div 
-            className="text-center px-6 max-w-md"
+          <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl"
           >
-            <motion.div className="mb-8">
-              <motion.div
-                animate={{ 
-                  rotate: [0, 360],
-                  scale: [0.8, 1.1, 0.8]
-                }} 
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut" 
-                }}
-                className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg"
-              >
-                <Icon size={32} className="text-white" />
-              </motion.div>
-              
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-                Booking {itemName}
-              </h1>
-              
-              <motion.p 
-                key={currentStep}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-lg text-white/90"
-              >
-                {steps[currentStep]}
-              </motion.p>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", damping: 15, stiffness: 300 }}
+              className="text-green-500 mb-6 flex justify-center"
+            >
+              {getIcon()}
             </motion.div>
             
-            <div className="w-full max-w-sm mx-auto mb-6">
-              <Progress 
-                value={progress} 
-                className="h-2 bg-white/20 overflow-hidden rounded-full" 
-              />
-              <p className="text-white/70 text-sm mt-2">
-                {Math.round(progress)}% complete
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {getTitle()}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {getSubtitle()}
               </p>
-            </div>
+            </motion.div>
 
             <motion.div
-              animate={{ 
-                scale: [1, 1.1, 1]
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="flex items-center justify-center text-white/80"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.6, type: "spring", damping: 20, stiffness: 300 }}
+              className="text-green-500"
             >
-              <Users size={16} className="mr-2" />
-              <span className="text-sm">Securing your booking...</span>
+              <CheckCircle className="h-8 w-8 mx-auto" />
             </motion.div>
           </motion.div>
         </motion.div>
