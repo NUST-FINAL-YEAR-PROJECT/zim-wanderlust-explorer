@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +9,7 @@ import { getDestinations } from "@/models/Destination";
 import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import AiAssistant from "@/components/AiAssistant";
-import { Calendar, ChevronRight, Compass, Heart, MapPin, Star, TrendingUp, Users, Eye, ArrowRight, Play } from "lucide-react";
+import { Calendar, ChevronRight, Compass, Heart, MapPin, Star, TrendingUp, Users, Eye, ArrowRight, Play, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -100,6 +99,10 @@ const Index = () => {
     }
   };
 
+  const handleSignIn = () => {
+    navigate("/auth");
+  };
+
   // Animation variants
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -142,7 +145,7 @@ const Index = () => {
     { number: "4.9", label: "Average Rating", icon: Star }
   ];
 
-  // Quick action cards with improved design
+  // Quick action cards with improved design including sign in
   const quickActions = [
     {
       title: "Explore Destinations",
@@ -169,12 +172,12 @@ const Index = () => {
       badge: "AI Powered"
     },
     {
-      title: "Save Favorites",
-      description: "Keep track of places to visit",
-      icon: Heart,
+      title: isLoggedIn ? "My Account" : "Sign In",
+      description: isLoggedIn ? "Access your dashboard" : "Join our community",
+      icon: isLoggedIn ? Users : LogIn,
       gradient: "from-rose-500 to-rose-600",
-      onClick: () => navigate("/wishlist"),
-      badge: "Free"
+      onClick: isLoggedIn ? () => navigate("/dashboard") : handleSignIn,
+      badge: isLoggedIn ? "Account" : "Free"
     }
   ];
 
@@ -182,6 +185,34 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Enhanced Hero Section */}
       <HeroCarousel />
+      
+      {/* Sign In Button in Top Right */}
+      <motion.div 
+        className="fixed top-6 right-6 z-50"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        {!isLoggedIn && (
+          <Button 
+            variant="default" 
+            onClick={handleSignIn}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+          >
+            <LogIn className="h-4 w-4" />
+            Sign In
+          </Button>
+        )}
+        {isLoggedIn && (
+          <Button 
+            variant="default" 
+            onClick={() => navigate("/dashboard")}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Dashboard
+          </Button>
+        )}
+      </motion.div>
       
       {/* Trust Indicators Bar */}
       <motion.div

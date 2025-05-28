@@ -308,6 +308,7 @@ const BookingForm = () => {
           bookingType="destination"
           itemName={destination?.name || 'Unknown Destination'}
           onComplete={handleSplashComplete}
+          duration={2500}
         />
       )}
 
