@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
@@ -133,6 +132,14 @@ function App() {
                     />
                     <Route
                       path="/destination/:id"
+                      element={
+                        <ProtectedRoute>
+                          <DestinationDetails />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/destination/:id/details"
                       element={
                         <ProtectedRoute>
                           <DestinationDetails />

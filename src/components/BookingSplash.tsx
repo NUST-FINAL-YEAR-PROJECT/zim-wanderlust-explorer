@@ -1,11 +1,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, MapPin, Calendar, Building } from 'lucide-react';
+import { CheckCircle, MapPin, Calendar, Building, Route } from 'lucide-react';
 
 interface BookingSplashProps {
   duration?: number;
-  bookingType: 'event' | 'destination' | 'accommodation';
+  bookingType: 'event' | 'destination' | 'accommodation' | 'itinerary';
   itemName?: string;
   onComplete?: () => void;
 }
@@ -37,6 +37,8 @@ const BookingSplash = ({
         return MapPin;
       case 'accommodation':
         return Building;
+      case 'itinerary':
+        return Route;
       default:
         return CheckCircle;
     }
@@ -52,6 +54,8 @@ const BookingSplash = ({
         return 'Destination Booking Started!';
       case 'accommodation':
         return 'Accommodation Booking Started!';
+      case 'itinerary':
+        return 'Itinerary Created!';
       default:
         return 'Booking Started!';
     }
