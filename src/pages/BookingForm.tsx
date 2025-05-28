@@ -239,47 +239,10 @@ const BookingForm = () => {
     navigate('/destinations');
   };
 
-  const handleBookingSuccess = () => {
-    setShowBookingSplash(true);
-  };
-
   const handleSplashComplete = () => {
     setShowBookingSplash(false);
     navigate('/bookings');
   };
-
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="space-y-6">
-          <Skeleton className="h-12 w-3/4" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <Skeleton className="h-[200px]" />
-              <Skeleton className="h-10 w-3/4" />
-              <Skeleton className="h-10 w-1/2" />
-            </div>
-            <Skeleton className="h-[400px]" />
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error || !destination) {
-    return (
-      <DashboardLayout>
-        <div className="flex flex-col items-center justify-center py-12">
-          <AlertCircle size={48} className="text-red-500 mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Destination Not Found</h2>
-          <p className="text-muted-foreground mb-6">The destination you're trying to book doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate('/destinations')}>
-            Back to Destinations
-          </Button>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout>

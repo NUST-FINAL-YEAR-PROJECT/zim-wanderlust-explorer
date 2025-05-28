@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -278,6 +279,7 @@ const AccommodationBookingForm = ({ accommodationId, accommodationDetails }: Acc
           bookingType="accommodation"
           itemName={accommodationDetails?.name || 'this accommodation'}
           onComplete={() => setShowBookingSplash(false)}
+          duration={2500}
         />
       )}
 
