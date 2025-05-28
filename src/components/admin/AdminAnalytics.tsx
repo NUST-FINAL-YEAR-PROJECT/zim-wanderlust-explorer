@@ -20,7 +20,7 @@ import { ChartContainer, ChartLegend } from '@/components/ui/chart';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Download, ChartBar, ChartPie, ChartLine } from 'lucide-react';
+import { Download, ChartBar, ChartPie, ChartLine, FileText } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -285,6 +285,82 @@ const AdminAnalytics: React.FC = () => {
     }
   };
 
+  // New CSV download functions
+  const downloadCSV = (data: any[], filename: string) => {
+    if (!data || data.length === 0) return;
+    
+    const headers = Object.keys(data[0]);
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => headers.map(header => row[header]).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadUserStatsCSV = () => {
+    downloadCSV(analyticsData.userStats, 'user-statistics');
+  };
+
+  const downloadBookingDataCSV = () => {
+    downloadCSV(analyticsData.bookingData, 'booking-statistics');
+  };
+
+  const downloadDestinationPopularityCSV = () => {
+    downloadCSV(analyticsData.destinationPopularity, 'destination-popularity');
+  };
+
+  const downloadAllDataCSV = async () => {
+    try {
+      // Fetch additional detailed data for comprehensive export
+      const { data: users } = await supabase
+        .from('profiles')
+        .select('id, email, created_at, role');
+      
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('id, user_id, destination_id, total_price, status, created_at, booking_date');
+      
+      const { data: destinations } = await supabase
+        .from('destinations')
+        .select('id, name, location, price');
+
+      // Create a comprehensive dataset
+      const comprehensiveData = {
+        summary: [{
+          total_users: analyticsData.totalUsers,
+          total_bookings: analyticsData.totalBookings,
+          total_revenue: analyticsData.totalRevenue,
+          export_date: new Date().toISOString(),
+        }],
+        users: users || [],
+        bookings: bookings || [],
+        destinations: destinations || [],
+        user_monthly_stats: analyticsData.userStats,
+        booking_monthly_stats: analyticsData.bookingData,
+        destination_popularity: analyticsData.destinationPopularity,
+      };
+
+      // Download each dataset as separate CSV files in a zip-like manner
+      Object.entries(comprehensiveData).forEach(([key, data]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          downloadCSV(data, `analytics-${key}`);
+        }
+      });
+
+    } catch (error) {
+      console.error('Error downloading comprehensive data:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -318,8 +394,16 @@ const AdminAnalytics: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Export All Charts Button */}
-      <div className="flex justify-end">
+      {/* Export Buttons */}
+      <div className="flex justify-end gap-2">
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2"
+          onClick={downloadAllDataCSV}
+        >
+          <FileText size={16} />
+          Export All Data (CSV)
+        </Button>
         <Button 
           variant="outline" 
           className="flex items-center gap-2"
@@ -394,15 +478,26 @@ const AdminAnalytics: React.FC = () => {
                     <CardTitle>User Growth</CardTitle>
                     <CardDescription>Monthly new user registrations</CardDescription>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1"
-                    onClick={() => downloadChart(chartRefs.userGrowth, 'UserGrowth')}
-                  >
-                    <Download size={14} />
-                    <span className="hidden sm:inline">Export</span>
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={downloadUserStatsCSV}
+                    >
+                      <FileText size={14} />
+                      <span className="hidden sm:inline">CSV</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => downloadChart(chartRefs.userGrowth, 'UserGrowth')}
+                    >
+                      <Download size={14} />
+                      <span className="hidden sm:inline">PNG</span>
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0 px-2 pb-4">
@@ -440,15 +535,26 @@ const AdminAnalytics: React.FC = () => {
                     <CardTitle>Popular Destinations</CardTitle>
                     <CardDescription>Booking distribution</CardDescription>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1"
-                    onClick={() => downloadChart(chartRefs.destinationPopularity, 'PopularDestinations')}
-                  >
-                    <Download size={14} />
-                    <span className="hidden sm:inline">Export</span>
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={downloadDestinationPopularityCSV}
+                    >
+                      <FileText size={14} />
+                      <span className="hidden sm:inline">CSV</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => downloadChart(chartRefs.destinationPopularity, 'PopularDestinations')}
+                    >
+                      <Download size={14} />
+                      <span className="hidden sm:inline">PNG</span>
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0 px-2 pb-4">
@@ -489,15 +595,26 @@ const AdminAnalytics: React.FC = () => {
                   <CardTitle>Booking Trends</CardTitle>
                   <CardDescription>Monthly booking statistics</CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex items-center gap-1"
-                  onClick={() => downloadChart(chartRefs.bookingTrends, 'BookingTrends')}
-                >
-                  <Download size={14} />
-                  <span className="hidden sm:inline">Export</span>
-                </Button>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={downloadBookingDataCSV}
+                  >
+                    <FileText size={14} />
+                    <span className="hidden sm:inline">CSV</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => downloadChart(chartRefs.bookingTrends, 'BookingTrends')}
+                  >
+                    <Download size={14} />
+                    <span className="hidden sm:inline">PNG</span>
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0 px-2 pb-4">
@@ -536,15 +653,26 @@ const AdminAnalytics: React.FC = () => {
                   <CardTitle>User Registration Trends</CardTitle>
                   <CardDescription>Detailed view of user growth over time</CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex items-center gap-1"
-                  onClick={() => downloadChart(chartRefs.userGrowth, 'UserGrowth')}
-                >
-                  <Download size={14} />
-                  Export
-                </Button>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={downloadUserStatsCSV}
+                  >
+                    <FileText size={14} />
+                    CSV
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => downloadChart(chartRefs.userGrowth, 'UserGrowth')}
+                  >
+                    <Download size={14} />
+                    PNG
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0 px-2 pb-4">
@@ -586,15 +714,26 @@ const AdminAnalytics: React.FC = () => {
                     <CardTitle>Booking Trends</CardTitle>
                     <CardDescription>Monthly booking volume</CardDescription>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1"
-                    onClick={() => downloadChart(chartRefs.bookingTrends, 'BookingTrends')}
-                  >
-                    <Download size={14} />
-                    Export
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={downloadBookingDataCSV}
+                    >
+                      <FileText size={14} />
+                      CSV
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => downloadChart(chartRefs.bookingTrends, 'BookingTrends')}
+                    >
+                      <Download size={14} />
+                      PNG
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0 px-2 pb-4">
@@ -630,15 +769,26 @@ const AdminAnalytics: React.FC = () => {
                     <CardTitle>Popular Destinations</CardTitle>
                     <CardDescription>Most booked destinations</CardDescription>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1"
-                    onClick={() => downloadChart(chartRefs.destinationPopularity, 'PopularDestinations')}
-                  >
-                    <Download size={14} />
-                    Export
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={downloadDestinationPopularityCSV}
+                    >
+                      <FileText size={14} />
+                      CSV
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => downloadChart(chartRefs.destinationPopularity, 'PopularDestinations')}
+                    >
+                      <Download size={14} />
+                      PNG
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0 px-2 pb-4">
