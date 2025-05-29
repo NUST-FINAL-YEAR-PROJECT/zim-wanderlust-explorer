@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,13 +32,8 @@ const Index = () => {
   // Check auth status
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setIsLoggedIn(!!data.session);
-      } catch (error) {
-        console.error("Error checking auth status:", error);
-        setIsLoggedIn(false);
-      }
+      const { data } = await supabase.auth.getSession();
+      setIsLoggedIn(!!data.session);
     };
     
     checkAuthStatus();
@@ -60,10 +54,8 @@ const Index = () => {
     async function loadData() {
       setLoading(true);
       try {
-        const [destinationsData, eventsData] = await Promise.all([
-          getDestinations(),
-          getEvents()
-        ]);
+        const destinationsData = await getDestinations();
+        const eventsData = await getEvents();
         
         // Take just the first 6 for better grid layout
         setDestinations(destinationsData.slice(0, 6));
@@ -101,9 +93,9 @@ const Index = () => {
   
   const handleCardClick = (item: any, type: string) => {
     if (type === 'destination') {
-      navigate(`/destination/${item.id}`);
+      navigate(`/destination/${item.id}/details`);
     } else {
-      navigate(`/events/${item.id}/book`);
+      navigate(`/booking/event/${item.id}`);
     }
   };
 
@@ -164,20 +156,20 @@ const Index = () => {
       badge: "Popular"
     },
     {
-      title: "Browse Accommodations",
-      description: "Find comfortable places to stay",
-      icon: Heart,
-      gradient: "from-amber-500 to-amber-600",
-      onClick: () => navigate("/accommodations"),
-      badge: "New"
-    },
-    {
       title: "Book Experiences",
       description: "Find unique cultural experiences",
       icon: Calendar,
       gradient: "from-purple-500 to-purple-600",
       onClick: () => navigate("/events"),
-      badge: "Featured"
+      badge: "New"
+    },
+    {
+      title: "Plan Your Trip",
+      description: "Create a custom itinerary",
+      icon: Compass,
+      gradient: "from-emerald-500 to-emerald-600",
+      onClick: () => navigate("/itineraries/create"),
+      badge: "AI Powered"
     },
     {
       title: isLoggedIn ? "My Account" : "Sign In",
