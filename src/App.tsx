@@ -1,275 +1,214 @@
-import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
-import { BrowserRouter } from "react-router-dom";
-import { motion, AnimatePresence } from 'framer-motion'
-import { ThemeProvider } from "@/components/ui/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from "./contexts/AuthContext";
-import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
-import { RefreshCw } from 'lucide-react'
-import SplashScreen from './components/SplashScreen.tsx'
-import Browse from "./pages/Browse";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import Events from "./pages/Events";
-import Destinations from "./pages/Destinations";
-import Accommodations from "./pages/Accommodations";
-import AccommodationBookingPage from "./pages/AccommodationBookingPage";
-import DestinationDetails from "./pages/DestinationDetails";
-import PublicDestinationDetails from "./pages/PublicDestinationDetails";
-import ProtectedRoute from "./components/ProtectedRoute";
-import CitiesExplorer from "./pages/CitiesExplorer";
-import Index from "./pages/Index";
-import WishlistPage from "./pages/WishlistPage";
-import BookingForm from "./pages/BookingForm";
-import Bookings from "./pages/Bookings";
-import ItinerariesPage from "./pages/ItinerariesPage";
-import ItineraryCreatePage from "./pages/ItineraryCreatePage";
-import ItineraryDetailsPage from "./pages/ItineraryDetailsPage";
-import PaymentPage from "./pages/PaymentPage";
-import InvoicePage from "./pages/InvoicePage";
-import Settings from "./pages/Settings";
-import EventBookingPage from "./pages/EventBookingPage";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from '@/components/ui/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { SplashScreen } from '@/components/SplashScreen';
 
-const queryClient = new QueryClient()
+// Import pages
+import Index from '@/pages/Index';
+import Auth from '@/pages/Auth';
+import Dashboard from '@/pages/Dashboard';
+import Destinations from '@/pages/Destinations';
+import DestinationDetailsPage from '@/pages/DestinationDetailsPage';
+import PublicDestinationDetails from '@/pages/PublicDestinationDetails';
+import Accommodations from '@/pages/Accommodations';
+import AccommodationDetailsPage from '@/pages/AccommodationDetailsPage';
+import AccommodationBookingPage from '@/pages/AccommodationBookingPage';
+import Events from '@/pages/Events';
+import EventBookingPage from '@/pages/EventBookingPage';
+import Bookings from '@/pages/Bookings';
+import BookingForm from '@/pages/BookingForm';
+import PaymentPage from '@/pages/PaymentPage';
+import InvoicePage from '@/pages/InvoicePage';
+import ItinerariesPage from '@/pages/ItinerariesPage';
+import ItineraryCreatePage from '@/pages/ItineraryCreatePage';
+import ItineraryDetailsPage from '@/pages/ItineraryDetailsPage';
+import ItinerarySharedPage from '@/pages/ItinerarySharedPage';
+import WishlistPage from '@/pages/WishlistPage';
+import Settings from '@/pages/Settings';
+import AdminDashboard from '@/pages/AdminDashboard';
+import Browse from '@/pages/Browse';
+import CitiesExplorer from '@/pages/CitiesExplorer';
+import NotFound from '@/pages/NotFound';
+import ProtectedRoute from '@/components/ProtectedRoute';
+
+const queryClient = new QueryClient();
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Error handling
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      console.error('Application error:', event.error);
-      setError('An unexpected error occurred. Please refresh the page and try again.');
-    };
+  const { isLoading, isAuthenticated, isAdmin } = useAuth();
 
-    window.addEventListener('error', handleError);
-    
-    return () => {
-      window.removeEventListener('error', handleError);
-    };
-  }, []);
+  if (isLoading) {
+    return <SplashScreen />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider defaultTheme="light" storageKey="zimbabwe-travels-theme">
-          <BrowserRouter>
-            {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-            
-            <AnimatePresence mode="wait">
-              {!showSplash && (
-                <motion.div
-                  key="app"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.7, delay: 0.3 }}
-                  className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-blue-950 dark:to-indigo-900"
-                >
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<Index />} />
-                    <Route path="/browse" element={<Browse />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/public/destination/:id" element={<PublicDestinationDetails />} />
-                    
-                    {/* Protected Routes */}
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    
-                    {/* Admin Routes */}
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedRoute requireAdmin={true}>
-                          <AdminDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    
-                    <Route
-                      path="/events"
-                      element={
-                        <ProtectedRoute>
-                          <Events />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/destinations"
-                      element={
-                        <ProtectedRoute>
-                          <Destinations />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/accommodations"
-                      element={
-                        <ProtectedRoute>
-                          <Accommodations />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/accommodation-booking/:id"
-                      element={
-                        <ProtectedRoute>
-                          <AccommodationBookingPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/destination/:id"
-                      element={
-                        <ProtectedRoute>
-                          <DestinationDetails />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/destination/:id/details"
-                      element={
-                        <ProtectedRoute>
-                          <DestinationDetails />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/cities"
-                      element={
-                        <ProtectedRoute>
-                          <CitiesExplorer />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/wishlist"
-                      element={
-                        <ProtectedRoute>
-                          <WishlistPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/booking/:id"
-                      element={
-                        <ProtectedRoute>
-                          <BookingForm />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/bookings"
-                      element={
-                        <ProtectedRoute>
-                          <Bookings />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/itineraries"
-                      element={
-                        <ProtectedRoute>
-                          <ItinerariesPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/itineraries/create"
-                      element={
-                        <ProtectedRoute>
-                          <ItineraryCreatePage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/itinerary/:id"
-                      element={
-                        <ProtectedRoute>
-                          <ItineraryDetailsPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/payment/:id"
-                      element={
-                        <ProtectedRoute>
-                          <PaymentPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/invoice/:id"
-                      element={
-                        <ProtectedRoute>
-                          <InvoicePage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <ProtectedRoute>
-                          <Settings />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/booking/event/:id"
-                      element={
-                        <ProtectedRoute>
-                          <EventBookingPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    
-                    {/* 404 Route */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            <Toaster />
-            
-            <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
-              <AlertDialogContent className="border-0 shadow-xl rounded-xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center text-blue-800 dark:text-blue-200">
-                    <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-full mr-2">
-                      <RefreshCw className="h-5 w-5 text-blue-600 dark:text-blue-300" />
-                    </div>
-                    Application Error
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {error}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <Button 
-                    onClick={() => window.location.reload()} 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white dark:from-blue-700 dark:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600"
-                  >
-                    Refresh Page
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </BrowserRouter>
-        </ThemeProvider>
-      </AuthProvider>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <Toaster />
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/destination/:id" element={<PublicDestinationDetails />} />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/cities" element={<CitiesExplorer />} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/destinations"
+              element={
+                <ProtectedRoute>
+                  <Destinations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/destinations/:id"
+              element={
+                <ProtectedRoute>
+                  <DestinationDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/accommodations"
+              element={
+                <ProtectedRoute>
+                  <Accommodations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/accommodations/:id"
+              element={
+                <ProtectedRoute>
+                  <AccommodationDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/accommodations/:id/book"
+              element={
+                <ProtectedRoute>
+                  <AccommodationBookingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <ProtectedRoute>
+                  <Events />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events/:id/book"
+              element={
+                <ProtectedRoute>
+                  <EventBookingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookings"
+              element={
+                <ProtectedRoute>
+                  <Bookings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/booking/:id"
+              element={
+                <ProtectedRoute>
+                  <BookingForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payment/:bookingId"
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/invoice/:bookingId"
+              element={
+                <ProtectedRoute>
+                  <InvoicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/itineraries"
+              element={
+                <ProtectedRoute>
+                  <ItinerariesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/itineraries/create"
+              element={
+                <ProtectedRoute>
+                  <ItineraryCreatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/itineraries/:id"
+              element={
+                <ProtectedRoute>
+                  <ItineraryDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/itinerary/shared/:shareCode" element={<ItinerarySharedPage />} />
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <WishlistPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
