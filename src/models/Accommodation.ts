@@ -17,8 +17,8 @@ export interface Accommodation {
   is_featured?: boolean;
   latitude?: number;
   longitude?: number;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export async function getAccommodations() {

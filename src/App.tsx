@@ -1,9 +1,10 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { SplashScreen } from '@/components/SplashScreen';
+import SplashScreen from '@/components/SplashScreen';
 
 // Import pages
 import Index from '@/pages/Index';
@@ -36,7 +37,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 const queryClient = new QueryClient();
 
 function App() {
-  const { isLoading, isAuthenticated, isAdmin } = useAuth();
+  const { isLoading, user, isAdmin } = useAuth();
 
   if (isLoading) {
     return <SplashScreen />;
@@ -198,7 +199,7 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute requireAdmin>
                   <AdminDashboard />
                 </ProtectedRoute>
               }

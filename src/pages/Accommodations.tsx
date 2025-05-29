@@ -12,26 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface AccommodationType {
-  id: string;
-  name: string;
-  description?: string;
-  location: string;
-  price_per_night: number;
-  image_url?: string;
-  rating?: number;
-  review_count?: number;
-  max_guests?: number;
-  amenities?: string[];
-  room_types?: any[];
-  is_featured?: boolean;
-  additional_images?: string[];
-  created_at?: string;
-  updated_at?: string;
-  latitude?: number;
-  longitude?: number;
-}
+import { Accommodation } from '@/models/Accommodation';
 
 const Accommodations = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,7 +43,7 @@ const Accommodations = () => {
       if (error) throw error;
       
       // Transform the data to match our expected type
-      return (data || []).map((accommodation: any): AccommodationType => ({
+      return (data || []).map((accommodation: any): Accommodation => ({
         id: accommodation.id,
         name: accommodation.name,
         description: accommodation.description,
