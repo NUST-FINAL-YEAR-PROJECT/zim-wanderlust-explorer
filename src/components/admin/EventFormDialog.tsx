@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -64,9 +65,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   title,
   description,
 }) => {
-  const [ticketTypes, setTicketTypes] = React.useState<Array<{name: string, price: number, description?: string}>>(
-    Array.isArray(event?.ticket_types) ? event.ticket_types : []
-  );
+  const [ticketTypes, setTicketTypes] = React.useState<Array<{name: string, price: number, description?: string}>>([]);
   const [newTicketName, setNewTicketName] = React.useState('');
   const [newTicketPrice, setNewTicketPrice] = React.useState(0);
   const [newTicketDescription, setNewTicketDescription] = React.useState('');
@@ -75,20 +74,65 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   const form = useForm<z.infer<typeof eventSchema>>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      title: event?.title || '',
-      description: event?.description || '',
-      location: event?.location || '',
-      start_date: event?.start_date ? event.start_date.slice(0, 16) : '',
-      end_date: event?.end_date ? event.end_date.slice(0, 16) : '',
-      price: event?.price || 0,
-      image_url: event?.image_url || '',
-      event_type: event?.event_type || '',
-      program_type: event?.program_type || '',
-      program_name: event?.program_name || '',
-      program_url: event?.program_url || '',
-      payment_url: event?.payment_url || '',
+      title: '',
+      description: '',
+      location: '',
+      start_date: '',
+      end_date: '',
+      price: 0,
+      image_url: '',
+      event_type: '',
+      program_type: '',
+      program_name: '',
+      program_url: '',
+      payment_url: '',
     },
   });
+
+  // Reset form and ticket types when event changes or dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      if (event) {
+        // Populate form with existing event data
+        form.reset({
+          title: event.title || '',
+          description: event.description || '',
+          location: event.location || '',
+          start_date: event.start_date ? event.start_date.slice(0, 16) : '',
+          end_date: event.end_date ? event.end_date.slice(0, 16) : '',
+          price: event.price || 0,
+          image_url: event.image_url || '',
+          event_type: event.event_type || '',
+          program_type: event.program_type || '',
+          program_name: event.program_name || '',
+          program_url: event.program_url || '',
+          payment_url: event.payment_url || '',
+        });
+
+        // Populate ticket types with existing data
+        setTicketTypes(Array.isArray(event.ticket_types) ? event.ticket_types : []);
+      } else {
+        // Reset form for new event
+        form.reset({
+          title: '',
+          description: '',
+          location: '',
+          start_date: '',
+          end_date: '',
+          price: 0,
+          image_url: '',
+          event_type: '',
+          program_type: '',
+          program_name: '',
+          program_url: '',
+          payment_url: '',
+        });
+
+        // Reset ticket types for new event
+        setTicketTypes([]);
+      }
+    }
+  }, [event, isOpen, form]);
 
   const addTicketType = () => {
     if (newTicketName.trim()) {
@@ -110,7 +154,6 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   const handleSubmit = async (data: z.infer<typeof eventSchema>) => {
     setIsSubmitting(true);
     try {
-      // Ensure required fields are present
       const eventData: EventInput = {
         title: data.title,
         description: data.description,
@@ -246,7 +289,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Event Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />

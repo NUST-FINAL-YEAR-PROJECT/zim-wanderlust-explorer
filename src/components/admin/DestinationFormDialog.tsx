@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -68,12 +69,12 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
   title,
   description,
 }) => {
-  const [activities, setActivities] = React.useState<string[]>(destination?.activities || []);
-  const [amenities, setAmenities] = React.useState<string[]>(destination?.amenities || []);
-  const [highlights, setHighlights] = React.useState<string[]>(destination?.highlights || []);
-  const [categories, setCategories] = React.useState<string[]>(destination?.categories || []);
-  const [whatToBring, setWhatToBring] = React.useState<string[]>(destination?.what_to_bring || []);
-  const [additionalImages, setAdditionalImages] = React.useState<string[]>(destination?.additional_images || []);
+  const [activities, setActivities] = React.useState<string[]>([]);
+  const [amenities, setAmenities] = React.useState<string[]>([]);
+  const [highlights, setHighlights] = React.useState<string[]>([]);
+  const [categories, setCategories] = React.useState<string[]>([]);
+  const [whatToBring, setWhatToBring] = React.useState<string[]>([]);
+  const [additionalImages, setAdditionalImages] = React.useState<string[]>([]);
   const [newActivity, setNewActivity] = React.useState('');
   const [newAmenity, setNewAmenity] = React.useState('');
   const [newHighlight, setNewHighlight] = React.useState('');
@@ -85,22 +86,81 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
   const form = useForm<z.infer<typeof destinationSchema>>({
     resolver: zodResolver(destinationSchema),
     defaultValues: {
-      name: destination?.name || '',
-      location: destination?.location || '',
-      price: destination?.price || 0,
-      description: destination?.description || '',
-      image_url: destination?.image_url || '',
-      difficulty_level: destination?.difficulty_level || '',
-      best_time_to_visit: destination?.best_time_to_visit || '',
-      duration_recommended: destination?.duration_recommended || '',
-      weather_info: destination?.weather_info || '',
-      getting_there: destination?.getting_there || '',
-      is_featured: destination?.is_featured || false,
-      payment_url: destination?.payment_url || '',
-      latitude: destination?.latitude || undefined,
-      longitude: destination?.longitude || undefined,
+      name: '',
+      location: '',
+      price: 0,
+      description: '',
+      image_url: '',
+      difficulty_level: '',
+      best_time_to_visit: '',
+      duration_recommended: '',
+      weather_info: '',
+      getting_there: '',
+      is_featured: false,
+      payment_url: '',
+      latitude: undefined,
+      longitude: undefined,
     },
   });
+
+  // Reset form and arrays when destination changes or dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      if (destination) {
+        // Populate form with existing destination data
+        form.reset({
+          name: destination.name || '',
+          location: destination.location || '',
+          price: destination.price || 0,
+          description: destination.description || '',
+          image_url: destination.image_url || '',
+          difficulty_level: destination.difficulty_level || '',
+          best_time_to_visit: destination.best_time_to_visit || '',
+          duration_recommended: destination.duration_recommended || '',
+          weather_info: destination.weather_info || '',
+          getting_there: destination.getting_there || '',
+          is_featured: destination.is_featured || false,
+          payment_url: destination.payment_url || '',
+          latitude: destination.latitude || undefined,
+          longitude: destination.longitude || undefined,
+        });
+
+        // Populate arrays with existing data
+        setActivities(destination.activities || []);
+        setAmenities(destination.amenities || []);
+        setHighlights(destination.highlights || []);
+        setCategories(destination.categories || []);
+        setWhatToBring(destination.what_to_bring || []);
+        setAdditionalImages(destination.additional_images || []);
+      } else {
+        // Reset form for new destination
+        form.reset({
+          name: '',
+          location: '',
+          price: 0,
+          description: '',
+          image_url: '',
+          difficulty_level: '',
+          best_time_to_visit: '',
+          duration_recommended: '',
+          weather_info: '',
+          getting_there: '',
+          is_featured: false,
+          payment_url: '',
+          latitude: undefined,
+          longitude: undefined,
+        });
+
+        // Reset arrays for new destination
+        setActivities([]);
+        setAmenities([]);
+        setHighlights([]);
+        setCategories([]);
+        setWhatToBring([]);
+        setAdditionalImages([]);
+      }
+    }
+  }, [destination, isOpen, form]);
 
   const addItem = (item: string, setItems: React.Dispatch<React.SetStateAction<string[]>>, setNewItem: React.Dispatch<React.SetStateAction<string>>) => {
     if (item.trim()) {
@@ -116,7 +176,6 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
   const handleSubmit = async (data: z.infer<typeof destinationSchema>) => {
     setIsSubmitting(true);
     try {
-      // Ensure all required fields are present
       const destinationData: DestinationInput = {
         name: data.name,
         location: data.location,
@@ -276,7 +335,7 @@ const DestinationFormDialog: React.FC<DestinationFormDialogProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Difficulty Level</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select difficulty" />
