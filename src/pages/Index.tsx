@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,11 +6,9 @@ import { useNavigate } from "react-router-dom";
 import DestinationCard from "@/components/DestinationCard";
 import EventCard from "@/components/EventCard";
 import Footer from "@/components/Footer";
-import { getDestinations } from "@/models/Destination";
-import { getEvents } from "@/models/Event";
 import { Skeleton } from "@/components/ui/skeleton";
 import AiAssistant from "@/components/AiAssistant";
-import { Calendar, ChevronRight, Compass, Heart, MapPin, Star, TrendingUp, Users, Eye, ArrowRight, Play, LogIn } from "lucide-react";
+import { Calendar, ChevronRight, Compass, Heart, MapPin, Star, TrendingUp, Users, Eye, ArrowRight, Play, LogIn, Bed } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -49,22 +48,109 @@ const Index = () => {
     };
   }, []);
   
-  // Fetch data
+  // Fetch data with error handling for missing tables
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const destinationsData = await getDestinations();
-        const eventsData = await getEvents();
+        // Try to fetch destinations
+        try {
+          const { data: destinationsData, error: destError } = await supabase
+            .from('destinations')
+            .select('*')
+            .limit(6);
+          
+          if (destError && destError.code !== '42P01') {
+            throw destError;
+          }
+          
+          if (destinationsData) {
+            setDestinations(destinationsData);
+          }
+        } catch (error: any) {
+          if (error.code === '42P01') {
+            console.log("Destinations table doesn't exist yet - using mock data");
+            // Set mock destinations for demo
+            setDestinations([
+              {
+                id: '1',
+                name: 'Victoria Falls',
+                description: 'Experience the magnificent Victoria Falls',
+                location: 'Victoria Falls',
+                price: 150,
+                image_url: '/victoria-falls.jpg'
+              },
+              {
+                id: '2', 
+                name: 'Hwange National Park',
+                description: 'Wildlife safari adventure',
+                location: 'Hwange',
+                price: 200,
+                image_url: '/hwange.jpg'
+              },
+              {
+                id: '3',
+                name: 'Great Zimbabwe',
+                description: 'Ancient ruins and history',
+                location: 'Masvingo',
+                price: 100,
+                image_url: '/great-zimbabwe.jpg'
+              }
+            ]);
+          } else {
+            throw error;
+          }
+        }
+
+        // Try to fetch events
+        try {
+          const { data: eventsData, error: eventsError } = await supabase
+            .from('events')
+            .select('*')
+            .order('start_date', { ascending: true })
+            .limit(6);
+          
+          if (eventsError && eventsError.code !== '42P01') {
+            throw eventsError;
+          }
+          
+          if (eventsData) {
+            setEvents(eventsData);
+          }
+        } catch (error: any) {
+          if (error.code === '42P01') {
+            console.log("Events table doesn't exist yet - using mock data");
+            // Set mock events for demo
+            setEvents([
+              {
+                id: '1',
+                name: 'Zimbabwe Carnival',
+                description: 'Annual cultural celebration',
+                location: 'Harare',
+                price: 50,
+                start_date: '2024-12-25',
+                image_url: '/carnival.jpg'
+              },
+              {
+                id: '2',
+                name: 'Traditional Dance Festival',
+                description: 'Celebrate traditional Zimbabwean culture',
+                location: 'Bulawayo',
+                price: 30,
+                start_date: '2024-12-31',
+                image_url: '/traditional.jpg'
+              }
+            ]);
+          } else {
+            throw error;
+          }
+        }
         
-        // Take just the first 6 for better grid layout
-        setDestinations(destinationsData.slice(0, 6));
-        setEvents(eventsData.slice(0, 6));
       } catch (error) {
         console.error("Error loading data:", error);
         toast({
           title: "Failed to load data",
-          description: "Please try refreshing the page",
+          description: "Using demo data instead",
           variant: "destructive",
         });
       } finally {
@@ -93,9 +179,9 @@ const Index = () => {
   
   const handleCardClick = (item: any, type: string) => {
     if (type === 'destination') {
-      navigate(`/destination/${item.id}/details`);
+      navigate(`/public/destination/${item.id}`);
     } else {
-      navigate(`/booking/event/${item.id}`);
+      navigate(`/auth`); // Redirect to auth for events if not logged in
     }
   };
 
@@ -152,7 +238,7 @@ const Index = () => {
       description: "Discover amazing places to visit",
       icon: MapPin,
       gradient: "from-blue-500 to-blue-600",
-      onClick: () => navigate("/destinations"),
+      onClick: () => navigate("/browse"),
       badge: "Popular"
     },
     {
@@ -160,16 +246,16 @@ const Index = () => {
       description: "Find unique cultural experiences",
       icon: Calendar,
       gradient: "from-purple-500 to-purple-600",
-      onClick: () => navigate("/events"),
+      onClick: () => navigate("/browse"),
       badge: "New"
     },
     {
-      title: "Plan Your Trip",
-      description: "Create a custom itinerary",
-      icon: Compass,
-      gradient: "from-emerald-500 to-emerald-600",
-      onClick: () => navigate("/itineraries/create"),
-      badge: "AI Powered"
+      title: "Find Accommodations",
+      description: "Comfortable places to stay",
+      icon: Bed,
+      gradient: "from-amber-500 to-amber-600",
+      onClick: () => navigate(isLoggedIn ? "/accommodations" : "/auth"),
+      badge: "Comfort"
     },
     {
       title: isLoggedIn ? "My Account" : "Sign In",

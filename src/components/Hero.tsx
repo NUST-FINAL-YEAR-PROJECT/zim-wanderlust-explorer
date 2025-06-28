@@ -15,37 +15,15 @@ const Hero = () => {
   const [images, setImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Fetch public images for slideshow
+  // Set default images for hero slideshow
   useEffect(() => {
-    const fetchPublicImages = async () => {
-      try {
-        const { data, error } = await supabase.storage
-          .from('public')
-          .list('', { limit: 100 });
-
-        if (error) {
-          console.error('Error fetching images:', error);
-          return;
-        }
-
-        if (data) {
-          const imageUrls = data
-            .filter(file => file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i))
-            .map(file => {
-              const { data: urlData } = supabase.storage
-                .from('public')
-                .getPublicUrl(file.name);
-              return urlData.publicUrl;
-            });
-          
-          setImages(imageUrls);
-        }
-      } catch (error) {
-        console.error('Error fetching public images:', error);
-      }
-    };
-
-    fetchPublicImages();
+    const defaultImages = [
+      '/lovable-uploads/6d4e39d4-1981-4237-afb7-a1a7afe47fb3.png',
+      '/victoria-falls.jpg',
+      '/hwange.jpg',
+      '/great-zimbabwe.jpg'
+    ];
+    setImages(defaultImages);
   }, []);
 
   // Auto-advance slideshow
@@ -132,16 +110,6 @@ const Hero = () => {
     navigate("/dashboard");
   };
 
-  const handleExploreDestinations = () => {
-    navigate("/browse?tab=destinations");
-    console.log("User clicked Explore Destinations");
-  };
-
-  const handleUpcomingEvents = () => {
-    navigate("/browse?tab=events");
-    console.log("User clicked Upcoming Events");
-  };
-
   // Animation variants
   const titleVariants = {
     hidden: { opacity: 0, x: -50 },
@@ -219,7 +187,7 @@ const Hero = () => {
             />
           ))
         ) : (
-          <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center bg-no-repeat" />
+          <div className="absolute inset-0 bg-[url('/lovable-uploads/6d4e39d4-1981-4237-afb7-a1a7afe47fb3.png')] bg-cover bg-center bg-no-repeat" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
       </div>
